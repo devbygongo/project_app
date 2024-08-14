@@ -58,5 +58,3 @@ Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user']
 Route::post('/login', [CreateController::class, 'login']);
 
 Route::post('/register_user', [CreateController::class, 'user']);
-
-Route::get('/view_user', [ViewController::class, 'user']);
