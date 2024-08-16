@@ -7,6 +7,10 @@ use App\Http\Controllers\CreateController;
 
 use App\Http\Controllers\ViewController;
 
+use App\Http\Controllers\UpdateController;
+
+use App\Http\Controllers\DeleteController;
+
 use App\Http\Middleware\GetUserRole;
 
 // Route::get('/user', function (Request $request) {
@@ -18,6 +22,8 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
     Route::post('/add_user', [CreateController::class, 'user']);
 
     Route::get('/view_user', [ViewController::class, 'user']);
+
+    Route::get('/logout', [CreateController::class, 'webLogout']);
 
     Route::post('/add_product', [CreateController::class, 'product']);
 
@@ -44,8 +50,10 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
     Route::post('/add_cart', [CreateController::class, 'cart']);
 
     Route::get('/view_cart_user/{id}', [ViewController::class, 'cart_user']);
+    
+    Route::patch('/update_cart', [UpdateController::class, 'cart']);
 
-    Route::get('/logout', [CreateController::class, 'logout']);
+    Route::delete('/delete_cart/{id}', [DeleteController::class, 'cart']);
 
 });
 
@@ -54,9 +62,13 @@ Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user']
     Route::get('/get_details', [ViewController::class, 'user_details']);
 
     Route::get('/logout', [CreateController::class, 'logout']);
+
+    Route::delete('/delete_cart/{id}', [DeleteController::class, 'cart']);
 });
-Route::post('/login', [CreateController::class, 'login']);
+Route::post('/login/{search?}', [CreateController::class, 'login']);
 
 Route::post('/register_user', [CreateController::class, 'user']);
 
 // Route::get('/view_user', [ViewController::class, 'user']);
+
+Route::post('/get_otp', [UpdateController::class, 'generate_otp']);

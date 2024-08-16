@@ -22,47 +22,133 @@ class CreateController extends Controller
 {
     //
 
-    public function login(Request $request)
+    public function user(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
-            'mobile' => 'required',
+            'email' => 'required|unique:users,email',
+            'mobile' => ['required', 'string', 'size:13', 'unique:users'],
+            'name' => 'required',
             'password' => 'required',
+            'role' => 'required',
+            'category_discount' => 'required',
         ]);
 
-        if(Auth::attempt(['email' => $request->email, 'mobile' => $request->mobile, 'password' => $request->password])){ 
-            $user = Auth::user(); 
+            $create_user = User::create([
+                'name' => $request->input('name'),
+                'password' => bcrypt($request->input('password')),
+                'email' => $request->input('email'),
+                'mobile' => $request->input('mobile'),
+                'role' => $request->input('role'),
+                'address_line_1' => $request->input('address_line_1'),
+                'address_line_2' => $request->input('address_line_2'),
+                'city' => $request->input('city'),
+                'pincode' => $request->input('pincode'),
+                'gstin' => $request->input('gstin'),
+                'state' => $request->input('state'),
+                'country' => $request->input('country'),
+                'category_discount' => $request->input('category_discount'),
+            ]);
 
-            // Check the user's role
-            if ($user->role !== 'admin' && $user->role !== 'user') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Unauthorized.',
-                    'errors' => ['error' => 'You do not have access to this section.'],
-                ], 403);
+
+        if (isset($create_user)) {
+            return response()->json([
+                'message' => 'User created successfully!',
+                'data' => $create_user
+            ], 201);
+        }
+
+        else {
+            return response()->json([
+                'message' => 'Failed to create successfully!',
+                'data' => $create_user
+            ], 400);
+        }    
+    }
+
+    public function login(Request $request, $otp = null)
+    {
+        if($otp)
+        {
+            $request->validate([
+                'mobile' => ['required', 'string', 'size:13'],
+            ]);
+
+            $otpRecord = User::select('otp', 'expires_at')
+            ->where('mobile', $request->mobile)
+            ->first();
+            
+            // Validate OTP and expiry
+            if (!$otpRecord || $otpRecord->otp != $otp) {
+                return response()->json(['message' => 'Invalid OTP.'], 400);
             }
 
-            // Generate a Sanctum token
-            $token = $user->createToken('API TOKEN')->plainTextToken;
-   
+            if ($otpRecord->expires_at < now()) {
+                return response()->json(['message' => 'OTP has expired.'], 400);
+            } 
+
+            else {
+                // Remove OTP record after successful validation
+                User::select('otp')->where('mobile', $request->mobile)->update(['otp' => null, 'expires_at' => null]);
+
+                // Retrieve the user
+                $user = User::where('mobile', $request->mobile)->first();
+
+                // Generate a Sanctum token
+                $token = $user->createToken('API TOKEN')->plainTextToken;
+    
             return response()->json([
                 'success' => true,
                 'data' => [
                     'token' => $token,
-                    'id' => $user->id,
                     'name' => $user->name,
                     'role' => $user->role,
                 ],
                 'message' => 'User login successfully.',
             ], 200);
-        } 
-        else{ 
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized.',
-                'errors' => ['error' => 'Unauthorized'],
-            ], 401);
-        } 
+            }
+        }
+        else
+        {
+            $request->validate([
+                'email' => 'required|email',
+                'mobile' => 'required',
+                'password' => 'required',
+            ]);
+    
+            if(Auth::attempt(['mobile' => $request->mobile, 'password' => $request->password])){ 
+                $user = Auth::user(); 
+    
+                // Check the user's role
+                if ($user->role !== 'admin' && $user->role !== 'user') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Unauthorized.',
+                        'errors' => ['error' => 'You do not have access to this section.'],
+                    ], 403);
+                }
+    
+                // Generate a Sanctum token
+                $token = $user->createToken('API TOKEN')->plainTextToken;
+       
+                return response()->json([
+                    'success' => true,
+                    'data' => [
+                        'token' => $token,
+                        // 'id' => $user->id,
+                        'name' => $user->name,
+                        'role' => $user->role,
+                    ],
+                    'message' => 'User login successfully.',
+                ], 200);
+            } 
+            else{ 
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized.',
+                    'errors' => ['error' => 'Unauthorized'],
+                ], 401);
+            } 
+        }
     }
 
     public function logout(Request $request)
@@ -74,6 +160,20 @@ class CreateController extends Controller
             'success' => true,
             'message' => 'Logged out successfully.',
         ]);
+    }
+
+    public function webLogout(Request $request)
+    {
+        // Log the user out of the session
+        Auth::logout();
+
+        // Invalidate the user's session
+        $request->session()->invalidate();
+
+        // Regenerate the session token to prevent CSRF attacks
+        $request->session()->regenerateToken();
+
+        return redirect('/login')->with('success', 'Logged out successfully.');
     }
     
     public function product(Request $request)
@@ -122,49 +222,6 @@ class CreateController extends Controller
             return response()->json([
                 'message' => 'Failed created successfully!',
                 'data' => $create_order
-            ], 400);
-        }    
-    }
-
-    public function user(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|unique:users,email',
-            'mobile' => ['required', 'numeric', 'digits:10', 'unique:users,mobile'],
-            'name' => 'required',
-            'password' => 'required',
-            'role' => 'required',
-            'category_discount' => 'required',
-        ]);
-
-            $create_user = User::create([
-                'name' => $request->input('name'),
-                'password' => bcrypt($request->input('password')),
-                'email' => $request->input('email'),
-                'mobile' => $request->input('mobile'),
-                'role' => $request->input('role'),
-                'address_line_1' => $request->input('address_line_1'),
-                'address_line_2' => $request->input('address_line_2'),
-                'city' => $request->input('city'),
-                'pincode' => $request->input('pincode'),
-                'gstin' => $request->input('gstin'),
-                'state' => $request->input('state'),
-                'country' => $request->input('country'),
-                'category_discount' => $request->input('category_discount'),
-            ]);
-
-
-        if (isset($create_user)) {
-            return response()->json([
-                'message' => 'User created successfully!',
-                'data' => $create_user
-            ], 201);
-        }
-
-        else {
-            return response()->json([
-                'message' => 'Failed to create successfully!',
-                'data' => $create_user
             ], 400);
         }    
     }

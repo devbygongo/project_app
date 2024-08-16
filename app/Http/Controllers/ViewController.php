@@ -244,4 +244,15 @@ class ViewController extends Controller
             ], 400);
         }    
     }
+    // return blade file
+    
+    public function login_view()
+    {
+        return view('login');
+    }
+
+    public function user_view()
+    {
+        return view('view_user');
+    }
 }

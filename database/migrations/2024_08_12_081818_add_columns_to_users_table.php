@@ -13,17 +13,20 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             //
-            $table->integer('mobile');
-            $table->enum('role', ['admin', 'user']);
-            $table->string('address_line_1')->nullable(); 
-            $table->string('address_line_2')->nullable(); 
-            $table->string('city')->nullable(); 
-            $table->integer('pincode')->nullable(); 
-            $table->string('gstin')->nullable(); 
-            $table->string('state')->nullable(); 
-            $table->string('country')->nullable(); 
-            $table->integer('discount')->default(0); 
-            $table->longText('category_discount'); 
+            $table->string('email')->nullable()->default(null)->change();
+            $table->string('mobile', 13)->after('remember_token');
+            $table->integer('otp')->after('mobile')->nullable();
+            $table->timestamp('expires_at')->after('otp')->nullable();
+            $table->enum('role', ['admin', 'user'])->after('expires_at');
+            $table->string('address_line_1')->nullable()->after('role'); 
+            $table->string('address_line_2')->nullable()->after('address_line_1'); 
+            $table->string('city')->nullable()->after('address_line_1'); 
+            $table->integer('pincode')->nullable()->after('city'); 
+            $table->string('gstin')->nullable()->after('pincode'); 
+            $table->string('state')->nullable()->after('gstin'); 
+            $table->string('country')->nullable()->after('state'); 
+            $table->integer('discount')->default(0)->after('country'); 
+            $table->longText('category_discount')->after('discount'); 
         });
     }
 
