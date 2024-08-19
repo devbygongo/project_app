@@ -11,6 +11,8 @@ use App\Http\Controllers\UpdateController;
 
 use App\Http\Controllers\DeleteController;
 
+use App\Http\Controllers\CsvImportController;
+
 use App\Http\Middleware\GetUserRole;
 
 // Route::get('/user', function (Request $request) {
@@ -57,6 +59,9 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
 
     Route::patch('/make_verify/{id}', [UpdateController::class, 'verify_user']);
 
+    Route::get('/fetch_products', [CsvImportController::class, 'importProduct']);
+
+    Route::get('/fetch_users', [CsvImportController::class, 'importUser']);
 });
 
 Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user'])->group(function () {

@@ -15,12 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string('sku');
             $table->string('product_code');
-            $table->string('product_Name');
-            $table->string('category')->nullable();;
-            $table->string('sub_category')->nullable();;
-            $table->longText('product_image');
-            $table->float('basic');
-            $table->float('gst');
+            $table->string('product_name');
+            $table->string('category')->nullable();
+            $table->string('sub_category')->nullable();
+            $table->longText('product_image')->nullable();
+            $table->float('basic')->nullable();
+            $table->float('gst')->nullable();
             // $table->float('mark_up');
             $table->timestamps();
         });
