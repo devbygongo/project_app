@@ -30,7 +30,10 @@ class CreateController extends Controller
             'name' => 'required',
             'password' => 'required',
             'role' => 'required',
-            'category_discount' => 'required',
+            // 'category_discount' => 'required',
+            'address_line_1' => 'required',
+            'city' => 'required',
+            'pincode' => 'required',
         ]);
 
             $create_user = User::create([
@@ -46,7 +49,7 @@ class CreateController extends Controller
                 'gstin' => $request->input('gstin'),
                 'state' => $request->input('state'),
                 'country' => $request->input('country'),
-                'category_discount' => $request->input('category_discount'),
+                // 'category_discount' => $request->input('category_discount'),
             ]);
 
 
@@ -110,7 +113,7 @@ class CreateController extends Controller
         else
         {
             $request->validate([
-                'email' => 'required|email',
+                // 'email' => 'required|email',
                 'mobile' => 'required',
                 'password' => 'required',
             ]);
@@ -179,18 +182,18 @@ class CreateController extends Controller
     public function product(Request $request)
     {
         $request->validate([
-            'SKU' => 'required|unique:t_products,SKU',
-            'Product_Code' => 'required|unique:t_products,Product_Code',
-            'Product_Name' => 'required',
-            'Product_Image'=> 'required',
+            'sku' => 'required|unique:t_products,sku',
+            'product_code' => 'required|unique:t_products,product_code',
+            'product_name' => 'required',
+            'product_image'=> 'required',
             'basic'=>'required',
             'gst'=>'required',
             'mark_up'=>'required',
         ]);
 
-        if($request->hasFile('Product_Image'))
+        if($request->hasFile('product_image'))
         {
-            $file = $request->file('Product_Image');
+            $file = $request->file('product_image');
             $filename = time().'_'. $file->getClientOriginalName();
             $path = $file->storeAs('uploads', $filename, 'public');
             $fileUrl = ('storage/uploads/' . $filename); 
@@ -198,12 +201,12 @@ class CreateController extends Controller
 
 
             $create_order = ProductModel::create([
-                'SKU' => $request->input('SKU'),
-                'Product_Code' => $request->input('Product_Code'),
-                'Product_Name' => $request->input('Product_Name'),
-                'Category' => $request->input('Category'),
-                'Sub_Category' => $request->input('Sub_Category'),
-                'Product_Image' => $fileUrl,
+                'sku' => $request->input('sku'),
+                'product_code' => $request->input('product_code'),
+                'product_name' => $request->input('product_name'),
+                'category' => $request->input('category'),
+                'sub_category' => $request->input('sub_category'),
+                'product_image' => $fileUrl,
                 'basic' => $request->input('basic'),
                 'gst' => $request->input('gst'),
                 'mark_up' => $request->input('mark_up'),

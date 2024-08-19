@@ -27,6 +27,6 @@ class CartModel extends Model
 
     public function get_products()
     {
-        return $this->belongsTo(ProductModel::class, 'products_id', 'Product_Code'); 
+        return $this->belongsTo(ProductModel::class, 'products_id', 'product_code'); 
     }
 }

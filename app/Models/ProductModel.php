@@ -10,12 +10,12 @@ class ProductModel extends Model
     use HasFactory;
     protected $table = "t_products";
     protected $fillable = [
-        'SKU',
-        'Product_Code',
+        'sku',
+        'product_code',
         'Product_Name',
-        'Product_Image',
-        'Category',
-        'Sub_Category',
+        'product_image',
+        'category',
+        'sub_category',
         'basic',
         'gst',
         'mark_up',
@@ -23,6 +23,6 @@ class ProductModel extends Model
 
     public function transactions()
     {
-        return $this->hasMany(CartModel::class, 'products_id', 'Product_Code');
+        return $this->hasMany(CartModel::class, 'products_id', 'product_code');
     }
 }

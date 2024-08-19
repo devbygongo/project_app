@@ -8,9 +8,17 @@ use App\Models\User;
 
 use App\Models\CartModel;
 
+use App\utils\WhatsAppService;
+
 class UpdateController extends Controller
 {
     //
+
+    // public function __construct(whatsapputility $whatsapputility)
+    // {
+    //     $this->whatsapputility = $whatsapputility;
+    // }
+
     public function generate_otp(Request $request)
     {
         $request->validate([
@@ -36,6 +44,28 @@ class UpdateController extends Controller
                 ]);
             
             if ($store_otp) {
+
+                $templateParams = [
+                    'name' => 'your_template_name', // Replace with your WhatsApp template name
+                    'language' => ['code' => 'en_US'],
+                    'components' => [
+                        [
+                            'type' => 'body',
+                            'parameters' => [
+                                [
+                                    'type' => 'text',
+                                    'text' => $six_digit_otp_number,
+                                ],
+                            ],
+                        ],
+                    ],
+                ];
+
+                // Send OTP via WhatsApp
+                $response = $this->whatsAppService->sendOtp($mobile, $templateParams);
+
+                dd($response);
+
                 return response()->json([
                     'message' => 'Otp store successfully!',
                     'data' => $store_otp
@@ -57,7 +87,7 @@ class UpdateController extends Controller
         }
     }
 
-    public function cart(Request $request)
+    public function cart($id)
     {
         $request->validate([
             'user_id' => 'required',
@@ -68,7 +98,7 @@ class UpdateController extends Controller
             'type' => 'required',
         ]);
 
-            $update_cart = CartModel::where('id', 1)
+            $update_cart = CartModel::where('id', $id)
             ->update([
                 'products_id' => $request->input('products_id'),
                 'quantity' => $request->input('quantity'),
@@ -87,5 +117,26 @@ class UpdateController extends Controller
                 'message' => 'Failed to update cart successfully!'
             ], 400);
         }    
+    }
+
+    public function verify_user($get_id)
+    {
+        $update_verify = User::where('id', $get_id)
+            ->update([
+                'verified' => '1',
+            ]);
+
+            if ($update_verify == 1) {
+                return response()->json([
+                    'message' => 'User verified successfully!',
+                    'data' => $update_verify
+                ], 200);
+            }
+    
+            else {
+                return response()->json([
+                    'message' => 'Failed to verify the user'
+                ], 400);
+            }    
     }
 }

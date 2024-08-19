@@ -21,7 +21,7 @@ class ViewController extends Controller
     //
     public function product()
     {
-        $get_product_details = ProductModel::select('SKU','Product_Code','Product_Name','Category','Sub_Category','Product_Image','basic','gst','mark_up')->get();
+        $get_product_details = ProductModel::select('SKU','product_code','product_name','category','sub_category','product_image','basic','gst','mark_up')->get();
         
 
         if (isset($get_product_details)) {
@@ -44,7 +44,7 @@ class ViewController extends Controller
         {
             $offset = 0;
             $limit = 10; // Number of records to fetch per batch
-            $get_products = ProductModel::select('SKU','Product_Code','Product_Name','Category','Sub_Category','Product_Image','basic','gst','mark_up')
+            $get_products = ProductModel::select('SKU','product_code','product_name','category','sub_category','product_image','basic','gst','mark_up')
             ->skip($offset)
             ->take($limit)
             ->get();
@@ -52,8 +52,8 @@ class ViewController extends Controller
         else {
             $offset = 0;
             $limit = 10; // Number of records to fetch per batch
-            $get_products = ProductModel::select('SKU','Product_Code','Product_Name','Category','Sub_Category','Product_Image','basic','gst','mark_up')
-            ->where('Product_Name', 'like', "%{$search}%")
+            $get_products = ProductModel::select('SKU','product_code','product_name','category','sub_category','product_image','basic','gst','mark_up')
+            ->where('product_name', 'like', "%{$search}%")
             ->skip($offset)
             ->take($limit)
             ->get();
@@ -76,7 +76,7 @@ class ViewController extends Controller
 
     public function categories()
     {
-        $get_categories = ProductModel::select('Category')->distinct()->get();
+        $get_categories = ProductModel::select('category')->distinct()->get();
         
         if (isset($get_categories)) {
             return response()->json([
@@ -94,7 +94,7 @@ class ViewController extends Controller
 
     public function sub_categories($category)
     {
-        $get_subcategories = ProductModel::select('Sub_Category')->where('Category',$category)->get();
+        $get_subcategories = ProductModel::select('sub_category')->where('category',$category)->get();
         
         if (isset($get_subcategories)) {
             return response()->json([

@@ -1,4 +1,7 @@
-namespace App\Utility;
+<!-- namespace App\Utility; -->
+namespace App\Utils;
+
+use Illuminate\Support\Facades\Http;
 
 class sendWhatsAppUtility 
 {
