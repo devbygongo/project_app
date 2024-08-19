@@ -8,13 +8,13 @@ use App\Models\User;
 
 use App\Models\CartModel;
 
-use App\utils\WhatsAppService;
+use App\Utils\sendWhatsAppUtility;
 
 class UpdateController extends Controller
 {
     //
 
-    // public function __construct(whatsapputility $whatsapputility)
+    // public function __construct(sendWhatsAppUtility $whatsapputility)
     // {
     //     $this->whatsapputility = $whatsapputility;
     // }
@@ -45,9 +45,31 @@ class UpdateController extends Controller
             
             if ($store_otp) {
 
+                // $templateParams = [
+                //     'name' => 'ace_otp', // Replace with your WhatsApp template name
+                //     'language' => ['code' => 'en'],
+                //     'components' => [
+                //         [
+                //             'type' => 'body',
+                //             'parameters' => [
+                //                 [
+                //                     'type' => 'text',
+                //                     'text' => $six_digit_otp_number,
+                //                 ],
+                //             ],
+                //         ],
+                //     ],
+                // ];
+
+                // // Directly create an instance of SendWhatsAppUtility
+                // $whatsAppUtility = new sendWhatsAppUtility();
+
+                // // Send OTP via WhatsApp
+                // // $whatsAppUtility->sendOtp("+918961043773", $templateParams);
+                // $response = $whatsAppUtility->sendWhatsApp("+918961043773", $templateParams, "+918961043773", 'OTP Campaign');
                 $templateParams = [
-                    'name' => 'your_template_name', // Replace with your WhatsApp template name
-                    'language' => ['code' => 'en_US'],
+                    'name' => 'ace_otp', // Replace with your WhatsApp template name
+                    'language' => ['code' => 'en'],
                     'components' => [
                         [
                             'type' => 'body',
@@ -58,11 +80,28 @@ class UpdateController extends Controller
                                 ],
                             ],
                         ],
+                        [
+                            'type' => 'button',
+                            'sub_type' => 'url', // Specify the type of button (e.g., url or quick_reply)
+                            'index' => 0, // Index position of the button
+                            'parameters' => [
+                                [
+                                    'type' => 'text',
+                                    'text' => 'Verify Now', // Button text
+                                ],
+                            ],
+                        ],
                     ],
                 ];
-
+                
+                // Directly create an instance of SendWhatsAppUtility
+                $whatsAppUtility = new sendWhatsAppUtility();
+                
                 // Send OTP via WhatsApp
-                $response = $this->whatsAppService->sendOtp($mobile, $templateParams);
+                $response = $whatsAppUtility->sendWhatsApp("+918961043773", $templateParams, "+918961043773", 'OTP Campaign');
+                
+                // Send OTP via WhatsApp
+                // $response = $this->whatsAppService->sendOtp("+918961043773", $templateParams);
 
                 dd($response);
 

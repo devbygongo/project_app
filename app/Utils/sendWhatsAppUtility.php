@@ -1,4 +1,5 @@
-<!-- namespace App\Utility; -->
+<?php
+
 namespace App\Utils;
 
 use Illuminate\Support\Facades\Http;
@@ -12,9 +13,9 @@ class sendWhatsAppUtility
 
             $content = array();
             $content['messaging_product'] = "whatsapp";
-            $content['to'] = $customer->phone;
+            $content['to'] = $customer;
             $content['type'] = 'template';
-            $content['biz_opaque_callback_data'] = 'testing_mazing';
+            $content['biz_opaque_callback_data'] = 'ace_commercial';
             $content['template'] = $params;
 
             $token = env('WHATSAPP_API_TOKEN');
@@ -22,7 +23,7 @@ class sendWhatsAppUtility
             $curl = curl_init();
 
             curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://graph.facebook.com/v18.0/147572895113819/messages',
+            CURLOPT_URL => 'https://graph.facebook.com/v19.0/357370407455461/messages',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -41,6 +42,6 @@ class sendWhatsAppUtility
             curl_close($curl);
 
         }
-    return true;
+        return $response;
     }
 }
