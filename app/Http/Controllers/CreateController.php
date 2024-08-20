@@ -232,21 +232,23 @@ class CreateController extends Controller
     public function orders(Request $request)
     {
         $request->validate([
-            'client_id' => 'required',
+            // 'client_id' => 'required',
+            'user_id' => 'required',
             'order_id' => 'required',
             'order_date' => 'required',
             'amount' => 'required',
-            'log_date' => 'required',
-            'log_user' => 'required',
+            // 'log_date' => 'required',
+            // 'log_user' => 'required',
         ]);
 
             $create_order = OrderModel::create([
-                'client_id' => $request->input('client_id'),
+                // 'client_id' => $request->input('client_id'),
+                'user_id' => $request->input('user_id'),
                 'order_id' => $request->input('order_id'),
                 'order_date' => $request->input('order_date'),
                 'amount' => $request->input('amount'),
-                'log_date' => $request->input('log_date'),
-                'log_user' => $request->input('log_user'),
+                // 'log_date' => $request->input('log_date'),
+                // 'log_user' => $request->input('log_user'),
             ]);
 
 
@@ -268,19 +270,27 @@ class CreateController extends Controller
     public function orders_items(Request $request)
     {
         $request->validate([
-            'orderID' => 'required',
-            'item' => 'required',
+            // 'orderID' => 'required',
+            'order_id' => 'required',
+            // 'item' => 'required',
+            'product_code' => 'required',
             'rate' => 'required',
-            'discount' => 'required',
-            'line_total' => 'required',
+            // 'discount' => 'required',
+            'quantity' => 'required',
+            // 'line_total' => 'required',
+            'total' => 'required',
         ]);
 
             $create_order_items = OrderItemsModel::create([
-                'orderID' => $request->input('orderID'),
-                'item' => $request->input('item'),
+                // 'orderID' => $request->input('orderID'),
+                'order_id' => $request->input('order_id'),
+                // 'item' => $request->input('item'),
+                'product_code' => $request->input('product_code'),
                 'rate' => $request->input('rate'),
-                'discount' => $request->input('discount'),
-                'line_total' => $request->input('line_total'),
+                // 'discount' => $request->input('discount'),
+                'quantity' => $request->input('quantity'),
+                // 'line_total' => $request->input('line_total'),
+                'total' => $request->input('line_total'),
             ]);
 
 
@@ -302,7 +312,8 @@ class CreateController extends Controller
     {
         $request->validate([
             'user_id' => 'required',
-            'products_id' => 'required',
+            // 'products_id' => 'required',
+            'product_code' => 'required',
             'rate' => 'required',
             'quantity' => 'required',
             'amount' => 'required',
@@ -311,7 +322,8 @@ class CreateController extends Controller
 
             $create_cart = CartModel::create([
                 'user_id' => $request->input('user_id'),
-                'products_id' => $request->input('products_id'),
+                // 'products_id' => $request->input('products_id'),
+                'product_code' => $request->input('product_code'),
                 'rate' => $request->input('rate'),
                 'quantity' => $request->input('quantity'),
                 'amount' => $request->input('amount'),

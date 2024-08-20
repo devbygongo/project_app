@@ -23,6 +23,7 @@ class ProductModel extends Model
 
     public function transactions()
     {
-        return $this->hasMany(CartModel::class, 'products_id', 'product_code');
+        // return $this->hasMany(CartModel::class, 'products_id', 'product_code');
+        return $this->hasMany(CartModel::class, 'product_code', 'product_code');
     }
 }

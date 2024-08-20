@@ -130,7 +130,8 @@ class UpdateController extends Controller
     {
         $request->validate([
             'user_id' => 'required',
-            'products_id' => 'required',
+            // 'products_id' => 'required',
+            'product_code' => 'required',
             // 'rate' => 'required',
             'quantity' => 'required',
             // 'amount' => 'required',
@@ -139,7 +140,8 @@ class UpdateController extends Controller
 
             $update_cart = CartModel::where('id', $id)
             ->update([
-                'products_id' => $request->input('products_id'),
+                // 'products_id' => $request->input('products_id'),
+                'product_code' => $request->input('product_code'),
                 'quantity' => $request->input('quantity'),
                 'type' => $request->input('type'),
             ]);

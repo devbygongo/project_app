@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('t_cart', function (Blueprint $table) {
             $table->id();
             $table->integer('user_id');
-            $table->string('products_id');
+            // $table->string('products_id');
+            $table->string('product_code');
+            $table->string('product_name');
             $table->float('rate');
             $table->integer('quantity');
             $table->float('amount');

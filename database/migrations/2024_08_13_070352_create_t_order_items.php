@@ -13,11 +13,17 @@ return new class extends Migration
     {
         Schema::create('t_order_items', function (Blueprint $table) {
             $table->id();
-            $table->integer('orderID');
-            $table->string('item');
+            // $table->integer('orderID');
+            $table->integer('order_id');
+            // $table->string('item');
+            $table->string('product_code');
+            $table->string('product_name');
             $table->float('rate');
-            $table->float('discount');
-            $table->float('line_total');
+            // $table->float('discount');
+            $table->float('quantity');
+            // $table->float('line_total');
+            $table->float('total');
+            $table->enum('type', ['basic', 'gst']);
             $table->timestamps();
         });
     }

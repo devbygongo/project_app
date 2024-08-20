@@ -12,15 +12,22 @@ class OrderItemsModel extends Model
     protected $table = 't_order_items';
 
     protected $fillable = [
-        'orderID',
-        'item',
+        // 'orderID',
+        'order_id',
+        // 'item',
+        'product_code',
+        'product_name',
         'rate',
-        'discount',
-        'line_total',
+        // 'discount',
+        'quantity',
+        // 'line_total',
+        'total',
+        'type',
     ];
 
     public function get_orders()
     {
-        return $this->belongsTo(OrderModel::class, 'orderID', 'order_id'); 
+        // return $this->belongsTo(OrderModel::class, 'orderID', 'order_id'); 
+        return $this->belongsTo(OrderModel::class, 'order_id', 'order_id'); 
     }
 }

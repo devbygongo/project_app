@@ -13,7 +13,9 @@ class CartModel extends Model
 
     protected $fillable = [
         'user_id',
-        'products_id',
+        // 'products_id',
+        'product_code',
+        'product_name',
         'rate',
         'quantity',
         'amount',
@@ -27,6 +29,7 @@ class CartModel extends Model
 
     public function get_products()
     {
-        return $this->belongsTo(ProductModel::class, 'products_id', 'product_code'); 
+        // return $this->belongsTo(ProductModel::class, 'products_id', 'product_code'); 
+        return $this->belongsTo(ProductModel::class, 'product_code', 'product_code'); 
     }
 }
