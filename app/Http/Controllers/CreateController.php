@@ -171,6 +171,14 @@ class CreateController extends Controller
 
     public function logout(Request $request)
     {
+        // Check if the user is authenticated
+        if (!$request->user()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No user is authenticated.',
+            ], 401); // 401 Unauthorized
+        }
+        
         // Revoke the token that was used to authenticate the current request
         $request->user()->currentAccessToken()->delete();
 
