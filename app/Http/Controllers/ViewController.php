@@ -47,7 +47,11 @@ class ViewController extends Controller
         {
             $offset = 0;
             $limit = 10; // Number of records to fetch per batch
-            $get_products = ProductModel::select('SKU','product_code','product_name','category','sub_category','product_image','basic','gst','mark_up')
+            // $get_products = ProductModel::select('SKU','product_code','product_name','category','sub_category','product_image','basic','gst','mark_up')
+            // ->skip($offset)
+            // ->take($limit)
+            // ->get();
+            $get_products = ProductModel::select('SKU','product_code','product_name','category','sub_category','product_image','basic','gst')
             ->skip($offset)
             ->take($limit)
             ->get();
@@ -55,7 +59,12 @@ class ViewController extends Controller
         else {
             $offset = 0;
             $limit = 10; // Number of records to fetch per batch
-            $get_products = ProductModel::select('SKU','product_code','product_name','category','sub_category','product_image','basic','gst','mark_up')
+            // $get_products = ProductModel::select('SKU','product_code','product_name','category','sub_category','product_image','basic','gst','mark_up')
+            // ->where('product_name', 'like', "%{$search}%")
+            // ->skip($offset)
+            // ->take($limit)
+            // ->get();
+            $get_products = ProductModel::select('SKU','product_code','product_name','category','sub_category','product_image','basic','gst')
             ->where('product_name', 'like', "%{$search}%")
             ->skip($offset)
             ->take($limit)
