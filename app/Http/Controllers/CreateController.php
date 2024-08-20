@@ -315,7 +315,7 @@ class CreateController extends Controller
                 // 'discount' => $request->input('discount'),
                 'quantity' => $request->input('quantity'),
                 // 'line_total' => $request->input('line_total'),
-                'total' => $request->input('line_total'),
+                'total' => $request->input('total'),
             ]);
 
 
