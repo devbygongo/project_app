@@ -98,12 +98,13 @@ class UpdateController extends Controller
                 $whatsAppUtility = new sendWhatsAppUtility();
                 
                 // Send OTP via WhatsApp
-                $response = $whatsAppUtility->sendWhatsApp("+918961043773", $templateParams, "+918961043773", 'OTP Campaign');
+                // $response = $whatsAppUtility->sendWhatsApp("+918961043773", $templateParams, "+918961043773", 'OTP Campaign');
+                $response = $whatsAppUtility->sendWhatsApp($mobile, $templateParams, $mobile, 'OTP Campaign');
                 
                 // Send OTP via WhatsApp
                 // $response = $this->whatsAppService->sendOtp("+918961043773", $templateParams);
 
-                dd($response);
+                // dd($response);
 
                 return response()->json([
                     'message' => 'Otp store successfully!',
