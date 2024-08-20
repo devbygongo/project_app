@@ -23,7 +23,8 @@ class ViewController extends Controller
     //
     public function product()
     {
-        $get_product_details = ProductModel::select('SKU','product_code','product_name','category','sub_category','product_image','basic','gst','mark_up')->get();
+        // $get_product_details = ProductModel::select('SKU','product_code','product_name','category','sub_category','product_image','basic','gst','mark_up')->get();
+        $get_product_details = ProductModel::select('SKU','product_code','product_name','category','sub_category','product_image','basic','gst')->get();
         
 
         if (isset($get_product_details)) {
