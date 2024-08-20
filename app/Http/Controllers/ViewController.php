@@ -16,6 +16,8 @@ use App\Models\OrderItemsModel;
 
 use App\Models\CartModel;
 
+use App\Models\CounterModel;
+
 class ViewController extends Controller
 {
     //
@@ -237,6 +239,24 @@ class ViewController extends Controller
             return response()->json([
                 'message' => 'Fetch data successfully!',
                 'data' => $get_items_for_user
+            ], 201);
+        }
+
+        else {
+            return response()->json([
+                'message' => 'Failed get data successfully!',
+            ], 400);
+        }    
+    }
+
+    public function counter()
+    {
+        $get_counter_records = CounterModel::all();
+        
+        if (isset($get_counter_records)) {
+            return response()->json([
+                'message' => 'Fetch data successfully!',
+                'data' => $get_counter_records
             ], 201);
         }
 

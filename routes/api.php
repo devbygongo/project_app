@@ -62,6 +62,10 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
     Route::get('/fetch_products', [CsvImportController::class, 'importProduct']);
 
     Route::get('/fetch_users', [CsvImportController::class, 'importUser']);
+
+    Route::post('/add_counter', [CreateController::class, 'counter']);
+
+    Route::get('/view_counter', [ViewController::class, 'counter']);
 });
 
 Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user'])->group(function () {

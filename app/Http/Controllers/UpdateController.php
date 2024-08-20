@@ -82,15 +82,15 @@ class UpdateController extends Controller
                         ],
                         [
                             'type' => 'button',
-                            'sub_type' => 'url', // Specify the type of button (e.g., url or quick_reply)
-                            'index' => 0, // Index position of the button
+                            'sub_type' => 'url',
+                            "index" => "0",
                             'parameters' => [
                                 [
                                     'type' => 'text',
-                                    'text' => 'Verify Now', // Button text
+                                    'text' => $six_digit_otp_number,
                                 ],
                             ],
-                        ],
+                        ]
                     ],
                 ];
                 

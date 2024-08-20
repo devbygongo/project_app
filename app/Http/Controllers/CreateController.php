@@ -14,6 +14,8 @@ use App\Models\OrderItemsModel;
 
 use App\Models\CartModel;
 
+use App\Models\CounterModel;
+
 use Illuminate\Support\Facades\Auth;
 
 use Hash;
@@ -341,6 +343,36 @@ class CreateController extends Controller
         else {
             return response()->json([
                 'message' => 'Failed to create order successfully!'
+            ], 400);
+        }    
+    }
+
+    public function counter(Request $request)
+    {
+        $request->validate([
+            'name' => 'required',
+            'counter' => 'required',
+        ]);
+
+            $create_counter = CounterModel::create([
+                'name' => $request->input('name'),
+                'prefix' => $request->input('prefix'),
+                'counter' => $request->input('counter'),
+                'postfix' => $request->input('postfix'),
+            ]);
+
+
+        if (isset($create_counter)) {
+            return response()->json([
+                'message' => 'Counter record created successfully!',
+                'data' => $create_counter
+            ], 201);
+        }
+
+        else {
+            return response()->json([
+                'message' => 'Failed to create counter record successfully!',
+                'data' => $create_counter
             ], 400);
         }    
     }
