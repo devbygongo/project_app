@@ -124,11 +124,12 @@ class CreateController extends Controller
                 $user = Auth::user(); 
     
                 // Check the user's role
-                if ($user->role !== 'admin' && $user->role !== 'user') {
+                // if ($user->role !== 'admin' && $user->role !== 'user') {
+                if ($user->verified == '0') {
                     return response()->json([
                         'success' => false,
                         'message' => 'Unauthorized.',
-                        'errors' => ['error' => 'You do not have access to this section.'],
+                        'errors' => ['error' => 'You do not have access to this section.\nPlease Verify your account first'],
                     ], 403);
                 }
     
