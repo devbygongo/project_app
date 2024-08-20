@@ -82,35 +82,47 @@ class CreateController extends Controller
             ->where('mobile', $request->mobile)
             ->first();
             
-            // Validate OTP and expiry
-            if (!$otpRecord || $otpRecord->otp != $otp) {
-                return response()->json(['message' => 'Invalid OTP.'], 400);
+            if ($otpRecord) 
+            {
+                // Validate OTP and expiry
+                if (!$otpRecord || $otpRecord->otp != $otp) {
+                    return response()->json(['message' => 'Invalid OTP.'], 400);
+                }
+
+                if ($otpRecord->expires_at < now()) {
+                    return response()->json(['message' => 'OTP has expired.'], 400);
+                } 
+
+                else 
+                {
+                    // Remove OTP record after successful validation
+                    User::select('otp')->where('mobile', $request->mobile)->update(['otp' => null, 'expires_at' => null]);
+
+                    // Retrieve the user
+                    $user = User::where('mobile', $request->mobile)->first();
+
+                    // Generate a Sanctum token
+                    $token = $user->createToken('API TOKEN')->plainTextToken;
+        
+                    return response()->json([
+                        'success' => true,
+                        'data' => [
+                            'token' => $token,
+                            'name' => $user->name,
+                            'role' => $user->role,
+                        ],
+                        'message' => 'User login successfully.',
+                    ], 200);
+                }
             }
 
-            if ($otpRecord->expires_at < now()) {
-                return response()->json(['message' => 'OTP has expired.'], 400);
+            else{ 
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not register.',
+                ], 401);
             } 
-
-            else {
-                // Remove OTP record after successful validation
-                User::select('otp')->where('mobile', $request->mobile)->update(['otp' => null, 'expires_at' => null]);
-
-                // Retrieve the user
-                $user = User::where('mobile', $request->mobile)->first();
-
-                // Generate a Sanctum token
-                $token = $user->createToken('API TOKEN')->plainTextToken;
-    
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'token' => $token,
-                    'name' => $user->name,
-                    'role' => $user->role,
-                ],
-                'message' => 'User login successfully.',
-            ], 200);
-            }
+            
         }
         else
         {
