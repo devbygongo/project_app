@@ -297,6 +297,7 @@ class CreateController extends Controller
             'order_id' => 'required',
             // 'item' => 'required',
             'product_code' => 'required',
+            'product_name' => 'required',
             'rate' => 'required',
             // 'discount' => 'required',
             'quantity' => 'required',
