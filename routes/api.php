@@ -25,7 +25,8 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
 
     Route::get('/view_user', [ViewController::class, 'user']);
 
-    Route::get('/logout', [CreateController::class, 'webLogout']);
+    // Route::get('/logout', [CreateController::class, 'webLogout']);
+    Route::get('/logout', [CreateController::class, 'logout']);
 
     Route::post('/add_product', [CreateController::class, 'product']);
 
