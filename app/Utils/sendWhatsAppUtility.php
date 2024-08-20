@@ -22,6 +22,10 @@ class sendWhatsAppUtility
 
             $curl = curl_init();
 
+            // Initialize $response to a default value
+            // changes due to server issue
+            $response = null;
+
             curl_setopt_array($curl, array(
             CURLOPT_URL => 'https://graph.facebook.com/v19.0/357370407455461/messages',
             CURLOPT_RETURNTRANSFER => true,
