@@ -310,6 +310,7 @@ class CreateController extends Controller
                 'order_id' => $request->input('order_id'),
                 // 'item' => $request->input('item'),
                 'product_code' => $request->input('product_code'),
+                'product_name' => $request->input('product_name'),
                 'rate' => $request->input('rate'),
                 // 'discount' => $request->input('discount'),
                 'quantity' => $request->input('quantity'),
