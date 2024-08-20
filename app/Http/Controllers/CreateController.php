@@ -178,7 +178,7 @@ class CreateController extends Controller
                 'message' => 'No user is authenticated.',
             ], 401); // 401 Unauthorized
         }
-        
+
         // Revoke the token that was used to authenticate the current request
         $request->user()->currentAccessToken()->delete();
 
@@ -211,7 +211,7 @@ class CreateController extends Controller
             'product_image'=> 'required',
             'basic'=>'required',
             'gst'=>'required',
-            'mark_up'=>'required',
+            // 'mark_up'=>'required',
         ]);
 
         if($request->hasFile('product_image'))
@@ -232,7 +232,7 @@ class CreateController extends Controller
                 'product_image' => $fileUrl,
                 'basic' => $request->input('basic'),
                 'gst' => $request->input('gst'),
-                'mark_up' => $request->input('mark_up'),
+                // 'mark_up' => $request->input('mark_up'),
             ]);
         }
 
