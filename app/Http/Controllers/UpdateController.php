@@ -127,7 +127,7 @@ class UpdateController extends Controller
         }
     }
 
-    public function cart($id)
+    public function cart(Request $request, $id)
     {
         $request->validate([
             'user_id' => 'required',
