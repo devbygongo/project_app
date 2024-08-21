@@ -19,7 +19,7 @@ use App\Http\Middleware\GetUserRole;
 //     return $request->user();
 // })->middleware('auth:sanctum');
 
-// Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin'])->group(function () {
+Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin'])->group(function () {
 
     Route::post('/add_user', [CreateController::class, 'user']);
 
@@ -69,7 +69,7 @@ use App\Http\Middleware\GetUserRole;
     Route::post('/add_counter', [CreateController::class, 'counter']);
 
     Route::get('/view_counter', [ViewController::class, 'counter']);
-// });
+});
 
 // Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user'])->group(function () {
 
