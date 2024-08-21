@@ -127,25 +127,48 @@ class UpdateController extends Controller
         }
     }
 
-    public function cart(Request $request, $id)
+    public function cart(Request $request, $id = null)
     {
-        $request->validate([
-            'user_id' => 'required',
-            // 'products_id' => 'required',
-            'product_code' => 'required',
-            // 'rate' => 'required',
-            'quantity' => 'required',
-            // 'amount' => 'required',
-            'type' => 'required',
-        ]);
+        $get_user = Auth::User();
 
-            $update_cart = CartModel::where('id', $id)
-            ->update([
-                // 'products_id' => $request->input('products_id'),
-                'product_code' => $request->input('product_code'),
-                'quantity' => $request->input('quantity'),
-                'type' => $request->input('type'),
+        if($get_user->role == 'admin')
+        {
+            $request->validate([
+                'user_id' => 'required',
+                // 'products_id' => 'required',
+                'product_code' => 'required',
+                // 'rate' => 'required',
+                'quantity' => 'required',
+                // 'amount' => 'required',
+                'type' => 'required',
             ]);
+    
+                $update_cart = CartModel::where('id', $id)
+                ->update([
+                    // 'products_id' => $request->input('products_id'),
+                    'product_code' => $request->input('product_code'),
+                    'quantity' => $request->input('quantity'),
+                    'type' => $request->input('type'),
+                ]);
+        }
+        else {
+            $request->validate([
+                // 'products_id' => 'required',
+                'product_code' => 'required',
+                // 'rate' => 'required',
+                'quantity' => 'required',
+                // 'amount' => 'required',
+                'type' => 'required',
+            ]);
+    
+                $update_cart = CartModel::where('id', $get_user->id)
+                ->update([
+                    // 'products_id' => $request->input('products_id'),
+                    'product_code' => $request->input('product_code'),
+                    'quantity' => $request->input('quantity'),
+                    'type' => $request->input('type'),
+                ]);
+        }
 
         if (isset($update_cart)) {
             return response()->json([
