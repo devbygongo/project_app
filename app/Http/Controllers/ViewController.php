@@ -51,6 +51,11 @@ class ViewController extends Controller
         $offset = max(0, (int) $offset);
         $limit = max(1, (int) $limit);
 
+        // Retrieve filter parameters if provided
+        $search = $request->query('search');
+        $category = $request->query('category');
+        $subCategory = $request->query('sub_category');
+
         // Build the query
         $query = ProductModel::select('SKU', 'product_code', 'product_name', 'category', 'sub_category', 'product_image', 'basic', 'gst');
 
