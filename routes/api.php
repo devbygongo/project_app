@@ -77,7 +77,8 @@ Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user']
 
     Route::get('/logout', [CreateController::class, 'logout']);
 
-    Route::get('/cart_user', [ViewController::class, 'cart_user']);
+    // Route::get('/cart_user', [ViewController::class, 'cart_user']);
+    Route::get('/view_cart_user/{id?}', [ViewController::class, 'cart_user']);
 
     Route::delete('/delete_cart/{id}', [DeleteController::class, 'cart']);
 });
