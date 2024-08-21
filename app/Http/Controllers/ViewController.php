@@ -240,6 +240,40 @@ class ViewController extends Controller
         }    
     }
 
+    public function cart()
+    {
+        // Retrieve all records with their associated user and product data
+        $get_all_cart_records = CartModel::with(['get_users', 'get_products'])->get();
+        
+
+        // Transform the data if needed
+        $formattedData = $data->map(function ($item) {
+            return [
+                'id' => $item->id, // Adjust as necessary
+                'user' => $item->user ? [
+                    'id' => $item->user->id,
+                    'name' => $item->user->name, // Adjust fields as necessary
+                ] : null,
+                'product' => $item->product ? [
+                    'product_code' => $item->product->product_code,
+                    'name' => $item->product->name, // Adjust fields as necessary
+                ] : null,
+            ];
+        });
+        if (isset($formattedData)) {
+            return response()->json([
+                'message' => 'Fetch all recods successfully!',
+                'data' => $formattedData
+            ], 200);
+        }
+
+        else {
+            return response()->json([
+                'message' => 'Failed fetch records successfully!',
+            ], 400);
+        }    
+    }
+
     public function cart_user($id)
     {
         $get_items_for_user = CartModel::where('user_id', $id)->get();
