@@ -264,10 +264,10 @@ class CreateController extends Controller
             // 'log_user' => 'required',
         ]);
 
-        $get_basic_product = CartModel::where('user_id', $id)->where('type', 'basic')->get();
+        $get_basic_product = CartModel::where('user_id', $request->input('user_id'),)->where('type', 'basic')->get();
         print_r($get_basic_product);
 
-        $get_gst_product = CartModel::where('user_id', $id)->where('type', 'gst')->get();
+        $get_gst_product = CartModel::where('user_id', $request->input('user_id'),)->where('type', 'gst')->get();
         dd($get_gst_product);
 
             $create_order = OrderModel::create([
