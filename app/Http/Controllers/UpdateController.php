@@ -136,7 +136,7 @@ class UpdateController extends Controller
         if($get_user->role == 'admin')
         {
             $request->validate([
-                'user_id' => 'required',
+                // 'user_id' => 'required',
                 // 'products_id' => 'required',
                 'product_code' => 'required',
                 // 'rate' => 'required',
@@ -155,6 +155,7 @@ class UpdateController extends Controller
         }
         else {
             $request->validate([
+                // 'user_id' => 'required',
                 // 'products_id' => 'required',
                 'product_code' => 'required',
                 // 'rate' => 'required',
