@@ -41,35 +41,38 @@ class ViewController extends Controller
         }    
     }
 
-    public function get_product($search = null)
+    public function get_product(Request $request)
     {
-        if(!isset($search))
-        {
-            $offset = 0;
-            $limit = 10; // Number of records to fetch per batch
-            // $get_products = ProductModel::select('SKU','product_code','product_name','category','sub_category','product_image','basic','gst','mark_up')
-            // ->skip($offset)
-            // ->take($limit)
-            // ->get();
-            $get_products = ProductModel::select('SKU','product_code','product_name','category','sub_category','product_image','basic','gst')
-            ->skip($offset)
-            ->take($limit)
-            ->get();
+        // Retrieve offset and limit from the request with default values
+        $offset = $request->query('offset', 0); // Default to 0 if not provided
+        $limit = $request->query('limit', 10);  // Default to 10 if not provided
+
+        // Ensure the offset and limit are integers and non-negative
+        $offset = max(0, (int) $offset);
+        $limit = max(1, (int) $limit);
+
+        // Build the query
+        $query = ProductModel::select('SKU', 'product_code', 'product_name', 'category', 'sub_category', 'product_image', 'basic', 'gst');
+
+        // Apply search filter if provided
+        if ($search) {
+            $query->where('product_name', 'like', "%{$search}%");
         }
-        else {
-            $offset = 0;
-            $limit = 10; // Number of records to fetch per batch
-            // $get_products = ProductModel::select('SKU','product_code','product_name','category','sub_category','product_image','basic','gst','mark_up')
-            // ->where('product_name', 'like', "%{$search}%")
-            // ->skip($offset)
-            // ->take($limit)
-            // ->get();
-            $get_products = ProductModel::select('SKU','product_code','product_name','category','sub_category','product_image','basic','gst')
-            ->where('product_name', 'like', "%{$search}%")
-            ->skip($offset)
-            ->take($limit)
-            ->get();
+
+        // Apply category filter if provided
+        if ($category) {
+            $query->where('category', $category);
         }
+
+        // Apply sub-category filter if provided
+        if ($subCategory) {
+            $query->where('sub_category', $subCategory);
+        }
+
+        // Apply pagination
+        $get_products = $query->skip($offset)
+                        ->take($limit)
+                        ->get();
         
 
         if (isset($get_products)) {

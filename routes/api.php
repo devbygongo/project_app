@@ -34,7 +34,7 @@ use App\Http\Middleware\GetUserRole;
 
     Route::get('/view_product', [ViewController::class, 'product']);
 
-    Route::get('/get_product/{search?}', [ViewController::class, 'get_product']);
+    Route::post('/get_product', [ViewController::class, 'get_product']);
 
     Route::get('/category', [ViewController::class, 'categories']);
 
