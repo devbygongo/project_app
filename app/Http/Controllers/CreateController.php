@@ -254,6 +254,7 @@ class CreateController extends Controller
 
     public function orders(Request $request)
     {
+        dd("abc");
         $request->validate([
             // 'client_id' => 'required',
             'user_id' => 'required',
