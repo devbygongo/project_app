@@ -250,13 +250,13 @@ class ViewController extends Controller
         $formattedData = $get_all_cart_records->map(function ($item) {
             return [
                 'id' => $item->id, // Adjust as necessary
-                'user' => $item->user ? [
-                    'id' => $item->user->id,
-                    'name' => $item->user->name, // Adjust fields as necessary
+                'user' => $item->get_users ? [
+                    'id' => $item->get_users->id,
+                    'name' => $item->get_users->name, // Adjust fields as necessary
                 ] : null,
-                'product' => $item->product ? [
-                    'product_code' => $item->product->product_code,
-                    'name' => $item->product->name, // Adjust fields as necessary
+                'product' => $item->get_products ? [
+                    'product_code' => $item->get_products->product_code,
+                    'name' => $item->get_products->product_name, // Adjust fields as necessary
                 ] : null,
             ];
         });
