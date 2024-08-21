@@ -56,7 +56,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
 
     Route::get('/view_cart', [ViewController::class, 'cart']);
 
-    Route::get('/view_cart_user/{id}', [ViewController::class, 'cart_user']);
+    Route::get('/view_cart_user/{id?}', [ViewController::class, 'cart_user']);
     
     Route::patch('/update_cart/{id}', [UpdateController::class, 'cart']);
 
