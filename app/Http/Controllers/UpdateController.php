@@ -131,10 +131,6 @@ class UpdateController extends Controller
 
     public function cart(Request $request, $id = null)
     {
-        print_r("ppp");
-        print_r($id);
-        dd("abc");
-dd($id);
         $get_user = Auth::User();
         
         if($get_user->role == 'admin')
