@@ -129,7 +129,7 @@ class UpdateController extends Controller
         }
     }
 
-    public function cart(Request $request, $id = null)
+    public function cart(Request $request, $id)
     {
         $get_user = Auth::User();
         
