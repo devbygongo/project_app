@@ -46,17 +46,15 @@ class ViewController extends Controller
         // Retrieve offset and limit from the request with default values
         $offset = $request->input('offset', 0); // Default to 0 if not provided
         $limit = $request->input('limit', 10);  // Default to 10 if not provided
-        print_r($offset);
-        print_r($limit);
 
         // Ensure the offset and limit are integers and non-negative
         $offset = max(0, (int) $offset);
         $limit = max(1, (int) $limit);
 
         // Retrieve filter parameters if provided
-        $search = $request->query('search');
-        $category = $request->query('category');
-        $subCategory = $request->query('sub_category');
+        $search = $request->input('search');
+        $category = $request->input('category');
+        $subCategory = $request->input('sub_category');
 
         // Build the query
         $query = ProductModel::select('SKU', 'product_code', 'product_name', 'category', 'sub_category', 'product_image', 'basic', 'gst');
