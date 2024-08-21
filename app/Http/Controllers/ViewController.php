@@ -247,7 +247,7 @@ class ViewController extends Controller
         
 
         // Transform the data if needed
-        $formattedData = $data->map(function ($item) {
+        $formattedData = $get_all_cart_records->map(function ($item) {
             return [
                 'id' => $item->id, // Adjust as necessary
                 'user' => $item->user ? [
