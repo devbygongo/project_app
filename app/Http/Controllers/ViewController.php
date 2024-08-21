@@ -276,7 +276,7 @@ class ViewController extends Controller
 
     public function cart_user($id = null)
     {
-        $abc = Auth::role();
+        $abc = Auth::User();
         dd($abc);
         $get_items_for_user = CartModel::where('user_id', $id)->get();
         
