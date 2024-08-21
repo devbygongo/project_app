@@ -276,11 +276,16 @@ class ViewController extends Controller
 
     public function cart_user($id = null)
     {
-        $abc = Auth::User();
-        print_r($abc);
-        print_r($abc->role);
-        die("abc");
-        $get_items_for_user = CartModel::where('user_id', $id)->get();
+        $get_user = Auth::User();
+
+        if($get_user->role == 'admin')
+        {
+            $get_items_for_user = CartModel::where('user_id', $id)->get();
+        }
+
+        else {
+            $get_items_for_user = CartModel::where('user_id', $get_user->id)->get();
+        }
         
 
         if (isset($get_items_for_user)) {
