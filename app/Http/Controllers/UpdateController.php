@@ -10,6 +10,8 @@ use App\Models\CartModel;
 
 use App\Utils\sendWhatsAppUtility;
 
+use Illuminate\Support\Facades\Auth;
+
 class UpdateController extends Controller
 {
     //
