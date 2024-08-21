@@ -131,9 +131,10 @@ class UpdateController extends Controller
 
     public function cart(Request $request, $id = null)
     {
-        $get_user = Auth::User();
         dd("abc");
 dd($id);
+        $get_user = Auth::User();
+        
         if($get_user->role == 'admin')
         {
             $request->validate([
