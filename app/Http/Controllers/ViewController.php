@@ -46,6 +46,8 @@ class ViewController extends Controller
         // Retrieve offset and limit from the request with default values
         $offset = $request->query('offset', 0); // Default to 0 if not provided
         $limit = $request->query('limit', 10);  // Default to 10 if not provided
+        print_r($offset);
+        print_r($limit);
 
         // Ensure the offset and limit are integers and non-negative
         $offset = max(0, (int) $offset);
