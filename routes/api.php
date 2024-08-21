@@ -84,5 +84,3 @@ Route::post('/register_user', [CreateController::class, 'user']);
 // Route::get('/view_user', [ViewController::class, 'user']);
 
 Route::post('/get_otp', [UpdateController::class, 'generate_otp']);
-
-Route::get('/logout', [CreateController::class, 'logout']);
