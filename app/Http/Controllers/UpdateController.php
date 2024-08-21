@@ -172,7 +172,7 @@ class UpdateController extends Controller
                 ]);
         }
 
-        if (isset($update_cart)) {
+        if ($update_cart == 1) {
             return response()->json([
                 'message' => 'Cart updated successfully!',
                 'data' => $update_cart
