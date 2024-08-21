@@ -254,7 +254,6 @@ class CreateController extends Controller
 
     public function orders(Request $request)
     {
-        dd("abc");
         $request->validate([
             // 'client_id' => 'required',
             'user_id' => 'required',
@@ -265,7 +264,7 @@ class CreateController extends Controller
             // 'log_user' => 'required',
         ]);
 
-        $get_basic_product = CartModel::where('user_id', $request->input('user_id'))->where('type', 'basic')->get();
+        $get_basic_product = CartModel::select('amount', 'quantity')->where('user_id', $request->input('user_id'))->where('type', 'basic')->get();
         print_r($get_basic_product);
         dd("abc");
 
