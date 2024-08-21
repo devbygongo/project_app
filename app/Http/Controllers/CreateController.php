@@ -257,12 +257,18 @@ class CreateController extends Controller
         $request->validate([
             // 'client_id' => 'required',
             'user_id' => 'required',
-            'order_id' => 'required',
-            'order_date' => 'required',
-            'amount' => 'required',
+            // 'order_id' => 'required',
+            // 'order_date' => 'required',
+            // 'amount' => 'required',
             // 'log_date' => 'required',
             // 'log_user' => 'required',
         ]);
+
+        $get_basic_product = CartModel::where('user_id', $id)->where('type', 'basic')->get();
+        dd($get_basic_product);
+
+        $get_gst_product = CartModel::where('user_id', $id)->where('type', 'gst')->get();
+        dd($get_gst_product);
 
             $create_order = OrderModel::create([
                 // 'client_id' => $request->input('client_id'),
