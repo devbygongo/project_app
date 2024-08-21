@@ -43,11 +43,9 @@ class ViewController extends Controller
 
     public function get_product(Request $request)
     {
-        print_r($request->input());
-        die("aaa");
         // Retrieve offset and limit from the request with default values
-        $offset = $request->query('offset', 0); // Default to 0 if not provided
-        $limit = $request->query('limit', 10);  // Default to 10 if not provided
+        $offset = $request->input('offset', 0); // Default to 0 if not provided
+        $limit = $request->input('limit', 10);  // Default to 10 if not provided
         print_r($offset);
         print_r($limit);
 
