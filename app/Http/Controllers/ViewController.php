@@ -274,7 +274,7 @@ class ViewController extends Controller
         }    
     }
 
-    public function cart_user($id)
+    public function cart_user($id = null)
     {
         $abc = Auth::user();
         dd($abc);
