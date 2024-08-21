@@ -265,7 +265,7 @@ class CreateController extends Controller
         ]);
 
         $get_basic_product = CartModel::where('user_id', $id)->where('type', 'basic')->get();
-        dd($get_basic_product);
+        print_r($get_basic_product);
 
         $get_gst_product = CartModel::where('user_id', $id)->where('type', 'gst')->get();
         dd($get_gst_product);
