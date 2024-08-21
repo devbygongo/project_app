@@ -266,6 +266,7 @@ class CreateController extends Controller
 
         $get_basic_product = CartModel::where('user_id', $request->input('user_id'),)->where('type', 'basic')->get();
         print_r($get_basic_product);
+        dd("abc");
 
         $get_gst_product = CartModel::where('user_id', $request->input('user_id'),)->where('type', 'gst')->get();
         dd($get_gst_product);
