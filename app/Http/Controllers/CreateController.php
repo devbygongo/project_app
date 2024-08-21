@@ -171,8 +171,6 @@ class CreateController extends Controller
 
     public function logout(Request $request)
     {
-        print_r("abc");
-        dd($request->user()->currentAccessToken());
         // Check if the user is authenticated
         if (!$request->user()) {
             return response()->json([
