@@ -264,7 +264,6 @@ class CreateController extends Controller
         $get_basic_product = CartModel::select('amount', 'quantity')->where('user_id', $request->input('user_id'))->where('type', 'basic')->get();
 
         $get_counter_data = CounterModel::select('prefix', 'counter', 'postfix')->where('name', 'order_basic')->get();
-        print_r($get_counter_data);
 
         $get_order_id = $get_counter_data[0]->prefix.$get_counter_data[0]->counter.$get_counter_data[0]->postfix;
 
@@ -292,8 +291,6 @@ class CreateController extends Controller
 
         $get_counter_data = CounterModel::select('prefix', 'counter', 'postfix')->where('name', 'order_gst')->get();
 
-        print_r($get_counter_data);
-die("aaa");
         $get_order_id = $get_counter_data[0]->prefix.$get_counter_data[0]->counter.$get_counter_data[0]->postfix;
 
         $update_cart = CounterModel::where('name', 'order_gst')
