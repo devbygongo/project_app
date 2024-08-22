@@ -257,30 +257,56 @@ class CreateController extends Controller
         $request->validate([
             // 'client_id' => 'required',
             'user_id' => 'required',
-            // 'order_id' => 'required',
-            // 'order_date' => 'required',
-            // 'amount' => 'required',
-            // 'log_date' => 'required',
-            // 'log_user' => 'required',
         ]);
 
         $get_basic_product = CartModel::select('amount', 'quantity')->where('user_id', $request->input('user_id'))->where('type', 'basic')->get();
-        print_r($get_basic_product);
-        dd("abc");
+
+        $get_counter_data = CounterModel::select('prefix', 'counter', 'postfix')->where('name', 'order_basic')->get();
+
+        $get_order_id = $get_counter_data[0]->prefix.$get_counter_data[0]->counter.$get_counter_data[0]->postfix;
+
+        $update_cart = CounterModel::where('name', 'order_basic')
+                ->update([
+                    'counter' => (($get_counter_data[0]->counter)+1),
+                ]);
+
+        if ((count($get_basic_product)) > 0) {
+            $product_amount = 0;
+            foreach ($get_basic_product as $product) {
+                $product_amount += (($product->amount) * ($product->quantity));
+            } 
+            $create_order = OrderModel::create([
+                'user_id' => $request->input('user_id'),
+                'order_id' => $get_order_id,
+                'order_date' => Carbon::now(),
+                'amount' => $product_amount,
+            ]);
+        }
 
         $get_gst_product = CartModel::where('user_id', $request->input('user_id'))->where('type', 'gst')->get();
-        dd($get_gst_product);
 
-            $create_order = OrderModel::create([
-                // 'client_id' => $request->input('client_id'),
-                'user_id' => $request->input('user_id'),
-                'order_id' => $request->input('order_id'),
-                'order_date' => $request->input('order_date'),
-                'amount' => $request->input('amount'),
-                // 'log_date' => $request->input('log_date'),
-                // 'log_user' => $request->input('log_user'),
-            ]);
+        $get_counter_data = CounterModel::select('prefix', 'counter', 'postfix')->where('name', 'order_gst')->get();
 
+        $get_order_id = $get_counter_data[0]->prefix.$get_counter_data[0]->counter.$get_counter_data[0]->postfix;
+
+        $update_cart = CounterModel::where('name', 'order_gst')
+                ->update([
+                    'counter' => (($get_counter_data[0]->counter)+1),
+                ]);
+
+        if ((count($get_gst_product)) > 0) {
+        $product_amount = 0;
+        foreach ($get_basic_product as $product) {
+            $product_amount += (($product->amount) * ($product->quantity));
+        }
+
+        $create_order = OrderModel::create([
+            'user_id' => $request->input('user_id'),
+            'order_id' => $request->input('order_id'),
+            'order_date' => Carbon::now(),
+            'amount' => $product_amount,
+        ]);
+    }
 
         if (isset($create_order)) {
             return response()->json([
