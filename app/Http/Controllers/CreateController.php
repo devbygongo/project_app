@@ -282,7 +282,7 @@ class CreateController extends Controller
                     $product_basic_amount += (($product->amount) * ($product->quantity));
                 } 
                 
-                $create_order = OrderModel::create
+                $create_order_basic = OrderModel::create
                 ([
                     'user_id' => $request->input('user_id'),
                     'order_id' => $get_order_id,
@@ -314,7 +314,7 @@ class CreateController extends Controller
                     $product_gst_amount += (($product->amount) * ($product->quantity));
                 }
 
-                $create_order = OrderModel::create([
+                $create_order_gst = OrderModel::create([
                     'user_id' => $request->input('user_id'),
                     'order_id' => $get_order_id,
                     'order_date' => Carbon::now(),
@@ -324,17 +324,18 @@ class CreateController extends Controller
             }
         }
 
-        if (isset($create_order)) {
+        if (($create_order_basic || $create_order_gst)) {
             return response()->json([
                 'message' => 'Order created successfully!',
-                'data' => $create_order
+                'data_basic' => $create_order_basic,
+                'data_gst' => $create_order_gst
             ], 201);
         }
 
         else {
             return response()->json([
                 'message' => 'Failed to create order successfully!',
-                'data' => $create_order
+                'data' => 'Error!'
             ], 400);
         }    
     }
