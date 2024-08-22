@@ -271,7 +271,7 @@ class CreateController extends Controller
                 ->update([
                     'counter' => (($get_counter_data[0]->counter)+1),
                 ]);
-
+dd("abv");
         if ((count($get_basic_product)) > 0) {
             $product_basic_amount = 0;
             foreach ($get_basic_product as $product) {
