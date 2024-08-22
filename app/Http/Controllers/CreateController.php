@@ -273,15 +273,16 @@ class CreateController extends Controller
                 ]);
 
         if ((count($get_basic_product)) > 0) {
-            $product_amount = 0;
+            $product_basic_amount = 0;
             foreach ($get_basic_product as $product) {
-                $product_amount += (($product->amount) * ($product->quantity));
+                $product_basic_amount += (($product->amount) * ($product->quantity));
             } 
+            print_r($product_basic_amount);
             $create_order = OrderModel::create([
                 'user_id' => $request->input('user_id'),
                 'order_id' => $get_order_id,
                 'order_date' => Carbon::now(),
-                'amount' => $product_amount,
+                'amount' => $product_basic_amount,
                 'type' => 'basic',
             ]);
         }
@@ -298,16 +299,16 @@ class CreateController extends Controller
                 ]);
 
         if ((count($get_gst_product)) > 0) {
-        $product_amount = 0;
+        $product_gst_amount = 0;
         foreach ($get_basic_product as $product) {
-            $product_amount += (($product->amount) * ($product->quantity));
+            $product_gst_amount += (($product->amount) * ($product->quantity));
         }
-
+print_r($product_gst_amount);
         $create_order = OrderModel::create([
             'user_id' => $request->input('user_id'),
             'order_id' => $get_order_id,
             'order_date' => Carbon::now(),
-            'amount' => $product_amount,
+            'amount' => $product_gst_amount,
             'type' => 'gst',
         ]);
     }
