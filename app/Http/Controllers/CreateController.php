@@ -304,7 +304,7 @@ class CreateController extends Controller
 
         $create_order = OrderModel::create([
             'user_id' => $request->input('user_id'),
-            'order_id' => $request->input('order_id'),
+            'order_id' => $get_order_id,
             'order_date' => Carbon::now(),
             'amount' => $product_amount,
         ]);
