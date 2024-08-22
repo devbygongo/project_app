@@ -261,6 +261,8 @@ class CreateController extends Controller
             'user_id' => 'required',
         ]);
 
+        dd($request->input('user_id'));
+
         $get_basic_product = CartModel::select('amount', 'quantity')->where('user_id', $request->input('user_id'))->where('type', 'basic')->get();
 
         $get_counter_data = CounterModel::select('prefix', 'counter', 'postfix')->where('name', 'order_basic')->get();
