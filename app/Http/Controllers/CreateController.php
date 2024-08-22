@@ -278,6 +278,7 @@ class CreateController extends Controller
                 $product_basic_amount += (($product->amount) * ($product->quantity));
             } 
             print_r($product_basic_amount);
+            dd("aaa");
             $create_order = OrderModel::create([
                 'user_id' => $request->input('user_id'),
                 'order_id' => $get_order_id,
