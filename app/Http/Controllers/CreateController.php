@@ -282,6 +282,7 @@ class CreateController extends Controller
                 'order_id' => $get_order_id,
                 'order_date' => Carbon::now(),
                 'amount' => $product_amount,
+                'type' => 'basic',
             ]);
         }
 
@@ -307,6 +308,7 @@ class CreateController extends Controller
             'order_id' => $get_order_id,
             'order_date' => Carbon::now(),
             'amount' => $product_amount,
+            'type' => 'gst',
         ]);
     }
 
