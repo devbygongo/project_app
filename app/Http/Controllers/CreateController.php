@@ -256,10 +256,20 @@ class CreateController extends Controller
 
     public function orders(Request $request)
     {
-        $request->validate([
-            // 'client_id' => 'required',
-            'user_id' => 'required',
-        ]);
+        $get_user = Auth::User();
+
+        if($get_user->role == 'user') {
+            $request->input('user_id') == $get_user->id;
+            dd($request->input('user_id'));
+        }
+
+        else 
+        {
+            $request->validate([
+                // 'client_id' => 'required',
+                'user_id' => 'required',
+            ]);
+        }
 
         $get_basic_product = CartModel::select('amount', 'quantity')->where('user_id', $request->input('user_id'))->where('type', 'basic')->get();
 
@@ -324,11 +334,14 @@ class CreateController extends Controller
             }
         }
 
+        $get_remove_items = CartModel::where('user_id', $request->input('user_id'))->delete();
+
         if (($create_order_basic || $create_order_gst)) {
             return response()->json([
                 'message' => 'Order created successfully!',
                 'data_basic' => $create_order_basic,
-                'data_gst' => $create_order_gst
+                'data_gst' => $create_order_gst,
+                'status' => $get_remove_items,
             ], 201);
         }
 
