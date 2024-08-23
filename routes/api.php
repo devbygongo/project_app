@@ -71,7 +71,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
     Route::get('/view_counter', [ViewController::class, 'counter']);
 });
 
-// Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user'])->group(function () {
+Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user'])->group(function () {
 
     Route::get('/get_details', [ViewController::class, 'user_details']);
 
@@ -83,7 +83,10 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
     Route::patch('/update_cart/{id}', [UpdateController::class, 'cart']);
 
     Route::delete('/delete_cart/{id}', [DeleteController::class, 'cart']);
-// });
+
+    Route::post('/add_order', [CreateController::class, 'orders']);
+
+});
 Route::post('/login/{otp?}', [CreateController::class, 'login']);
 
 Route::post('/register_user', [CreateController::class, 'user']);

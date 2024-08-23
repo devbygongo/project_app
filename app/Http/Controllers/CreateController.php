@@ -259,8 +259,7 @@ class CreateController extends Controller
         $get_user = Auth::User();
 
         if($get_user->role == 'user') {
-            $request->input('user_id') == $get_user->id;
-            dd($request->input('user_id'));
+            $userId = $get_user->id;
         }
 
         else 
@@ -269,9 +268,13 @@ class CreateController extends Controller
                 // 'client_id' => 'required',
                 'user_id' => 'required',
             ]);
+            $userId = $request->input('user_id');
         }
 
-        $get_basic_product = CartModel::select('amount', 'quantity')->where('user_id', $request->input('user_id'))->where('type', 'basic')->get();
+        $create_order_basic = null;
+        $create_order_gst = null;
+
+        $get_basic_product = CartModel::select('amount', 'quantity')->where('user_id', $userId)->where('type', 'basic')->get();
 
         $get_counter_data = CounterModel::select('prefix', 'counter', 'postfix')->where('name', 'order_basic')->get();
 
@@ -294,7 +297,7 @@ class CreateController extends Controller
                 
                 $create_order_basic = OrderModel::create
                 ([
-                    'user_id' => $request->input('user_id'),
+                    'user_id' => $userId,
                     'order_id' => $get_order_id,
                     'order_date' => Carbon::now(),
                     'amount' => $product_basic_amount,
@@ -304,7 +307,7 @@ class CreateController extends Controller
 
         }
 
-        $get_gst_product = CartModel::where('user_id', $request->input('user_id'))->where('type', 'gst')->get();
+        $get_gst_product = CartModel::where('user_id', $userId)->where('type', 'gst')->get();
 
         $get_counter_data = CounterModel::select('prefix', 'counter', 'postfix')->where('name', 'order_gst')->get();
 
@@ -325,7 +328,7 @@ class CreateController extends Controller
                 }
 
                 $create_order_gst = OrderModel::create([
-                    'user_id' => $request->input('user_id'),
+                    'user_id' => $userId,
                     'order_id' => $get_order_id,
                     'order_date' => Carbon::now(),
                     'amount' => $product_gst_amount,
@@ -334,9 +337,9 @@ class CreateController extends Controller
             }
         }
 
-        $get_remove_items = CartModel::where('user_id', $request->input('user_id'))->delete();
+        $get_remove_items = CartModel::where('user_id', $userId)->delete();
 
-        if (($create_order_basic || $create_order_gst)) {
+        if ($create_order_basic !== null || $create_order_gst !== null) {
             return response()->json([
                 'message' => 'Order created successfully!',
                 'data_basic' => $create_order_basic,
