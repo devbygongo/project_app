@@ -52,9 +52,9 @@ class ViewController extends Controller
         $limit = max(1, (int) $limit);
 
         // Retrieve filter parameters if provided
-        $search = $request->input('search');
-        $category = $request->input('category');
-        $subCategory = $request->input('sub_category');
+        $search = $request->input('search', null);
+        $category = $request->input('category', null);
+        $subCategory = $request->input('sub_category', null);
 
         // Build the query
         $query = ProductModel::select('SKU', 'product_code', 'product_name', 'category', 'sub_category', 'product_image', 'basic', 'gst');
@@ -74,10 +74,22 @@ class ViewController extends Controller
             $query->where('sub_category', $subCategory);
         }
 
-        // Apply pagination
-        $get_products = $query->skip($offset)
-                        ->take($limit)
-                        ->get();
+        if (is_null($search) && is_null($category) && is_null($subCategory)) {
+            // If all filters are null, return the SQL query as a string
+           // Apply pagination
+            $get_products = $query->skip($offset)
+            ->take($limit)
+            ->get();
+        }
+
+        else {
+            // Otherwise, return the results with pagination applied
+            // Apply pagination
+            $get_products = $query
+            ->take($limit)
+            ->get();
+        }
+        
         
 
         if (isset($get_products)) {
