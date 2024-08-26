@@ -219,9 +219,10 @@ class CreateController extends Controller
         if($request->hasFile('product_image'))
         {
             $file = $request->file('product_image');
-            $filename = time().'_'. $file->getClientOriginalName();
-            $path = $file->storeAs('uploads', $filename, 'public');
-            $fileUrl = ('storage/uploads/' . $filename); 
+            // $filename = time().'_'. $file->getClientOriginalName();
+            $filename = $file->getClientOriginalName();
+            $path = $file->storeAs('uploads/products', $filename, 'public');
+            $fileUrl = ('storage/uploads/products' . $filename); 
             $get_file_name = $filename;
 
 
