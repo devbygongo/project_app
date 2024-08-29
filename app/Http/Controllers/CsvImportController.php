@@ -39,7 +39,7 @@ class CsvImportController extends Controller
 
             $basicPrice_product = $record_csv['Basic Price'] !== '' ? $record_csv['Basic Price'] : 0;
             $gstPrice_prduct = $record_csv['GST Price'] !== '' ? $record_csv['GST Price'] : 0;
-            $filename = $record_csv['Product Name'];
+            $filename = $record_csv['Product Code'];
 
             if ($product_csv) 
             {
@@ -52,7 +52,7 @@ class CsvImportController extends Controller
                     'basic' => $basicPrice_product, // Ensure this is a valid number
                     'gst' => $gstPrice_prduct,     // Ensure this is a valid number
                     // 'product_image' => null, // Set this if you have the image URL or path
-                    'product_image' => ('storage/uploads/products' . $filename),
+                    'product_image' => ('storage/uploads/products/' . $filename . '.jpg'),
                 ]);
             } 
             else 
@@ -67,7 +67,7 @@ class CsvImportController extends Controller
                     'basic' => $basicPrice_product, // Ensure this is a valid number
                     'gst' => $gstPrice_prduct,     // Ensure this is a valid number
                     // 'product_image' => null, // Set this if you have the image URL or path
-                    'product_image' => ('storage/uploads/products' . $filename),
+                    'product_image' => ('storage/uploads/products/' . $filename. '.jpg'),
                 ]);
             }
         }   
