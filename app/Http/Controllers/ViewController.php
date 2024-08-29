@@ -299,17 +299,22 @@ class ViewController extends Controller
         if($get_user->role == 'admin')
         {
             $get_items_for_user = CartModel::where('user_id', $id)->get();
+
+            $cart_data_count = count($get_items_for_user);
         }
 
         else {
             $get_items_for_user = CartModel::where('user_id', $get_user->id)->get();
+
+            $cart_data_count = count($get_items_for_user);
         }
         
 
         if (isset($get_items_for_user)) {
             return response()->json([
                 'message' => 'Fetch data successfully!',
-                'data' => $get_items_for_user
+                'data' => $get_items_for_user,
+                'record count' => $cart_data_count
             ], 201);
         }
 
