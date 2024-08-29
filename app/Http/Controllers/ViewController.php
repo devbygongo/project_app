@@ -89,16 +89,14 @@ class ViewController extends Controller
             ->take($limit)
             ->get();
         }
-        
-        
 
-        if (isset($get_products)) {
+        if (isset($get_products) && !$get_products->isEmpty()) {            
             return response()->json([
                 'message' => 'Fetch data successfully!',
                 'data' => $get_products
             ], 201);
-        }
-
+        } 
+        
         else {
             return response()->json([
                 'message' => 'Failed get data successfully!',
