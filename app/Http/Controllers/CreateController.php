@@ -39,11 +39,11 @@ class CreateController extends Controller
             'city' => 'required',
             'pincode' => 'required',
         ]);
-
+        
             $create_user = User::create([
                 'name' => $request->input('name'),
                 'password' => bcrypt($request->input('password')),
-                'email' => $request->input('email'),
+                'email' => strtolower($request->input('email')),
                 'mobile' => $request->input('mobile'),
                 'role' => $request->input('role'),
                 'address_line_1' => $request->input('address_line_1'),
