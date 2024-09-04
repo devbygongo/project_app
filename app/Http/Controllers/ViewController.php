@@ -342,6 +342,32 @@ class ViewController extends Controller
             ], 400);
         }    
     }
+
+    public function dashboard_details()
+    {
+        $get_product_numbers = ProductModel::count();
+        $get_user_numbers = User::count();
+        $get_order_numbers = OrderModel::count();
+
+        $get_dashboard_records = array([
+            'total_users' => $get_user_numbers,
+            'total_products' => $get_product_numbers,
+            'total_orders' => $get_order_numbers,
+        ]);
+        
+        if (isset($get_dashboard_records)) {
+            return response()->json([
+                'message' => 'Fetch records successfully!',
+                'data' => $get_dashboard_records
+            ], 201);
+        }
+
+        else {
+            return response()->json([
+                'message' => 'Sorry, failed get records',
+            ], 400);
+        }    
+    }
     // return blade file
     
     public function login_view()

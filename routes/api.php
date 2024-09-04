@@ -69,6 +69,8 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
     Route::post('/add_counter', [CreateController::class, 'counter']);
 
     Route::get('/view_counter', [ViewController::class, 'counter']);
+
+    Route::get('/dashboard', [ViewController::class, 'dashboard_details']);
 });
 
 Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user'])->group(function () {
