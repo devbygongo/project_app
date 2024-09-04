@@ -296,8 +296,7 @@ class CreateController extends Controller
                     $product_basic_amount += (($product->amount) * ($product->quantity));
                 } 
                 
-                $create_order_basic = OrderModel::create
-                ([
+                $create_order_basic = OrderModel::create([
                     'user_id' => $userId,
                     'order_id' => $get_order_id,
                     'order_date' => Carbon::now(),
