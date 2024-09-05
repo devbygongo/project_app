@@ -9,7 +9,9 @@
         "laravel/framework": "^11.9",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
-        "league/csv": "^9.16"
+        "league/csv": "^9.16",
+        "mpdf/mpdf": "^8.2",
+        "simplesoftwareio/simple-qrcode": "^4.2"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

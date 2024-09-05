@@ -15,6 +15,44 @@ use Illuminate\Support\Facades\Auth;
 class UpdateController extends Controller
 {
     //
+    public function user(Request $request)
+    {
+        $get_user = Auth::id();
+
+        $request->validate([
+            'mobile' => ['required', 'string', 'size:13'],
+            'password' => 'required',
+        ]);
+
+        $update_user_record = User::where('id', $get_user)
+        ->update([
+            'name' => $request->input('name'),
+            'password' => bcrypt($request->input('password')),
+            'email' => strtolower($request->input('email')),
+            'mobile' => $request->input('mobile'),
+            'role' => $request->input('role'),
+            'address_line_1' => $request->input('address_line_1'),
+            'address_line_2' => $request->input('address_line_2'),
+            'city' => $request->input('city'),
+            'pincode' => $request->input('pincode'),
+            'gstin' => $request->input('gstin'),
+            'state' => $request->input('state'),
+            'country' => $request->input('country'),
+        ]);
+
+        if ($update_user_record == 1) {
+            return response()->json([
+                'message' => 'User record updated successfully!',
+                'data' => $update_user_record
+            ], 200);
+        }
+        
+        else {
+            return response()->json([
+                'message' => 'Failed to user record successfully'
+            ], 400);
+        }
+    }
 
     // public function __construct(sendWhatsAppUtility $whatsapputility)
     // {

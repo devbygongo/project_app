@@ -13,6 +13,8 @@ use App\Http\Controllers\DeleteController;
 
 use App\Http\Controllers\CsvImportController;
 
+use App\Http\Controllers\InvoiceController;
+
 use App\Http\Middleware\GetUserRole;
 
 // Route::get('/user', function (Request $request) {
@@ -26,6 +28,8 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
     Route::get('/view_user', [ViewController::class, 'user']);
 
     Route::patch('/make_verify/{id}', [UpdateController::class, 'verify_user']);
+
+    Route::patch('/update_user', [UpdateController::class, 'user']);
 
     // Route::get('/logout', [CreateController::class, 'webLogout']);
     Route::post('/logout', [CreateController::class, 'logout']);
@@ -71,11 +75,15 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
     Route::get('/view_counter', [ViewController::class, 'counter']);
 
     Route::get('/dashboard', [ViewController::class, 'dashboard_details']);
+
+    Route::post('/generate_invoice/{orderId}', [InvoiceController::class, 'generateInvoice']);
 });
 
 Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user'])->group(function () {
 
     Route::get('/get_details', [ViewController::class, 'user_details']);
+
+    Route::patch('/update_user', [UpdateController::class, 'user']);
 
     Route::get('/logout', [CreateController::class, 'logout']);
 
@@ -89,6 +97,8 @@ Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user']
     Route::delete('/delete_cart/{id}', [DeleteController::class, 'cart']);
 
     Route::post('/add_order', [CreateController::class, 'orders']);
+
+    Route::get('/generate_invoice/{userId}/{orderId}', [InvoiceController::class, 'generateInvoice']);
 
 });
 Route::post('/login/{otp?}', [CreateController::class, 'login']);
