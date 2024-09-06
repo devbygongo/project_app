@@ -50,7 +50,7 @@ class CsvImportController extends Controller
 
             // $categoryModel = CategoryModel::firstOrCreate(['name' => $category]);
 
-            $categoryNameSanitized = str_replace([' ', '/', '\\', ':', '*'], '_', $category);
+            $categoryNameSanitized = str_replace([' ', '/', '\\', ':', '*'], '_', strtolower($category));
             $imagePath = "/storage/uploads/category/{$categoryNameSanitized}.jpg";
             $category_imagePath_for_not_avaliable = "/storage/uploads/category/placeholder.jpg";
 
@@ -78,7 +78,7 @@ class CsvImportController extends Controller
             {
                 // $subCategoryModel = SubCategoryModel::firstOrCreate([
 
-                $subcategoryNameSanitized = str_replace([' ', '/', '\\', ':', '*'], '_', $sub_category);
+                $subcategoryNameSanitized = str_replace([' ', '/', '\\', ':', '*'], '_', strtolower($sub_category));
                 $subCategoryImagePath  = "/storage/uploads/category/{$subcategoryNameSanitized}.jpg";
                 $sub_category_imagePath_for_not_avaliable = "/storage/uploads/sub_category/placeholder.jpg";
 
