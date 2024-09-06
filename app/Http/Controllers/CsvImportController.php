@@ -14,6 +14,10 @@ use League\Csv\Statement;
 
 use Hash;
 
+use App\Models\CategoryModel;
+
+use App\Models\SubCategoryModel;
+
 class CsvImportController extends Controller
 {
     //
@@ -40,6 +44,21 @@ class CsvImportController extends Controller
             $basicPrice_product = $record_csv['Basic Price'] !== '' ? $record_csv['Basic Price'] : 0;
             $gstPrice_prduct = $record_csv['GST Price'] !== '' ? $record_csv['GST Price'] : 0;
             $filename = $record_csv['Product Code'];
+
+            $category = $record_csv['Category'];
+            $sub_category = $record_csv['Sub Category'];
+
+            // $categoryModel = CategoryModel::firstOrCreate(['name' => $category]);
+            $categoryModel = CategoryModel::updateOrCreate(['name' => $category]);
+            $category_id = $categoryModel->id;
+
+            if (($sub_category != '')) {
+                // $subCategoryModel = SubCategoryModel::firstOrCreate([
+                $subCategoryModel = SubCategoryModel::updateOrCreate([
+                    'name' => $sub_category,
+                    'category_id' => $category_id // Include category_id in the search/creation criteria
+                ]);
+            }
 
             if ($product_csv) 
             {

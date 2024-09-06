@@ -10,6 +10,7 @@ use Mpdf\Mpdf;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
+use App\Utils\sendWhatsAppUtility;
 
 class InvoiceController extends Controller
 {
@@ -59,17 +60,34 @@ class InvoiceController extends Controller
         // Write the HTML into the PDF
         $mpdf->WriteHTML($html);
 
-       // Define the directory path and file path
-        $directoryPath = storage_path('app/public/uploads/invoices/'); // Define your nested directory structure
-        $filePath = $directoryPath . 'invoice_' . $sanitizedOrderId . '.pdf';
+    //    // Define the directory path and file path
+    //     $directoryPath = storage_path('app/public/uploads/invoices/'); // Define your nested directory structure
+    //     $filePath = $directoryPath . 'invoice_' . $sanitizedOrderId . '.pdf';
+
+    
+        $publicPath = 'uploads/invoices/';
+        $fileName = 'invoice_' . $sanitizedOrderId . '.pdf';
+        $filePath = storage_path('app/public/' . $publicPath . $fileName);
 
         // Ensure the directory exists, if not, create it
-        if (!File::isDirectory($directoryPath)) {
-            File::makeDirectory($directoryPath, 0755, true, true); // Create the directory with recursive creation
+        // if (!File::isDirectory($directoryPath)) {
+        //     File::makeDirectory($directoryPath, 0755, true, true); // Create the directory with recursive creation
+        // }
+        if (!File::isDirectory(storage_path('app/public/' . $publicPath))) {
+            File::makeDirectory(storage_path('app/public/' . $publicPath), 0755, true, true);
         }
 
         // Save the file on the server
         $mpdf->Output($filePath, 'F'); // 'F' saves the file on the server
+
+        // Create instance of your WhatsApp utility
+        $whatsAppUtility = new sendWhatsAppUtility();
+
+        $message = 'Here is your PDF document!';
+
+        $fileUrl = asset('storage/' . $publicPath . $fileName);
+        // Assuming sendWhatsApp method accepts a file URL for media
+        $response = $whatsAppUtility->sendWhatsAppInvoice($user[0]->mobile, $message, $fileUrl);
 
         // Output the generated PDF in the browser
         return $mpdf->Output('invoice.pdf', 'I'); // 'I' sends it to the browser
