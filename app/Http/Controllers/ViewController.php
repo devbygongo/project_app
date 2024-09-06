@@ -18,6 +18,10 @@ use App\Models\CartModel;
 
 use App\Models\CounterModel;
 
+use App\Models\CategoryModel;
+
+use App\Models\SubCategoryModel;
+
 class ViewController extends Controller
 {
     //
@@ -106,8 +110,9 @@ class ViewController extends Controller
 
     public function categories()
     {
-        $get_categories = ProductModel::select('category')->distinct()->get();
-        
+        // $get_categories = ProductModel::select('category')->distinct()->get();
+        $get_categories = CategoryModel::select('id', 'name', 'image')->get();
+
         if (isset($get_categories)) {
             return response()->json([
                 'message' => 'Fetch data successfully!',
@@ -124,7 +129,8 @@ class ViewController extends Controller
 
     public function sub_categories($category)
     {
-        $get_subcategories = ProductModel::select('sub_category')->where('category',$category)->get();
+        // $get_subcategories = ProductModel::select('sub_category')->where('category',$category)->get();
+        $get_categories = SubCategoryModel::select('id', 'name', 'image')->get();
         
         if (isset($get_subcategories)) {
             return response()->json([
@@ -142,12 +148,39 @@ class ViewController extends Controller
 
     public function user()
     {
-        $get_user_details = User::select('name','email','mobile','role','address_line_1','address_line_2','city','pincode','gstin','state','country')->get();
+        $get_user_details = User::select('id','name','email','mobile','role','address_line_1','address_line_2','city','pincode','gstin','state','country')->get();
         
 
         if (isset($get_user_details)) {
             return response()->json([
                 'message' => 'Fetch data successfully!',
+                'data' => $get_user_details
+            ], 201);
+        }
+
+        else {
+            return response()->json([
+                'message' => 'Failed get data successfully!',
+            ], 400);
+        }    
+    }
+
+    public function find_user($search = null)
+    {   
+        if ($search == null) {
+            $get_user_details = User::select('id','name','email','mobile','role','address_line_1','address_line_2','city','pincode','gstin','state','country')
+                                ->get();     
+        }
+        else {
+            $get_user_details = User::select('id','name','email','mobile','role','address_line_1','address_line_2','city','pincode','gstin','state','country')
+                                ->where('name', $search)
+                                ->orWhere('mobile', $search)
+                                ->get();     
+        }
+
+        if (isset($get_user_details)) {
+            return response()->json([
+                'message' => 'Fetch record successfully!',
                 'data' => $get_user_details
             ], 201);
         }

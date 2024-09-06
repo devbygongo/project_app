@@ -27,6 +27,8 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
 
     Route::get('/view_user', [ViewController::class, 'user']);
 
+    Route::get('/fetch_user/{search?}', [ViewController::class, 'find_user']);
+
     Route::patch('/make_verify/{id}', [UpdateController::class, 'verify_user']);
 
     Route::patch('/update_user', [UpdateController::class, 'user']);
