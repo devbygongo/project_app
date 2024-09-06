@@ -406,8 +406,8 @@ class CreateController extends Controller
         if($get_user->role == 'admin')
         {
             $request->validate([
-                'mobile' => 'required',
-                // 'user_id' => 'required',
+                // 'mobile' => 'required',
+                'user_id' => 'required',
                 // 'products_id' => 'required',
                 'product_code' => 'required',
                 'product_name' => 'required',
@@ -417,10 +417,11 @@ class CreateController extends Controller
                 'type' => 'required',
             ]);
 
-            $get_user_id = User::select('id')->where('mobile', $request->input('mobile'))->get();
+            // $get_user_id = User::select('id')->where('mobile', $request->input('mobile'))->get();
     
             $create_cart = CartModel::create([
-                'user_id' => $get_user_id[0]->id,
+                // 'user_id' => $get_user_id[0]->id,
+                'user_id' => $request->input('user_id'),
                 // 'products_id' => $request->input('products_id'),
                 'product_code' => $request->input('product_code'),
                 'product_name' => $request->input('product_name'),
