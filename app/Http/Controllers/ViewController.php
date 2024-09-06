@@ -178,7 +178,7 @@ class ViewController extends Controller
                                 ->get();     
         }
 
-        if (isset($get_user_details)) {
+        if (isset($get_user_details) && (!$get_user_details->isEmpty())) {
             return response()->json([
                 'message' => 'Fetch record successfully!',
                 'data' => $get_user_details
