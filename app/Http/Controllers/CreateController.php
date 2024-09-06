@@ -275,26 +275,25 @@ class CreateController extends Controller
         $create_order_basic = null;
         $create_order_gst = null;
 
-        $get_basic_product = CartModel::select('amount', 'quantity')->where('user_id', $userId)->where('type', 'basic')->get();
+        $get_basic_product = CartModel::select('amount', 'quantity', 'product_code', 'product_name', 'rate', 'type')
+                                       ->where('user_id', $userId)
+                                       ->where('type', 'basic')
+                                       ->get();
 
         $get_counter_data = CounterModel::select('prefix', 'counter', 'postfix')->where('name', 'order_basic')->get();
 
         if ($get_counter_data) 
         {
             $get_order_id = $get_counter_data[0]->prefix.$get_counter_data[0]->counter.$get_counter_data[0]->postfix;
-
-            $update_cart = CounterModel::where('name', 'order_basic')
-                    ->update([
-                        'counter' => (($get_counter_data[0]->counter)+1),
-                    ]);
     
+            // for `basic` product
             if ((count($get_basic_product)) > 0) 
             {
                 $product_basic_amount = 0;
-                foreach ($get_basic_product as $product) 
+                foreach ($get_basic_product as $basic_product) 
                 {
-                    $product_basic_amount += (($product->amount) * ($product->quantity));
-                } 
+                    $product_basic_amount += (($basic_product->amount) * ($basic_product->quantity));
+                }
                 
                 $create_order_basic = OrderModel::create([
                     'user_id' => $userId,
@@ -303,11 +302,26 @@ class CreateController extends Controller
                     'amount' => $product_basic_amount,
                     'type' => 'basic',
                 ]);
+                //order_table_id
+
+                // save every item in order_items with order_table_id
+                $create_order_items = OrderItemsModel::create([
+                    'order_id' => $create_order_basic->id,
+                    'product_code' => $basic_product->product_code,
+                    'product_name' => $basic_product->product_name,
+                    'rate' => $basic_product->rate,
+                    'quantity' => $basic_product->quantity,
+                    'total' => $product_basic_amount,
+                    'type' => $basic_product->type,
+                ]);
             }
 
         }
 
-        $get_gst_product = CartModel::where('user_id', $userId)->where('type', 'gst')->get();
+        $get_gst_product = CartModel::select('amount', 'quantity', 'product_code', 'product_name', 'rate', 'type')
+                                      ->where('user_id', $userId)
+                                      ->where('type', 'gst')
+                                      ->get();
 
         $get_counter_data = CounterModel::select('prefix', 'counter', 'postfix')->where('name', 'order_gst')->get();
 
@@ -315,16 +329,12 @@ class CreateController extends Controller
         {
             $get_order_id = $get_counter_data[0]->prefix.$get_counter_data[0]->counter.$get_counter_data[0]->postfix;
 
-            $update_cart = CounterModel::where('name', 'order_gst')
-                ->update([
-                    'counter' => (($get_counter_data[0]->counter)+1),
-                ]);
-
+            // for `gst` product    
             if ((count($get_gst_product)) > 0) 
             {
                 $product_gst_amount = 0;
-                foreach ($get_gst_product as $product) {
-                    $product_gst_amount += (($product->amount) * ($product->quantity));
+                foreach ($get_gst_product as $gst_product) {
+                    $product_gst_amount += (($gst_product->amount) * ($gst_product->quantity));
                 }
 
                 $create_order_gst = OrderModel::create([
@@ -334,17 +344,46 @@ class CreateController extends Controller
                     'amount' => $product_gst_amount,
                     'type' => 'gst',
                 ]);
+
+                 //order_table_id
+
+                // save every item in order_items with order_table_id
+                $create_order_items = OrderItemsModel::create([
+                    'order_id' => $create_order_gst->id,
+                    'product_code' => $gst_product->product_code,
+                    'product_name' => $gst_product->product_name,
+                    'rate' => $gst_product->rate,
+                    'quantity' => $gst_product->quantity,
+                    'total' => $product_gst_amount,
+                    'type' => $gst_product->type,
+                ]);
+                
             }
         }
 
-        $get_remove_items = CartModel::where('user_id', $userId)->delete();
+        if ($create_order_basic != null) {
+            $update_cart = CounterModel::where('name', 'order_basic')
+            ->update([
+                'counter' => (($get_counter_data[0]->counter)+1),
+            ]);
+        }
+
+        if($create_order_gst != null)
+        {
+            $update_cart = CounterModel::where('name', 'order_gst')
+                                        ->update([
+                                         'counter' => (($get_counter_data[0]->counter)+1),
+            ]);
+        }
+
+        // $get_remove_items = CartModel::where('user_id', $userId)->delete();
 
         if ($create_order_basic !== null || $create_order_gst !== null) {
             return response()->json([
                 'message' => 'Order created successfully!',
                 'data_basic' => $create_order_basic,
                 'data_gst' => $create_order_gst,
-                'status' => $get_remove_items,
+                // 'status' => $get_remove_items,
             ], 201);
         }
 

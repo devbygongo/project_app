@@ -49,15 +49,57 @@ class CsvImportController extends Controller
             $sub_category = $record_csv['Sub Category'];
 
             // $categoryModel = CategoryModel::firstOrCreate(['name' => $category]);
-            $categoryModel = CategoryModel::updateOrCreate(['name' => $category]);
+
+            $categoryNameSanitized = str_replace([' ', '/', '\\', ':', '*'], '_', $category);
+            $imagePath = "/storage/uploads/category/{$categoryNameSanitized}.jpg";
+            $category_imagePath_for_not_avaliable = "/storage/uploads/category/placeholder.jpg";
+
+            if (file_exists(public_path($imagePath))) 
+            {
+                $categoryModel = CategoryModel::updateOrCreate([
+                    'name' => $category,
+                ], [
+                    'image' => $imagePath,
+                ]);
+            }
+            else 
+            {
+                $categoryModel = CategoryModel::updateOrCreate([
+                    'name' => $category,
+                ], [
+                    'image' => $category_imagePath_for_not_avaliable,
+                ]);
+            }
+
+            // Get the category ID for future use
             $category_id = $categoryModel->id;
 
-            if (($sub_category != '')) {
+            if (($sub_category != '')) 
+            {
                 // $subCategoryModel = SubCategoryModel::firstOrCreate([
-                $subCategoryModel = SubCategoryModel::updateOrCreate([
-                    'name' => $sub_category,
-                    'category_id' => $category_id // Include category_id in the search/creation criteria
-                ]);
+
+                $subcategoryNameSanitized = str_replace([' ', '/', '\\', ':', '*'], '_', $sub_category);
+                $subCategoryImagePath  = "/storage/uploads/category/{$subcategoryNameSanitized}.jpg";
+                $sub_category_imagePath_for_not_avaliable = "/storage/uploads/sub_category/placeholder.jpg";
+
+                if (file_exists(public_path($subCategoryImagePath))) 
+                {
+                    $subCategoryModel = SubCategoryModel::updateOrCreate([
+                        'name' => $sub_category,
+                        'category_id' => $category_id, // Include category_id in the search/creation criteria
+                        'image' => $imagePath,
+                    ]);
+                }
+                else 
+                {
+                    // Optionally continue without setting the image
+                    $subCategoryModel = SubCategoryModel::updateOrCreate([
+                        'name' => $sub_category,
+                        'category_id' => $category_id,
+                    ], [
+                        'image' => $sub_category_imagePath_for_not_avaliable,
+                    ]);
+                }
             }
 
             if ($product_csv) 
