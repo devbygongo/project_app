@@ -22,6 +22,8 @@ class UpdateController extends Controller
         $request->validate([
             'mobile' => ['required', 'string'],
             'password' => 'required',
+            'name' => ['required', 'string'],
+            
         ]);
 
         $update_user_record = User::where('id', $get_user)
