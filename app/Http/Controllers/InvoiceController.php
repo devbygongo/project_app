@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Models\User;        
 use App\Models\OrderModel;    
+use App\Models\OrderItemsModel;    
 use Mpdf\Mpdf;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Facades\Auth;
@@ -18,13 +19,17 @@ class InvoiceController extends Controller
     public function generateInvoice($orderId)
 {
     $get_user = Auth::id();
-    $user = User::select('name', 'mobile', 'address_line_1', 'address_line_2', 'gstin')
+    $user = User::select('name', 'mobile', 'email', 'address_line_1', 'address_line_2', 'gstin')
                 ->where('id', $get_user)
                 ->get();
     
     $order = OrderModel::select('order_id', 'amount', 'type', 'order_date')
                         ->where('id', $orderId)
                         ->get();
+
+    $order_items = OrderItemsModel::select('product_code', 'product_name', 'rate', 'quantity', 'total')
+                                  ->where('order_id', $orderId)
+                                  ->get();
 
     // Sanitize the order ID by removing slashes, backslashes, carriage return, and newline characters
     // $sanitizedOrderId = preg_replace('/[\/\\\r\n]+/', '-', $order[0]->order_id); // Replace problematic characters with dashes
@@ -46,14 +51,20 @@ class InvoiceController extends Controller
     $data = [
         'user_name' => $user[0]->name,
         'user_mobile' => $user[0]->mobile,
+        'user_email' => $user[0]->email,
         'user_address1' => $user[0]->address_line_1,
         'user_address2' => $user[0]->address_line_2,
         'user_gstin' => $user[0]->gstin,
         'order_id' => $order[0]->order_id,
         'amount' => $order[0]->amount,
         'type' => $order[0]->type,
-        'order_data' => $order[0]->order_date,
+        'order_date' => $order[0]->order_date,
         'qrCode' => $qrCode,
+        'product_name' => $order_items[0]->product_name,
+        'product_code' => $order_items[0]->product_code,
+        'product_rate' => $order_items[0]->rate,
+        'product_quantity' => $order_items[0]->quantity,
+        'product_total' => $order_items[0]->total,
     ];
 
     // Render the invoice view to HTML
