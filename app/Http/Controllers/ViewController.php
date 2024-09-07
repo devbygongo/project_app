@@ -139,12 +139,6 @@ class ViewController extends Controller
 
     public function sub_categories($category = null)
     {
-        // // $get_subcategories = ProductModel::select('sub_category')->where('category',$category)->get();
-        // $get_categories = SubCategoryModel::select('id', 'name', 'image')->get();
-        
-        // // Fetch all categories with their product count
-        // $sub_categories = SubCategoryModel::withCount('products')->get();
-
         // Fetch subcategories filtered by category_id if provided
         $sub_categories = SubCategoryModel::withCount('products')
         ->when($category, function ($query, $category) {
