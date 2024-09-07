@@ -31,6 +31,7 @@ class InvoiceController extends Controller
                                   ->where('order_id', $orderId)
                                   ->get();
 
+                                  dd($order);
     // Sanitize the order ID by removing slashes, backslashes, carriage return, and newline characters
     // $sanitizedOrderId = preg_replace('/[\/\\\r\n]+/', '-', $order[0]->order_id); // Replace problematic characters with dashes
     $sanitizedOrderId = preg_replace('/[^A-Za-z0-9]+/', '-', trim($order[0]->order_id));
