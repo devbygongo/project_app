@@ -26,4 +26,16 @@ class ProductModel extends Model
         // return $this->hasMany(CartModel::class, 'products_id', 'product_code');
         return $this->hasMany(CartModel::class, 'product_code', 'product_code');
     }
+
+    // Define the relationship: A product belongs to a category using the 'category' field
+    public function category()
+    {
+        return $this->belongsTo(CategoryModel::class, 'category', 'name');
+    }
+
+    // Define the relationship: A product belongs to a sub_category using the 'category' field
+    public function sub_category()
+    {
+        return $this->belongsTo(CategoryModel::class, 'sub_category', 'name');
+    }
 }

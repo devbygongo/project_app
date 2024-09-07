@@ -16,4 +16,10 @@ class SubCategoryModel extends Model
         'category_id',
         'image',
     ];
+
+    // Define the relationship: A category has many products, joined by the 'name' column
+    public function products()
+    {
+        return $this->hasMany(ProductModel::class, 'sub_category', 'name');
+    }
 }

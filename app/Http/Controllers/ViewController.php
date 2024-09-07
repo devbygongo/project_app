@@ -110,13 +110,23 @@ class ViewController extends Controller
 
     public function categories()
     {
-        // $get_categories = ProductModel::select('category')->distinct()->get();
-        $get_categories = CategoryModel::select('id', 'name', 'image')->get();
+        // Fetch all categories with their product count
+        $categories = CategoryModel::withCount('get_products')->get();
 
-        if (isset($get_categories)) {
+        // Format the categories data for a JSON response
+        $formattedCategories = $categories->map(function ($category) {
+            return [
+                'category_name' => $category->name,
+                'category_image' => $category->image,
+                'products_count' => $category->get_products_count,
+            ];
+        });
+
+        if (isset($formattedCategories)) {
             return response()->json([
                 'message' => 'Fetch data successfully!',
-                'data' => $get_categories
+                'data' => $formattedCategories,
+                'count' => count($formattedCategories),
             ], 201);
         }
 
@@ -127,15 +137,36 @@ class ViewController extends Controller
         }    
     }
 
-    public function sub_categories($category)
+    public function sub_categories($category = null)
     {
-        // $get_subcategories = ProductModel::select('sub_category')->where('category',$category)->get();
-        $get_categories = SubCategoryModel::select('id', 'name', 'image')->get();
+        // // $get_subcategories = ProductModel::select('sub_category')->where('category',$category)->get();
+        // $get_categories = SubCategoryModel::select('id', 'name', 'image')->get();
         
-        if (isset($get_subcategories)) {
+        // // Fetch all categories with their product count
+        // $sub_categories = SubCategoryModel::withCount('products')->get();
+
+        // Fetch subcategories filtered by category_id if provided
+        $sub_categories = SubCategoryModel::withCount('products')
+        ->when($category, function ($query, $category) {
+            // Filter subcategories by the category_id if a category is provided
+            return $query->where('category_id', $category);
+        })->get();
+
+
+        // Format the categories data for a JSON response
+        $formattedSubCategories = $sub_categories->map(function ($sub_category) {
+            return [
+                'sub_category_name' => $sub_category->name,
+                'sub_category_image' => $sub_category->image,
+                'sub_products_count' => $sub_category->products_count,
+            ];
+        });
+        
+        if (isset($formattedSubCategories)) {
             return response()->json([
                 'message' => 'Fetch data successfully!',
-                'data' => $get_subcategories
+                'data' => $formattedSubCategories,
+                'count' => count($formattedSubCategories),
             ], 201);
         }
 
