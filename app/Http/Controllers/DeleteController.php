@@ -8,9 +8,10 @@ use App\Models\CartModel;
 
 class DeleteController extends Controller
 {
-    //
+    //Delete Cart 
     public function cart($id)
     {
+		
         $get_cart_records = CartModel::find($id);
         
         if (!$get_cart_records == null) 

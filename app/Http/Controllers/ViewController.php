@@ -46,67 +46,78 @@ class ViewController extends Controller
     }
 
     public function get_product(Request $request)
-    {
-        // Retrieve offset and limit from the request with default values
-        $offset = $request->input('offset', 0); // Default to 0 if not provided
-        $limit = $request->input('limit', 10);  // Default to 10 if not provided
+{
+    // Retrieve offset and limit from the request with default values
+    $offset = $request->input('offset', 0); // Default to 0 if not provided
+    $limit = $request->input('limit', 10);  // Default to 10 if not provided
+    $user_id = $request->input('user_id');  // Assuming the user ID is provided in the request
 
-        // Ensure the offset and limit are integers and non-negative
-        $offset = max(0, (int) $offset);
-        $limit = max(1, (int) $limit);
+    // Ensure the offset and limit are integers and non-negative
+    $offset = max(0, (int) $offset);
+    $limit = max(1, (int) $limit);
 
-        // Retrieve filter parameters if provided
-        $search = $request->input('search', null);
-        $category = $request->input('category', null);
-        $subCategory = $request->input('sub_category', null);
+    // Retrieve filter parameters if provided
+    $search = $request->input('search', null);
+    $category = $request->input('category', null);
+    $subCategory = $request->input('sub_category', null);
 
-        // Build the query
-        $query = ProductModel::select('SKU', 'product_code', 'product_name', 'category', 'sub_category', 'product_image', 'basic', 'gst');
+    // Build the query for products
+    $query = ProductModel::select('SKU', 'product_code', 'product_name', 'category', 'sub_category', 'product_image', 'basic', 'gst');
 
-        // Apply search filter if provided
-        if ($search) {
-            $query->where('product_name', 'like', "%{$search}%");
-        }
-
-        // Apply category filter if provided
-        if ($category) {
-            $query->where('category', $category);
-        }
-
-        // Apply sub-category filter if provided
-        if ($subCategory) {
-            $query->where('sub_category', $subCategory);
-        }
-
-        if (is_null($search) && is_null($category) && is_null($subCategory)) {
-            // If all filters are null, return the SQL query as a string
-           // Apply pagination
-            $get_products = $query->skip($offset)
-            ->take($limit)
-            ->get();
-        }
-
-        else {
-            // Otherwise, return the results with pagination applied
-            // Apply pagination
-            $get_products = $query
-            ->take($limit)
-            ->get();
-        }
-
-        if (isset($get_products) && !$get_products->isEmpty()) {            
-            return response()->json([
-                'message' => 'Fetch data successfully!',
-                'data' => $get_products
-            ], 201);
-        } 
-        
-        else {
-            return response()->json([
-                'message' => 'Failed get data successfully!',
-            ], 400);
-        }    
+    // Apply search filter if provided
+    if ($search) {
+        $query->where('product_name', 'like', "%{$search}%");
     }
+
+    // Apply category filter if provided
+    if ($category) {
+        $query->where('category', $category);
+    }
+
+    // Apply sub-category filter if provided
+    if ($subCategory) {
+        $query->where('sub_category', $subCategory);
+    }
+
+    // Apply pagination
+    $query->skip($offset)->take($limit);
+    $get_products = $query->get();
+
+    // Check if products are found
+    if (isset($get_products) && !$get_products->isEmpty()) {
+
+        // Loop through each product to check if it's in the cart
+        foreach ($get_products as $product) {
+            // Check if the product is in the user's cart
+            $cart_item = CartModel::where('user_id', $user_id)
+                ->where('product_code', $product->product_code)
+                ->first();
+
+            // If the product is in the cart, set cart details
+            if ($cart_item) {
+                $product->in_cart = true;
+                $product->cart_quantity = $cart_item->quantity;
+                $product->cart_type = $cart_item->type;
+            } else {
+                // If the product is not in the cart
+                $product->in_cart = false;
+                $product->cart_quantity = null;  // or 0, depending on your preference
+                $product->cart_type = null;
+            }
+        }
+
+        return response()->json([
+            'message' => 'Fetch data successfully!',
+            'data' => $get_products
+        ], 201);
+
+    } else {
+        return response()->json([
+            'message' => 'Failed to fetch data!',
+        ], 400);
+    }
+}
+
 
     public function categories()
     {
@@ -324,6 +335,7 @@ class ViewController extends Controller
 
         // Transform the data if needed
         $formattedData = $get_all_cart_records->map(function ($item) {
+			
             return [
                 'id' => $item->id, // Adjust as necessary
                 'user' => $item->get_users ? [
@@ -356,13 +368,50 @@ class ViewController extends Controller
 
         if($get_user->role == 'admin')
         {
-            $get_items_for_user = CartModel::where('user_id', $id)->get();
+            //$get_items_for_user = CartModel::where('user_id', $id)->get();
+			$get_items_for_user = CartModel::where('t_cart.user_id', $id)
+				->join('t_products', 't_cart.product_code', '=', 't_products.product_code')
+				->select(
+					't_cart.id',
+					't_cart.user_id',
+					't_cart.product_code',
+					't_cart.product_name',
+					't_cart.rate',
+					't_cart.quantity',
+					't_cart.amount',
+					't_cart.type',
+					't_cart.created_at',
+					't_cart.updated_at',
+					't_products.basic',
+					't_products.gst',
+					't_products.product_image'
+				)
+				->get();
 
             $cart_data_count = count($get_items_for_user);
         }
 
         else {
-            $get_items_for_user = CartModel::where('user_id', $get_user->id)->get();
+            //$get_items_for_user = CartModel::where('user_id', $get_user->id)->get();
+			$get_items_for_user = CartModel::where('t_cart.user_id', $get_user->id)
+				->join('t_products', 't_cart.product_code', '=', 't_products.product_code')
+				->select(
+					't_cart.id',
+					't_cart.user_id',
+					't_cart.product_code',
+					't_cart.product_name',
+					't_cart.rate',
+					't_cart.quantity',
+					't_cart.amount',
+					't_cart.type',
+					't_cart.created_at',
+					't_cart.updated_at',
+					't_products.basic',
+					't_products.gst',
+					't_products.product_image'
+				)
+				->get();
+
 
             $cart_data_count = count($get_items_for_user);
         }

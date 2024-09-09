@@ -458,17 +458,20 @@ class CreateController extends Controller
 
             // $get_user_id = User::select('id')->where('mobile', $request->input('mobile'))->get();
     
-            $create_cart = CartModel::create([
-                // 'user_id' => $get_user_id[0]->id,
-                'user_id' => $request->input('user_id'),
-                // 'products_id' => $request->input('products_id'),
-                'product_code' => $request->input('product_code'),
-                'product_name' => $request->input('product_name'),
-                'rate' => $request->input('rate'),
-                'quantity' => $request->input('quantity'),
-                'amount' => $request->input('amount'),
-                'type' => $request->input('type'),
-            ]);
+            $create_cart = CartModel::updateOrCreate(
+				[
+					'user_id' => $request->input('user_id'),
+					'product_code' => $request->input('product_code'),
+				], 
+				[
+					'product_name' => $request->input('product_name'),
+					'rate' => $request->input('rate'),
+					'quantity' => $request->input('quantity'),
+					'amount' => $request->input('amount'),
+					'type' => $request->input('type'),
+				]
+			);
+
         }
 
     else {
@@ -483,7 +486,7 @@ class CreateController extends Controller
             'type' => 'required',
         ]);
 
-        $create_cart = CartModel::create([
+        /*$create_cart = CartModel::create([
             'user_id' => Auth::id(),
             // 'products_id' => $request->input('products_id'),
             'product_code' => $request->input('product_code'),
@@ -492,7 +495,22 @@ class CreateController extends Controller
             'quantity' => $request->input('quantity'),
             'amount' => $request->input('amount'),
             'type' => $request->input('type'),
-        ]);
+        ]);*/
+		
+		$create_cart = CartModel::updateOrCreate(
+			[
+				'user_id' => $request->input('user_id'),
+				'product_code' => $request->input('product_code'),
+			], 
+			[
+				'product_name' => $request->input('product_name'),
+				'rate' => $request->input('rate'),
+				'quantity' => $request->input('quantity'),
+				'amount' => $request->input('amount'),
+				'type' => $request->input('type'),
+			]
+		);
+
     }
         
 
