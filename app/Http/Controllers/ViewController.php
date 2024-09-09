@@ -127,6 +127,7 @@ class ViewController extends Controller
         // Format the categories data for a JSON response
         $formattedCategories = $categories->map(function ($category) {
             return [
+                'category_id' => $category->id,
                 'category_name' => $category->name,
                 'category_image' => $category->image,
                 'products_count' => $category->get_products_count,
