@@ -185,7 +185,7 @@ class ViewController extends Controller
 
     public function user()
     {
-        $get_user_details = User::select('id','name','email','mobile','role','address_line_1','address_line_2','city','pincode','gstin','state','country')->get();
+        $get_user_details = User::select('id','name','email','mobile','role','address_line_1','address_line_2','city','pincode','gstin','state','country', 'verified')->get();
         
 
         if (isset($get_user_details)) {
