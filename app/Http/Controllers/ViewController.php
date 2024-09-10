@@ -151,13 +151,22 @@ class ViewController extends Controller
 
     public function sub_categories($category = null)
     {
-        // Fetch subcategories filtered by category_id if provided
-        $sub_categories = SubCategoryModel::withCount('products')
-        ->when($category, function ($query, $category) {
-            // Filter subcategories by the category_id if a category is provided
-            return $query->where('category_id', $category);
-        })->get();
+        // Convert the string of category IDs to an array, e.g., '1,2' -> [1, 2]
+        $categoryIds = $category ? explode(',', $category) : [];
 
+        // // Fetch subcategories filtered by category_id if provided
+        // $sub_categories = SubCategoryModel::withCount('products')
+        // ->when($category, function ($query, $category) {
+        //     // Filter subcategories by the category_id if a category is provided
+        //     return $query->where('category_id', $category);
+        // })->get();
+
+        // Fetch subcategories filtered by multiple category_ids if provided
+        $sub_categories = SubCategoryModel::withCount('products')
+        ->when(!empty($categoryIds), function ($query) use ($categoryIds) {
+            // Filter subcategories by multiple category_ids using whereIn
+            return $query->whereIn('category_id', $categoryIds);
+        })->get();
 
         // Format the categories data for a JSON response
         $formattedSubCategories = $sub_categories->map(function ($sub_category) {
