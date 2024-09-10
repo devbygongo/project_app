@@ -162,7 +162,7 @@ class CsvImportController extends Controller
 
             if ($user_csv) 
             {
-                // If product exists, update it
+                // If user exists, update it
                 $user_csv->update([
                     'name' => $record_user['Name'],
                     'email' => $email_user,
@@ -181,7 +181,7 @@ class CsvImportController extends Controller
             } 
             else 
             {
-                // If product does not exist, create a new one
+                // If user does not exist, create a new one
                 User::create([
                     'mobile' => $record_user['Mobile '],
                     'name' => $record_user['Name'],
