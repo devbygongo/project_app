@@ -187,7 +187,7 @@ class CreateController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Logged out successfully.',
-        ]);
+        ], 204);
     }
 
     public function webLogout(Request $request)
