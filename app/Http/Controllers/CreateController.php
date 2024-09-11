@@ -376,14 +376,26 @@ class CreateController extends Controller
             ]);
         }
 
+        $data = [];
+
+        // Check if data_basic exists and is not null, then add it to the array
+        if(!empty($create_order_basic))
+        {
+            $data[] = $create_order_basic;
+        }
+
+        // Check if data_gst exists and is not null, then add it to the array
+        if(!empty($create_order_gst))
+        {
+            $data[] = $create_order_gst;
+        }
+
         // $get_remove_items = CartModel::where('user_id', $userId)->delete();
 
         if ($create_order_basic !== null || $create_order_gst !== null) {
             return response()->json([
                 'message' => 'Order created successfully!',
-                'data_basic' => $create_order_basic,
-                'data_gst' => $create_order_gst,
-                // 'status' => $get_remove_items,
+                'data' => $data
             ], 201);
         }
 

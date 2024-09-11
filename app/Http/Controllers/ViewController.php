@@ -281,6 +281,7 @@ class ViewController extends Controller
     public function orders_user_id($id)
     {
         // $get_user_orders = OrderModel::where('client_id', $id)->get();
+        // $get_user_orders = OrderModel::where('user_id', $id)->get();
         $get_user_orders = OrderModel::where('user_id', $id)->get();
         
 
@@ -319,8 +320,10 @@ class ViewController extends Controller
 
     public function orders_items_order_id($id)
     {
-        // $get_items_for_orders = OrderItemsModel::where('orderID', $id)->get();
-        $get_items_for_orders = OrderItemsModel::where('order_id', $id)->get();
+        $get_items_for_orders = OrderItemsModel::where('orderID', $id)->get();
+        // $get_items_for_orders = OrderItemsModel::where('order_id', $id)
+        // ->join()
+        // ->get();
         
 
         if (isset($get_items_for_orders)) {
