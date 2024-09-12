@@ -45,78 +45,191 @@ class ViewController extends Controller
         }    
     }
 
-    public function get_product(Request $request)
-{
-    // Retrieve offset and limit from the request with default values
-    $offset = $request->input('offset', 0); // Default to 0 if not provided
-    $limit = $request->input('limit', 10);  // Default to 10 if not provided
-    $user_id = $request->input('user_id');  // Assuming the user ID is provided in the request
+    public function lng_product($lang = 'eng')
+    {
+        $get_product_details = ProductModel::select('SKU','product_code','product_name', 'name_in_hindi','name_in_telugu','category','sub_category','product_image','basic','gst')->get();
+        
+        $processed_prd_rec = $get_product_details->map(function($prd_rec) use ($lang)
+        {
+            $product_name = $prd_rec->product_name;
 
-    // Ensure the offset and limit are integers and non-negative
-    $offset = max(0, (int) $offset);
-    $limit = max(1, (int) $limit);
-
-    // Retrieve filter parameters if provided
-    $search = $request->input('search', null);
-    $category = $request->input('category', null);
-    $subCategory = $request->input('sub_category', null);
-
-    // Build the query for products
-    $query = ProductModel::select('SKU', 'product_code', 'product_name', 'category', 'sub_category', 'product_image', 'basic', 'gst');
-
-    // Apply search filter if provided
-    if ($search) {
-        $query->where('product_name', 'like', "%{$search}%");
-    }
-
-    // Apply category filter if provided
-    if ($category) {
-        $query->where('category', $category);
-    }
-
-    // Apply sub-category filter if provided
-    if ($subCategory) {
-        $query->where('sub_category', $subCategory);
-    }
-
-    // Apply pagination
-    $query->skip($offset)->take($limit);
-    $get_products = $query->get();
-
-    // Check if products are found
-    if (isset($get_products) && !$get_products->isEmpty()) {
-
-        // Loop through each product to check if it's in the cart
-        foreach ($get_products as $product) {
-            // Check if the product is in the user's cart
-            $cart_item = CartModel::where('user_id', $user_id)
-                ->where('product_code', $product->product_code)
-                ->first();
-
-            // If the product is in the cart, set cart details
-            if ($cart_item) {
-                $product->in_cart = true;
-                $product->cart_quantity = $cart_item->quantity;
-                $product->cart_type = $cart_item->type;
-            } else {
-                // If the product is not in the cart
-                $product->in_cart = false;
-                $product->cart_quantity = null;  // or 0, depending on your preference
-                $product->cart_type = null;
+            if($lang === 'hin' && !empty($prd_rec->name_in_hindi))
+            {
+                $product_name = $prd_rec->name_in_hindi;
             }
+
+            elseif ($lang === 'tlg' && !empty($prd_rec->name_in_telugu)) {
+                $product_name = $prd_rec->name_in_telugu;
+            }
+
+            return [
+                'SKU' => $prd_rec->SKU,
+                'SKU' => $prd_rec->product_code,
+                'product_name' => $product_name,
+                'category' => $prd_rec->category,
+                'sub_category' => $prd_rec->sub_category,
+                'product_image' => $prd_rec->product_image,
+                'basic' => $prd_rec->basic,
+                'gst' => $prd_rec->gst,
+            ];
+        });
+
+
+        if (isset($get_product_details)) {
+            return response()->json([
+                'message' => 'Fetch data successfully!',
+                'data' => $processed_prd_rec
+            ], 201);
         }
 
-        return response()->json([
-            'message' => 'Fetch data successfully!',
-            'data' => $get_products
-        ], 201);
-
-    } else {
-        return response()->json([
-            'message' => 'Failed to fetch data!',
-        ], 400);
+        else {
+            return response()->json([
+                'message' => 'Failed get data successfully!',
+            ], 400);
+        }    
     }
-}
+
+    public function get_product(Request $request)
+    {
+        // Retrieve offset and limit from the request with default values
+        $offset = $request->input('offset', 0); // Default to 0 if not provided
+        $limit = $request->input('limit', 10);  // Default to 10 if not provided
+        $user_id = $request->input('user_id');  // Assuming the user ID is provided in the request
+
+        // Ensure the offset and limit are integers and non-negative
+        $offset = max(0, (int) $offset);
+        $limit = max(1, (int) $limit);
+
+        // Retrieve filter parameters if provided
+        $search = $request->input('search', null);
+        $category = $request->input('category', null);
+        $subCategory = $request->input('sub_category', null);
+
+        // Build the query for products
+        $query = ProductModel::select('SKU', 'product_code', 'product_name', 'category', 'sub_category', 'product_image', 'basic', 'gst');
+
+        // Apply search filter if provided
+        if ($search) {
+            $query->where('product_name', 'like', "%{$search}%");
+        }
+
+        // Apply category filter if provided
+        if ($category) {
+            $query->where('category', $category);
+        }
+
+        // Apply sub-category filter if provided
+        if ($subCategory) {
+            $query->where('sub_category', $subCategory);
+        }
+
+        // Apply pagination
+        $query->skip($offset)->take($limit);
+        $get_products = $query->get();
+
+        // Check if products are found
+        if (isset($get_products) && !$get_products->isEmpty()) {
+
+            // Loop through each product to check if it's in the cart
+            foreach ($get_products as $product) {
+                // Check if the product is in the user's cart
+                $cart_item = CartModel::where('user_id', $user_id)
+                    ->where('product_code', $product->product_code)
+                    ->first();
+
+                // If the product is in the cart, set cart details
+                if ($cart_item) {
+                    $product->in_cart = true;
+                    $product->cart_quantity = $cart_item->quantity;
+                    $product->cart_type = $cart_item->type;
+                } else {
+                    // If the product is not in the cart
+                    $product->in_cart = false;
+                    $product->cart_quantity = null;  // or 0, depending on your preference
+                    $product->cart_type = null;
+                }
+            }
+
+            return response()->json([
+                'message' => 'Fetch data successfully!',
+                'data' => $get_products
+            ], 201);
+
+        } else {
+            return response()->json([
+                'message' => 'Failed to fetch data!',
+            ], 400);
+        }
+    }
+
+    public function lng_get_product(Request $request, $lang = 'eng')
+    {
+        // Retrieve input parameters with defaults
+        $offset = max(0, (int) $request->input('offset', 0));
+        $limit = max(1, (int) $request->input('limit', 10));
+        $user_id = $request->input('user_id');
+        $search = $request->input('search', null);
+        $category = $request->input('category', null);
+        $subCategory = $request->input('sub_category', null);
+
+        // Build the query for products
+        $query = ProductModel::select(
+            'SKU', 'product_code', 'product_name', 'name_in_hindi', 'name_in_telugu', 'category', 'sub_category', 'product_image', 'basic', 'gst'
+        );
+
+        // Apply filters
+        if ($search) {
+            $query->where('product_name', 'like', "%{$search}%");
+        }
+        if ($category) {
+            $query->where('category', $category);
+        }
+        if ($subCategory) {
+            $query->where('sub_category', $subCategory);
+        }
+
+        // Apply pagination and get products
+        $get_products = $query->skip($offset)->take($limit)->get();
+
+        // Process products for language and cart details
+        $processed_prd_lang_rec = $get_products->map(function ($prd_rec) use ($lang, $user_id) {
+            // Set product name based on the selected language
+            $product_name = $prd_rec->product_name;
+            if ($lang === 'hin' && !empty($prd_rec->name_in_hindi)) {
+                $product_name = $prd_rec->name_in_hindi;
+            } elseif ($lang === 'tlg' && !empty($prd_rec->name_in_telugu)) {
+                $product_name = $prd_rec->name_in_telugu;
+            }
+
+            // Check if the product is in the user's cart
+            $cart_item = CartModel::where('user_id', $user_id)
+                ->where('product_code', $prd_rec->product_code)
+                ->first();
+
+            // Return processed product data
+            return [
+                'SKU' => $prd_rec->SKU,
+                'product_code' => $prd_rec->product_code,
+                'product_name' => $product_name,
+                'category' => $prd_rec->category,
+                'sub_category' => $prd_rec->sub_category,
+                'product_image' => $prd_rec->product_image,
+                'basic' => $prd_rec->basic,
+                'gst' => $prd_rec->gst,
+                'in_cart' => $cart_item ? true : false,
+                'cart_quantity' => $cart_item->quantity ?? null,
+                'cart_type' => $cart_item->type ?? null,
+            ];
+        });
+
+        // Return response based on the result
+        return $processed_prd_lang_rec->isEmpty()
+        ? response()->json(['Failed to fetch data!'], 400)
+        : response()->json(['message' => 'Fetch data successfully!',
+                'data' => $processed_prd_lang_rec,
+                'count' => count($processed_prd_lang_rec)], 201);
+    }
+
 
 
     public function categories()
@@ -192,23 +305,126 @@ class ViewController extends Controller
         }    
     }
 
-    public function user()
+    public function lng_sub_categories($category = null, $lang = 'eng')
     {
-        $get_user_details = User::select('id','name','email','mobile','role','address_line_1','address_line_2','city','pincode','gstin','state','country', 'verified')->get();
-        
+        $categoryIds = $category ? explode(',', $category) : [];
 
-        if (isset($get_user_details)) {
-            return response()->json([
-                'message' => 'Fetch data successfully!',
-                'data' => $get_user_details
-            ], 201);
+        // Fetch subcategories filtered by multiple category_ids if provided
+        $sub_categories = SubCategoryModel::withCount('products')
+        ->when(!empty($categoryIds), function ($query) use ($categoryIds) {
+            // Filter subcategories by multiple category_ids using whereIn
+            return $query->whereIn('category_id', $categoryIds);
+        })
+        ->get();
+
+        // Format the subcategories data for a JSON response
+        $formattedSubCategories = $sub_categories->map(function ($sub_category) use ($lang) {
+        // Set the sub-category name based on the selected language
+        $sub_category_name = $sub_category->name; // Default to English
+
+        if ($lang === 'hn' && !empty($sub_category->name_in_hindi)) {
+            $sub_category_name = $sub_category->name_in_hindi;
+        } elseif ($lang === 'tlg' && !empty($sub_category->name_in_telugu)) {
+            $sub_category_name = $sub_category->name_in_telugu;
         }
 
-        else {
-            return response()->json([
-                'message' => 'Failed get data successfully!',
-            ], 400);
-        }    
+        return [
+            'sub_category_name' => $sub_category_name,
+            'sub_category_image' => $sub_category->image,
+            'sub_products_count' => $sub_category->products_count,
+        ];
+    });
+        
+        return $processed_prd_lang_rec->isEmpty()
+        ? response()->json(['Failed get data successfully!'], 400)
+        : response()->json(['message' => 'Fetch data successfully!',
+                'data' => $formattedSubCategories,
+                'count' => count($formattedSubCategories)], 201);
+    }
+
+    public function lng_categories($lang = 'eng')
+    {
+        // Fetch all categories with their product count
+        $categories = CategoryModel::withCount('get_products')->get();
+
+        // Format the categories data for a JSON response
+        $formattedCategories = $categories->map(function ($category) use ($lang) {
+
+            $category_name = $category->name;
+
+            if($lang === 'hn' && !empty($category->name_in_hindi))
+            {
+                $category_name = $category->name_in_hindi;
+            }
+
+            elseif ($lang === 'tlg' && !empty($category->name_in_telugu)) 
+            {
+                $category_name = $category->name_in_telugu;
+            }
+            return [
+                'category_id' => $category->id,
+                'category_name' => $category_name,
+                'category_image' => $category->image,
+                'products_count' => $category->get_products_count,
+            ];
+        });
+        // Check if the categories are set and return response
+        return $formattedCategories->isEmpty()
+        ? response()->json(['Failed get data successfully!'], 400)
+        : response()->json(['message' => 'Fetch data successfully!',
+                'data' => $formattedCategories,
+                'count' => count($formattedCategories)], 201);
+    }
+
+    public function user($lang = 'eng')
+    {
+        $get_user_details = User::select('id','name', 'name_in_hindi', 'name_in_telugu', 'email','mobile','role','address_line_1','address_line_2','city','pincode','gstin','state','country', 'verified')->get();
+
+        $processed_rec_user = $get_user_details->map(function ($record) use ($lang)
+        {
+            $name = $record->name;
+
+            if($lang == 'hn' && !empty($record->name_in_hindi))
+            {
+                $name = $record->name_in_hindi;
+            }
+            elseif ($lang == 'tlg' && !empty($record->name_in_telugu)) 
+            {
+                $name = $record->name_in_telugu;
+            }
+
+                return [
+                    'id' => $record->id,
+                    'name' => $name,
+                    'email' => $record->email,
+                    'mobile' => $record->mobile,
+                    'role' => ucfirst($record->role),
+                    'address' => implode(', ', array_filter([$record->address_line_1, $record->address_line_2, $record->city, $record->state, $record->pincode, $record->country])),
+                    'gstin' => $record->gstin,
+                    'state' => $record->state,
+                    'country' => $record->country,
+                    'verified' => $record->verified,
+                ];  
+        }) ;
+        
+        
+
+        // if (isset($get_user_details)) {
+        //     return response()->json([
+        //         'message' => 'Fetch data successfully!',
+        //         'data' => $get_user_details
+        //     ], 201);
+        // }
+
+        // else {
+        //     return response()->json([
+        //         'message' => 'Failed get data successfully!',
+        //     ], 400);
+        // }    
+
+        return $processed_rec_user->isEmpty()
+        ? response()->json(['Failed get data successfully!'], 400)
+        : response()->json(['Fetch data successfully!', 'data' => $processed_rec_user], 201);
     }
 
     public function find_user($search = null)

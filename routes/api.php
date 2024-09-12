@@ -25,7 +25,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
 
     Route::post('/add_user', [CreateController::class, 'user']);
 
-    Route::get('/view_user', [ViewController::class, 'user']);
+    Route::get('/view_user/{lang?}', [ViewController::class, 'user']);
 
     Route::get('/fetch_user/{search?}', [ViewController::class, 'find_user']);
 
@@ -40,11 +40,19 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
 
     Route::get('/view_product', [ViewController::class, 'product']);
 
+    Route::get('/lng_product/{lang?}', [ViewController::class, 'lng_product']);
+
     Route::post('/get_product', [ViewController::class, 'get_product']);
+
+    Route::get('/lng_get_product/{lang?}', [ViewController::class, 'lng_get_product']);
 
     Route::get('/category', [ViewController::class, 'categories']);
 
+    Route::get('/lng_category/{lang?}', [ViewController::class, 'lng_categories']);
+
     Route::get('/subcategory/{category?}', [ViewController::class, 'sub_categories']);
+
+    Route::get('/lng_subcategory/{category?}/{lang?}', [ViewController::class, 'lng_sub_categories']);
 
     Route::post('/add_order', [CreateController::class, 'orders']);
 

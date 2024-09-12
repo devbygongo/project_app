@@ -42,7 +42,7 @@ class InvoiceController extends Controller
             // Trim any leading or trailing dashes caused by the replacement
             $sanitizedOrderId = trim($sanitizedOrderId, '-');
 
-            $orderId = $order[0]->order_id;
+            // $orderId = $order[0]->order_id;
 
             $qrCode = QrCode::format('svg')
                             ->size(100)
@@ -97,11 +97,24 @@ class InvoiceController extends Controller
             $message = 'Here is your PDF document!';
             $fileUrl = asset('storage/' . $publicPath . $fileName);
 
-            // Assuming sendWhatsApp method accepts a file URL for media
-            $response = $whatsAppUtility->sendWhatsAppInvoice($user[0]->mobile, $message, $fileUrl);
+            $update_order = OrderModel::where('id', $orderId)
+            ->update([
+                'order_invoice' => $fileUrl,
+            ]);
 
-            // Output the generated PDF in the browser
-            return $mpdf->Output('invoice.pdf', 'I'); // 'I' sends it to the browser
+            if ($update_order) {
+                // Assuming sendWhatsApp method accepts a file URL for media
+                $response = $whatsAppUtility->sendWhatsAppInvoice($user[0]->mobile, $message, $fileUrl);
+
+                // Output the generated PDF in the browser
+                return $mpdf->Output('invoice.pdf', 'I'); // 'I' sends it to the browser
+            }
+            else
+            {
+                return response()->json([
+                    'message' => 'Error, failed to generate invoice!',
+                ], 422);
+            }
         }
     }
 }

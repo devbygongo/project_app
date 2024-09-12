@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('name');
             $table->integer('category_id');
             $table->string('image')->nullable();
+            $table->string('name_in_hindi')->nullable();
+            $table->string('name_in_telugu')->nullable();
             $table->timestamps();
         });
     }

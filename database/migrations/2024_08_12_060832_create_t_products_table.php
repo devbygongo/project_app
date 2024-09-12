@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('sku');
             $table->string('product_code');
             $table->string('product_name');
+            $table->string('name_in_hindi')->nullable();
+            $table->string('name_in_telugu')->nullable();
             $table->string('category')->nullable();
             $table->string('sub_category')->nullable();
             $table->longText('product_image')->nullable();
