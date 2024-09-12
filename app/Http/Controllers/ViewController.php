@@ -311,29 +311,31 @@ class ViewController extends Controller
 
         // Fetch subcategories filtered by multiple category_ids if provided
         $sub_categories = SubCategoryModel::withCount('products')
-        ->when(!empty($categoryIds), function ($query) use ($categoryIds) {
+        ->when(!empty($categoryIds), function ($query) use ($categoryIds) 
+        {
             // Filter subcategories by multiple category_ids using whereIn
             return $query->whereIn('category_id', $categoryIds);
         })
         ->get();
 
         // Format the subcategories data for a JSON response
-        $formattedSubCategories = $sub_categories->map(function ($sub_category) use ($lang) {
-        // Set the sub-category name based on the selected language
-        $sub_category_name = $sub_category->name; // Default to English
+        $formattedSubCategories = $sub_categories->map(function ($sub_category) use ($lang) 
+        {
+            // Set the sub-category name based on the selected language
+            $sub_category_name = $sub_category->name; // Default to English
 
-        if ($lang === 'hn' && !empty($sub_category->name_in_hindi)) {
-            $sub_category_name = $sub_category->name_in_hindi;
-        } elseif ($lang === 'tlg' && !empty($sub_category->name_in_telugu)) {
-            $sub_category_name = $sub_category->name_in_telugu;
-        }
+            if ($lang === 'hn' && !empty($sub_category->name_in_hindi)) {
+                $sub_category_name = $sub_category->name_in_hindi;
+            } elseif ($lang === 'tlg' && !empty($sub_category->name_in_telugu)) {
+                $sub_category_name = $sub_category->name_in_telugu;
+            }
 
-        return [
-            'sub_category_name' => $sub_category_name,
-            'sub_category_image' => $sub_category->image,
-            'sub_products_count' => $sub_category->products_count,
-        ];
-    });
+            return [
+                'sub_category_name' => $sub_category_name,
+                'sub_category_image' => $sub_category->image,
+                'sub_products_count' => $sub_category->products_count,
+            ];
+        });
         
         return $processed_prd_lang_rec->isEmpty()
         ? response()->json(['Failed get data successfully!'], 400)
