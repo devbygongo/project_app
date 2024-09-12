@@ -285,6 +285,7 @@ class ViewController extends Controller
         {
             // If $id is not null, filter by user_id
             return $query->where('user_id', $id);
+            
         })->toSql();   
 
         if($get_user_orders->isEmpty()) {
