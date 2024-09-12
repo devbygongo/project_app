@@ -278,12 +278,14 @@ class ViewController extends Controller
         }    
     }
 
-    public function orders_user_id($id)
+    public function orders_user_id($id = null)
     {
-        // $get_user_orders = OrderModel::where('client_id', $id)->get();
-        // $get_user_orders = OrderModel::where('user_id', $id)->get();
-        $get_user_orders = OrderModel::where('user_id', $id)->get();
-        
+        // Fetch all records if $id is null, otherwise filter by user_id
+        $get_user_orders = OrderModel::when($id, function($query, $id)
+        {
+            // If $id is not null, filter by user_id
+            return $query->where('user_id', $id);
+        })->toSql();   
 
         if($get_user_orders->isEmpty()) {
             return response()->json([
