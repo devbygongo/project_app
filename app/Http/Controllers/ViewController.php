@@ -230,8 +230,6 @@ class ViewController extends Controller
                 'count' => count($processed_prd_lang_rec)], 201);
     }
 
-
-
     public function categories()
     {
         // Fetch all categories with their product count
