@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use App\Models\User;        
 use App\Models\OrderModel;    
 use App\Models\OrderItemsModel;
-use App\Models\Product;    
 use Mpdf\Mpdf;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Facades\Auth;
