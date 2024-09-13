@@ -66,11 +66,11 @@ class InvoiceController extends Controller
                 'type' => $order[0]->type,
                 'order_date' => $order[0]->order_date,
                 'qrCode' => $qrCode,
-                'product_name' => $order_items[0]->product_name,
-                'product_code' => $order_items[0]->product_code,
-                'product_rate' => $order_items[0]->rate,
-                'product_quantity' => $order_items[0]->quantity,
-                'product_total' => $order_items[0]->total,
+                'product_name' => $order_items->product_name,
+                'product_code' => $order_items->product_code,
+                'product_rate' => $order_items->rate,
+                'product_quantity' => $order_items->quantity,
+                'product_total' => $order_items->total,
                 'product_sku' => $order_items->product->sku,
             ];
 
