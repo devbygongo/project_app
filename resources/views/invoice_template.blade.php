@@ -86,7 +86,7 @@
         <tbody>
             <tr>
                 <td style="text-align:left;">
-                    <img src="{{ asset('storage/uploads/products/' . $product_code . '.jpg') }}" alt="" style="height: 60px; width: 60px;">
+                    <img src="{{ Storage::url('uploads/products/' . $product_code . '.jpg') }}" alt="" style="height: 60px; width: 60px;">
                     {{ $product_name }}<br>SPRAYER 16L<br>SKU: 1073
                 </td>
                 <td>{{ $product_quantity }}</td>
