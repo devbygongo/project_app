@@ -86,12 +86,12 @@
         <tbody>
             <tr>
                 <td style="text-align:left;">
-                    <img src="{{ public_path('images/product.png') }}" alt="" style="height: 60px; width: 60px;">
-                    GASOLINE CHAINSAW<br>SPRAYER 16L<br>SKU: 1073
+                    <img src="{{ asset('storage/uploads/products/' . $product_code . '.jpg') }}" alt="" style="height: 60px; width: 60px;">
+                    {{ $product_name }}<br>SPRAYER 16L<br>SKU: 1073
                 </td>
-                <td>1</td>
-                <td>₹ 894</td>
-                <td>₹ 894</td>
+                <td>{{ $product_quantity }}</td>
+                <td>{{ $product_rate }}</td>
+                <td>{{ $product_total }}</td>
             </tr>
         </tbody>
     </table>
@@ -99,11 +99,11 @@
     <!-- QR Code and Grand Total -->
     <table width="100%" style="padding: 10px; margin-top: 20px;">
         <tr>
-            <td width="50%">
-                <img src="data:image/png;base64,{!! $qrCode !!}" alt="QR Code" style="width:100px;">
-            </td>
+        <td width="50%">
+            {!! $qrCode !!}
+        </td>
             <td width="50%" style="text-align:right;">
-                <h3>Grand Total: ₹ 894</h3>
+                <h3>Grand Total: {{ $product_total }}</h3>
             </td>
         </tr>
     </table>
