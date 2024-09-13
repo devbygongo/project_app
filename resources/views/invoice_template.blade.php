@@ -68,7 +68,7 @@
                 <strong>Order ID.:</strong> {{ $order_id }}<br>
                 <strong>Order Date:</strong> {{ $order_date }}<br>
                 <strong>Order Type:</strong> {{ $type }}<br>
-                <strong>Amount:</strong> ₹ 894
+                <strong>Amount:</strong> ₹ {{ $amount }}
             </td>
         </tr>
     </table>
