@@ -30,4 +30,10 @@ class OrderItemsModel extends Model
         // return $this->belongsTo(OrderModel::class, 'orderID', 'order_id'); 
         return $this->belongsTo(OrderModel::class, 'order_id', 'order_id'); 
     }
+
+    // Define the relationship to the Product model
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_code', 'product_code');
+    }
 }

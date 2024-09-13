@@ -50,7 +50,7 @@
 
     <!-- Header Section -->
     <div class="header">
-        <img src="{{ asset('storage/uploads/s1.jpg') }}" alt="Logo">
+        <!-- <img src="{{ asset('storage/uploads/s1.jpg') }}" alt="Logo"> -->
     </div>
 
     <!-- Customer Information -->
@@ -87,7 +87,7 @@
             <tr>
                 <td style="text-align:left;">
                     <img src="{{ Storage::url('uploads/products/' . $product_code . '.jpg') }}" alt="" style="height: 60px; width: 60px;">
-                    {{ $product_name }}<br>SPRAYER 16L<br>SKU: 1073
+                    {{ $product_name }}<br>SPRAYER 16L<br>SKU: {{ $product_sku }}
                 </td>
                 <td>{{ $product_quantity }}</td>
                 <td>{{ $product_rate }}</td>

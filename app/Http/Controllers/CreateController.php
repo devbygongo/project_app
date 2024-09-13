@@ -390,7 +390,7 @@ class CreateController extends Controller
             $data[] = $create_order_gst;
         }
 
-        // $get_remove_items = CartModel::where('user_id', $userId)->delete();
+        $get_remove_items = CartModel::where('user_id', $userId)->delete();
 
         if ($create_order_basic !== null || $create_order_gst !== null) {
             return response()->json([

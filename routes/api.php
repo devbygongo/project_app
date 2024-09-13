@@ -31,7 +31,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
 
     Route::patch('/make_verify/{id}', [UpdateController::class, 'verify_user']);
 
-    Route::patch('/update_user', [UpdateController::class, 'user']);
+    Route::post('/update_user', [UpdateController::class, 'user']);
 
     // Route::get('/logout', [CreateController::class, 'webLogout']);
     Route::post('/logout', [CreateController::class, 'logout']);
@@ -108,7 +108,8 @@ Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user']
 
     Route::post('/add_order', [CreateController::class, 'orders']);
 
-    Route::get('/generate_invoice/{userId}/{orderId}', [InvoiceController::class, 'generateInvoice']);
+    // Route::get('/generate_invoice/{userId}/{orderId}', [InvoiceController::class, 'generateInvoice']);
+    // Route::get('/generate_invoice/{orderId}', [InvoiceController::class, 'generateInvoice']);
 
 });
 Route::post('/login/{otp?}', [CreateController::class, 'login']);
