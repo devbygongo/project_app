@@ -38,21 +38,21 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
 
     Route::post('/add_product', [CreateController::class, 'product']);
 
-    Route::get('/view_product', [ViewController::class, 'lng_product']);
+    Route::get('/view_product/{lang?}', [ViewController::class, 'lng_product']);
 
-    Route::get('/lng_product/{lang?}', [ViewController::class, 'product']);
+    Route::get('/lng_product', [ViewController::class, 'product']);
 
-    Route::post('/get_product', [ViewController::class, 'lng_get_product']);
+    Route::post('/get_product/{lang?}', [ViewController::class, 'lng_get_product']);
 
-    Route::post('/lng_get_product/{lang?}', [ViewController::class, 'get_product']);
+    Route::post('/lng_get_product', [ViewController::class, 'get_product']);
 
-    Route::get('/category', [ViewController::class, 'lng_categories']);
+    Route::get('/category/{lang?}', [ViewController::class, 'lng_categories']);
 
-    Route::get('/lng_category/{lang?}', [ViewController::class, 'categories']);
+    Route::get('/lng_category', [ViewController::class, 'categories']);
 
-    Route::get('/subcategory/{category?}', [ViewController::class, 'lng_sub_categories']);
+    Route::get('/subcategory/{category?}/{lang?}', [ViewController::class, 'lng_sub_categories']);
 
-    Route::get('/lng_subcategory/{category?}/{lang?}', [ViewController::class, 'sub_categories']);
+    Route::get('/lng_subcategory/{category?}', [ViewController::class, 'sub_categories']);
 
     Route::post('/add_order', [CreateController::class, 'orders']);
 
