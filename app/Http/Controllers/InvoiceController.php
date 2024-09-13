@@ -32,7 +32,7 @@ class InvoiceController extends Controller
                                     ->where('order_id', $orderId)
                                     ->first();
 
-        if (!isset($user[0]) || !isset($order[0]) || !isset($order_items[0])) {
+        if (!isset($user[0]) || !isset($order[0]) || !isset($order_items)) {
             return response()->json(['error' => 'Sorry, required data are not available!'], 500);
         }
         else {
@@ -129,7 +129,7 @@ class InvoiceController extends Controller
                                     ->select('product_code', 'product_name', 'rate', 'quantity', 'total')
                                     ->where('order_id', $orderId)
                                     ->first();
-dd($order_items->product->sku);
+dd($order_items);
         dd($get_user);
     }
 }
