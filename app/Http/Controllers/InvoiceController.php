@@ -35,7 +35,7 @@ class InvoiceController extends Controller
                                     ->select('product_code', 'product_name', 'rate', 'quantity', 'total')
                                     ->where('order_id', $orderId)
                                     ->first();
-                                    print_r($order_items);
+                                    dd($order_items);
                                     print_r($order_items->product);
                                     dd($order_items->product->sku);
 
