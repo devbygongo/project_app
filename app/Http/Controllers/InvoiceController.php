@@ -27,17 +27,10 @@ class InvoiceController extends Controller
                             ->where('id', $orderId)
                             ->get();
 
-        // $order_items = OrderItemsModel::with('product:product_code,sku')
-        //                             ->select('product_code', 'product_name', 'rate', 'quantity', 'total')
-        //                             ->where('order_id', $orderId)
-        //                             ->first();
-                                    $order_items = OrderItemsModel::with('product:product_code,sku')
+        $order_items = OrderItemsModel::with('product:product_code,sku')
                                     ->select('product_code', 'product_name', 'rate', 'quantity', 'total')
                                     ->where('order_id', $orderId)
                                     ->first();
-                                    dd($order_items);
-                                    print_r($order_items->product);
-                                    dd($order_items->product->sku);
 
         if (!isset($user[0]) || !isset($order[0]) || !isset($order_items)) {
             return response()->json(['error' => 'Sorry, required data are not available!'], 500);
