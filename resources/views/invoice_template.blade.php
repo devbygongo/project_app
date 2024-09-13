@@ -50,7 +50,7 @@
 
     <!-- Header Section -->
     <div class="header">
-        <!-- <img src="{{ asset('storage/uploads/s1.jpg') }}" alt="Logo"> -->
+        <img src="{{ asset('storage/uploads/s1.jpg') }}" alt="Logo">
     </div>
 
     <!-- Customer Information -->
