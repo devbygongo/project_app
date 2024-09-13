@@ -124,6 +124,12 @@ dd($order_items);
     public function generateInvoice2($orderId)
     {
         $get_user = Auth::id();
+
+        $order_items = OrderItemsModel::with('product:product_code,sku')
+                                    ->select('product_code', 'product_name', 'rate', 'quantity', 'total')
+                                    ->where('order_id', $orderId)
+                                    ->first();
+dd($order_items->product->sku);
         dd($get_user);
     }
 }
