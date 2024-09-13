@@ -63,7 +63,7 @@ class InvoiceController extends Controller
                 'user_gstin' => $user[0]->gstin,
                 'order_id' => $order[0]->order_id,
                 'amount' => $order[0]->amount,
-                'type' => $order[0]->type,
+                'type' => ucfirst($order[0]->type),
                 'order_date' => $order[0]->order_date,
                 'qrCode' => $qrCode,
                 'product_name' => $order_items->product_name,
