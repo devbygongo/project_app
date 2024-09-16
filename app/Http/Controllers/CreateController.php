@@ -396,7 +396,7 @@ class CreateController extends Controller
             $data[] = $create_order_gst;
         }
 
-        $get_remove_items = CartModel::where('user_id', $userId)->delete();
+        // $get_remove_items = CartModel::where('user_id', $userId)->delete();
 
         if ($create_order_basic !== null || $create_order_gst !== null) {
 
@@ -419,9 +419,12 @@ class CreateController extends Controller
                 $invoices['gst'] = $generate_invoice->generateInvoice($create_order_gst->id);
             }
 
+            // Add invoices to the $data array under a specific key
+            $data['invoices'] = $invoices;
+
             return response()->json([
                 'message' => 'Order created and Invoice generated successfully!',
-                'data' => $invoices
+                'data' => $data
             ], 201);
         }
 
