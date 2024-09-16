@@ -87,8 +87,6 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
     Route::get('/dashboard', [ViewController::class, 'dashboard_details']);
 
     Route::post('/generate_invoice/{orderId}', [InvoiceController::class, 'generateInvoice']);
-
-    Route::post('/generate_invoice2/{orderId}', [InvoiceController::class, 'generateInvoice2']);
 });
 
 Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user'])->group(function () {
