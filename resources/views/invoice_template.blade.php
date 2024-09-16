@@ -122,12 +122,6 @@
         </tbody>
     </table>
 
-    <!-- Display total amount in words -->
-    <!-- <div class="total-in-words">
-        <p>Total Amount in Words: {{ $total_in_words }}</p>
-    </div> -->
-    <!-- .. -->
-
     <!-- QR Code and Footer -->
     <div style="position: fixed; bottom: 10px; width: 100%;">
         <div style="float: right;">
