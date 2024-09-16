@@ -129,7 +129,7 @@ class InvoiceController extends Controller
                                     ->select('product_code', 'product_name', 'rate', 'quantity', 'total')
                                     ->where('order_id', $orderId)
                                     ->first();
-dd($order_items->product->sku);
+        dd($order_items->product->sku);
         dd($get_user);
     }
 }
