@@ -22,6 +22,8 @@ use Hash;
 
 use Carbon\Carbon;
 
+use App\Http\Controllers\InvoiceController;
+
 class CreateController extends Controller
 {
     //
@@ -304,16 +306,19 @@ class CreateController extends Controller
                 ]);
                 //order_table_id
 
-                // save every item in order_items with order_table_id
-                $create_order_items = OrderItemsModel::create([
-                    'order_id' => $create_order_basic->id,
-                    'product_code' => $basic_product->product_code,
-                    'product_name' => $basic_product->product_name,
-                    'rate' => $basic_product->rate,
-                    'quantity' => $basic_product->quantity,
-                    'total' => $product_basic_amount,
-                    'type' => $basic_product->type,
-                ]);
+                foreach ($get_basic_product as $basic_product) 
+                {
+                    // save every item in order_items with order_table_id
+                    $create_order_items = OrderItemsModel::create([
+                        'order_id' => $create_order_basic->id,
+                        'product_code' => $basic_product->product_code,
+                        'product_name' => $basic_product->product_name,
+                        'rate' => $basic_product->rate,
+                        'quantity' => $basic_product->quantity,
+                        'total' => $product_basic_amount,
+                        'type' => $basic_product->type,
+                    ]);
+                }
             }
 
         }
@@ -346,17 +351,18 @@ class CreateController extends Controller
                 ]);
 
                  //order_table_id
-
-                // save every item in order_items with order_table_id
-                $create_order_items = OrderItemsModel::create([
-                    'order_id' => $create_order_gst->id,
-                    'product_code' => $gst_product->product_code,
-                    'product_name' => $gst_product->product_name,
-                    'rate' => $gst_product->rate,
-                    'quantity' => $gst_product->quantity,
-                    'total' => $product_gst_amount,
-                    'type' => $gst_product->type,
-                ]);
+                 foreach ($get_gst_product as $gst_product) {
+                    // save every item in order_items with order_table_id
+                    $create_order_items = OrderItemsModel::create([
+                        'order_id' => $create_order_gst->id,
+                        'product_code' => $gst_product->product_code,
+                        'product_name' => $gst_product->product_name,
+                        'rate' => $gst_product->rate,
+                        'quantity' => $gst_product->quantity,
+                        'total' => $product_gst_amount,
+                        'type' => $gst_product->type,
+                    ]);
+                }
                 
             }
         }
@@ -390,18 +396,23 @@ class CreateController extends Controller
             $data[] = $create_order_gst;
         }
 
-        $get_remove_items = CartModel::where('user_id', $userId)->delete();
+        // $get_remove_items = CartModel::where('user_id', $userId)->delete();
 
         if ($create_order_basic !== null || $create_order_gst !== null) {
+
+            $generate_invoice = new InvoiceController();
+
+            $get_invoice = $invoiceController->generateInvoice($orderId);
+
             return response()->json([
-                'message' => 'Order created successfully!',
-                'data' => $data
+                'message' => 'Order created and Invoice generated successfully!',
+                'data' => $get_invoice
             ], 201);
         }
 
         else {
             return response()->json([
-                'message' => 'Failed to create order successfully!',
+                'message' => 'Sorry, failed to create order!',
                 'data' => 'Error!'
             ], 400);
         }    
