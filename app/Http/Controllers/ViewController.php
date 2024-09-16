@@ -322,7 +322,7 @@ class ViewController extends Controller
             // Set the sub-category name based on the selected language
             $sub_category_name = $sub_category->name; // Default to English
 
-            if ($lang === 'hn' && !empty($sub_category->name_in_hindi)) {
+            if ($lang === 'hin' && !empty($sub_category->name_in_hindi)) {
                 $sub_category_name = $sub_category->name_in_hindi;
             } elseif ($lang === 'tlg' && !empty($sub_category->name_in_telugu)) {
                 $sub_category_name = $sub_category->name_in_telugu;
@@ -352,7 +352,7 @@ class ViewController extends Controller
 
             $category_name = $category->name;
 
-            if($lang === 'hn' && !empty($category->name_in_hindi))
+            if($lang === 'hin' && !empty($category->name_in_hindi))
             {
                 $category_name = $category->name_in_hindi;
             }
@@ -384,7 +384,7 @@ class ViewController extends Controller
         {
             $name = $record->name;
 
-            if($lang == 'hn' && !empty($record->name_in_hindi))
+            if($lang == 'hin' && !empty($record->name_in_hindi))
             {
                 $name = $record->name_in_hindi;
             }
