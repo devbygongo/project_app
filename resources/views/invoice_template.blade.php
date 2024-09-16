@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order</title>
+    <title>Order Invoice</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -67,61 +67,59 @@
     <table class="customer-info">
         <tr>
             <td class="label">Client:</td>
-            <td class="value">{{ $user_name }}</td>
+            <td class="value">{{ $user->name }}</td>
             <td class="label">Order ID:</td>
-            <td class="value">{{ $order_id }}</td>
+            <td class="value">{{ $order->order_id }}</td>
         </tr>
         <tr>
             <td class="label">Address:</td>
-            <td class="value">{{ $user_address1 }}@if(!empty($user_address1) && !empty($user_address2)), @endif{{ $user_address2 }}</td>
+            <td class="value">{{ $user->address_line_1 }}{{ !empty($user->address_line_1) && !empty($user->address_line_2) ? ', ' : '' }}{{ $user->address_line_2 }}</td>
             <td class="label">Order Date:</td>
-            <td class="value">{{ $order_date }}</td>
+            <td class="value">{{ $order->order_date }}</td>
         </tr>
         <tr>
             <td class="label">GSTIN:</td>
-            <td class="value">{{ $user_gstin }}</td>
+            <td class="value">{{ $user->gstin }}</td>
             <td class="label">Order Type:</td>
-            <td class="value">{{ $type }}</td>
+            <td class="value">{{ $order->type }}</td>
         </tr>
         <tr>
             <td class="label">Mobile:</td>
-            <td class="value">{{ $user_mobile }}</td>
+            <td class="value">{{ $user->mobile }}</td>
             <td class="label">Amount:</td>
-            <td class="value">₹ {{ $amount }}</td>
+            <td class="value">₹ {{ $order->amount }}</td>
         </tr>
     </table>
 
     <!-- Order Details -->
-<table class="order-summary">
-    <thead>
-        <tr>
-            <th class="center-align">SN</th>
-            <th>Photo</th>
-            <th>Product Name</th>
-            <th class="center-align">Qty</th>
-            <th class="right-align">Unit Price (Rs.)</th>
-            <th class="right-align">Total (Rs.)</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach($order_items as $index => $item)
+    <table class="order-summary">
+        <thead>
             <tr>
-                <td class="center-align">{{ $index + 1 }}</td>
-                <td><img src="{{ Storage::url('uploads/products/' . $item->product_code . '.jpg') }}" alt="" style="height: 60px; width: 60px;"></td>
-                <td>{{ $item->product_name }}<br>SKU: {{ $item->product->sku }}</td>
-                <td class="center-align">{{ $item->quantity }}</td>
-                <td class="right-align">₹ {{ $item->rate }}</td>
-                <td class="right-align">₹ {{ $item->total }}</td>
+                <th class="center-align">SN</th>
+                <th>Photo</th>
+                <th>Product Name</th>
+                <th class="center-align">Qty</th>
+                <th class="right-align">Unit Price (Rs.)</th>
+                <th class="right-align">Total (Rs.)</th>
             </tr>
-        @endforeach
-        <!-- Row for displaying total -->
-        <tr>
-            <td colspan="5" class="right-align">Total</td>
-            <td class="right-align">₹ {{ $order->amount }}</td>
-        </tr>
-    </tbody>
-</table>
-
+        </thead>
+        <tbody>
+            @foreach($order_items as $index => $item)
+                <tr>
+                    <td class="center-align">{{ $index + 1 }}</td>
+                    <td><img src="{{ Storage::url('uploads/products/' . $item->product_code . '.jpg') }}" alt="" style="height: 60px; width: 60px;"></td>
+                    <td>{{ $item->product_name }}<br>SKU: {{ $item->product->sku }}</td>
+                    <td class="center-align">{{ $item->quantity }}</td>
+                    <td class="right-align">₹ {{ $item->rate }}</td>
+                    <td class="right-align">₹ {{ $item->total }}</td>
+                </tr>
+            @endforeach
+            <tr>
+                <td colspan="5" class="right-align">Total</td>
+                <td class="right-align">₹ {{ $order->amount }}</td>
+            </tr>
+        </tbody>
+    </table>
 
     <!-- QR Code and Footer -->
     <div style="position: fixed; bottom: 10px; width: 100%;">
