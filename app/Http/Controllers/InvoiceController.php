@@ -19,7 +19,7 @@ class InvoiceController extends Controller
     public function generateInvoice($orderId)
     {
         $get_user = Auth::id();
-        dd($get_user);
+        
         $user = User::select('name', 'mobile', 'email', 'address_line_1', 'address_line_2', 'gstin')
                     ->where('id', $get_user)
                     ->first();

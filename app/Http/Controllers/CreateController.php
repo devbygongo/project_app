@@ -396,17 +396,32 @@ class CreateController extends Controller
             $data[] = $create_order_gst;
         }
 
-        // $get_remove_items = CartModel::where('user_id', $userId)->delete();
+        $get_remove_items = CartModel::where('user_id', $userId)->delete();
 
         if ($create_order_basic !== null || $create_order_gst !== null) {
 
             $generate_invoice = new InvoiceController();
 
-            $get_invoice = $invoiceController->generateInvoice($orderId);
+             // This will store the invoices generated for display or further processing
+            $invoices = [];
+
+            // Check if $create_order_basic is not null and has an id
+            if (!is_null($create_order_basic) && isset($create_order_basic->id)) 
+            {
+                // Generate invoice for $create_order_basic
+                $invoices['basic'] = $generate_invoice->generateInvoice($create_order_basic->id);
+            }
+
+            // Check if $create_order_gst is not null and has an id
+            if (!is_null($create_order_gst) && isset($create_order_gst->id)) 
+            {
+                // Generate invoice for $create_order_gst
+                $invoices['gst'] = $generate_invoice->generateInvoice($create_order_gst->id);
+            }
 
             return response()->json([
                 'message' => 'Order created and Invoice generated successfully!',
-                'data' => $get_invoice
+                'data' => $invoices
             ], 201);
         }
 
