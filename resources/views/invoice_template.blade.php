@@ -34,27 +34,25 @@
         .footer {
             text-align: center;
             margin-top: 50px;
-            background-color: black;
-            color: grey;
-            padding: 10px;
+            background-color: lightgrey; /* Light grey background */
+            color: black; /* Black text */
+            padding: 5px; /* Thinner padding for a less bulky look */
         }
         table, th, td {
             border: 1px solid #ddd;
             border-collapse: collapse;
         }
-        td {
-            text-align: left;
-        }
-        .order-id-section {
-            background-color: aliceblue;
-            padding: 10px;
-            text-align: right;
-        }
-        .total-in-words {
-            margin-top: 10px;
+        .center-align {
+            text-align: center;
         }
         .right-align {
             text-align: right;
+        }
+        .label {
+            width: 15%; /* Slimmer labels */
+        }
+        .value {
+            width: 35%; /* Wider values */
         }
     </style>
 </head>
@@ -65,31 +63,31 @@
         <img src="{{ asset('storage/uploads/s1.jpg') }}" alt="Logo">
     </div>
 
-    <!-- Customer Information -->
+    <!-- Customer and Order Information -->
     <table class="customer-info">
         <tr>
-            <td>{{ $user_name }}</td>
-            <td></td>
+            <td class="label">Client:</td>
+            <td class="value">{{ $user_name }}</td>
+            <td class="label">Order ID:</td>
+            <td class="value">{{ $order_id }}</td>
         </tr>
         <tr>
-            <td>{{ $user_address1 }}@if(!empty($user_address1) && !empty($user_address2)), @endif{{ $user_address2 }}</td>
-            <td></td>
+            <td class="label">Address:</td>
+            <td class="value">{{ $user_address1 }}@if(!empty($user_address1) && !empty($user_address2)), @endif{{ $user_address2 }}</td>
+            <td class="label">Order Date:</td>
+            <td class="value">{{ $order_date }}</td>
         </tr>
         <tr>
-            <td>GSTIN: {{ $user_gstin }}</td>
-            <td></td>
+            <td class="label">GSTIN:</td>
+            <td class="value">{{ $user_gstin }}</td>
+            <td class="label">Order Type:</td>
+            <td class="value">{{ $type }}</td>
         </tr>
         <tr>
-            <td>Phone: {{ $user_mobile }}</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td class="order-id-section" colspan="2">
-                <strong>Order ID:</strong> {{ $order_id }}<br>
-                <strong>Order Date:</strong> {{ $order_date }}<br>
-                <strong>Order Type:</strong> {{ $type }}<br>
-                <strong>Amount:</strong> ₹ {{ $amount }}
-            </td>
+            <td class="label">Mobile:</td>
+            <td class="value">{{ $user_mobile }}</td>
+            <td class="label">Amount:</td>
+            <td class="value">₹ {{ $amount }}</td>
         </tr>
     </table>
 
@@ -97,27 +95,27 @@
     <table class="order-summary">
         <thead>
             <tr>
-                <th>SN</th>
+                <th class="center-align">SN</th>
                 <th>Photo</th>
                 <th>Product Name</th>
-                <th>Qty</th>
-                <th>Unit Price (Rs.)</th>
-                <th>Total (Rs.)</th>
+                <th class="center-align">Qty</th>
+                <th class="right-align">Unit Price (Rs.)</th>
+                <th class="right-align">Total (Rs.)</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td>1</td>
+                <td class="center-align">1</td>
                 <td><img src="{{ Storage::url('uploads/products/' . $product_code . '.jpg') }}" alt="" style="height: 60px; width: 60px;"></td>
                 <td>{{ $product_name }}<br>SKU: {{ $product_sku }}</td>
-                <td>{{ $product_quantity }}</td>
-                <td>₹ {{ $product_rate }}</td>
-                <td>₹ {{ $product_total }}</td>
+                <td class="center-align">{{ $product_quantity }}</td>
+                <td class="right-align">₹ {{ $product_rate }}</td>
+                <td class="right-align">₹ {{ $product_total }}</td>
             </tr>
             <!-- Row for displaying total -->
             <tr>
-                <td colspan="4">Total</td>
-                <td colspan="2" class="right-align">₹ {{ $product_total }}</td>
+                <td colspan="5" class="right-align">Total</td>
+                <td class="right-align">₹ {{ $product_total }}</td>
             </tr>
         </tbody>
     </table>
