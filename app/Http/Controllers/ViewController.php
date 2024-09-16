@@ -335,7 +335,7 @@ class ViewController extends Controller
             ];
         });
         
-        return $processed_prd_lang_rec->isEmpty()
+        return $formattedSubCategories->isEmpty()
         ? response()->json(['Failed get data successfully!'], 400)
         : response()->json(['message' => 'Fetch data successfully!',
                 'data' => $formattedSubCategories,
