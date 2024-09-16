@@ -92,33 +92,36 @@
     </table>
 
     <!-- Order Details -->
-    <table class="order-summary">
-        <thead>
+<table class="order-summary">
+    <thead>
+        <tr>
+            <th class="center-align">SN</th>
+            <th>Photo</th>
+            <th>Product Name</th>
+            <th class="center-align">Qty</th>
+            <th class="right-align">Unit Price (Rs.)</th>
+            <th class="right-align">Total (Rs.)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach($order_items as $index => $item)
             <tr>
-                <th class="center-align">SN</th>
-                <th>Photo</th>
-                <th>Product Name</th>
-                <th class="center-align">Qty</th>
-                <th class="right-align">Unit Price (Rs.)</th>
-                <th class="right-align">Total (Rs.)</th>
+                <td class="center-align">{{ $index + 1 }}</td>
+                <td><img src="{{ Storage::url('uploads/products/' . $item->product_code . '.jpg') }}" alt="" style="height: 60px; width: 60px;"></td>
+                <td>{{ $item->product_name }}<br>SKU: {{ $item->product->sku }}</td>
+                <td class="center-align">{{ $item->quantity }}</td>
+                <td class="right-align">₹ {{ $item->rate }}</td>
+                <td class="right-align">₹ {{ $item->total }}</td>
             </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td class="center-align">1</td>
-                <td><img src="{{ Storage::url('uploads/products/' . $product_code . '.jpg') }}" alt="" style="height: 60px; width: 60px;"></td>
-                <td>{{ $product_name }}<br>SKU: {{ $product_sku }}</td>
-                <td class="center-align">{{ $product_quantity }}</td>
-                <td class="right-align">₹ {{ $product_rate }}</td>
-                <td class="right-align">₹ {{ $product_total }}</td>
-            </tr>
-            <!-- Row for displaying total -->
-            <tr>
-                <td colspan="5" class="right-align">Total</td>
-                <td class="right-align">₹ {{ $product_total }}</td>
-            </tr>
-        </tbody>
-    </table>
+        @endforeach
+        <!-- Row for displaying total -->
+        <tr>
+            <td colspan="5" class="right-align">Total</td>
+            <td class="right-align">₹ {{ $order->amount }}</td>
+        </tr>
+    </tbody>
+</table>
+
 
     <!-- QR Code and Footer -->
     <div style="position: fixed; bottom: 10px; width: 100%;">
