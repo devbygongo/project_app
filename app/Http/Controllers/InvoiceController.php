@@ -72,7 +72,7 @@ class InvoiceController extends Controller
             'order_invoice' => $fileUrl,
         ]);
 
-        // $mpdf->Output($filePath, 'F');
+        $mpdf->Output($filePath, 'F');
 
         // // Assuming additional functionality such as WhatsApp integration etc.
         // return $mpdf->Output('invoice.pdf', 'I');
