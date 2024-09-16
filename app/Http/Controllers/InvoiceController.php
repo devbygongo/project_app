@@ -65,14 +65,14 @@ class InvoiceController extends Controller
             File::makeDirectory($storage_path, 0755, true);
         }
 
+        $mpdf->Output($filePath, 'F');
+
         $fileUrl = asset('storage/' . $publicPath . $fileName);
 
         $update_order = OrderModel::where('id', $orderId)
         ->update([
             'order_invoice' => $fileUrl,
         ]);
-
-        $mpdf->Output($filePath, 'F');
 
         // // Assuming additional functionality such as WhatsApp integration etc.
         // return $mpdf->Output('invoice.pdf', 'I');
