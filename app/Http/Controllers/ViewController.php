@@ -705,6 +705,18 @@ class ViewController extends Controller
             ], 400);
         }    
     }
+
+    public function return_order($orderId)
+    {
+        $get_order_details = OrderModel::where('id', $orderId)
+        ->get();
+
+        return $get_order_details->isEmpty()
+        ? response()->json(['Failed to get order records!'], 400)
+        : response()->json(['message' => 'Fetch records successfully!',
+                'data' => $get_order_details], 201);
+    }
+
     // return blade file
     
     public function login_view()
