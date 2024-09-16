@@ -164,7 +164,18 @@ class CsvImportController extends Controller
 
         // Iterate through each record and create or update the product
         foreach ($records_user as $record_user) {
-            $user_csv = User::where('mobile', $record_user['Mobile '])->first();
+
+            if (strlen($record_user['Mobile']) == 10) {
+                // If it's 10 digits, add '+91' prefix
+                $mobile = '+91' . $record_user['Mobile'];
+            } elseif (strlen($record_user['Mobile']) == 12) {
+                // If it's 12 digits, add '+' prefix
+                $mobile = '+' . $record_user['Mobile'];
+            } else {
+                $mobile = $record_user['Mobile'];
+            }
+
+            $user_csv = User::where('mobile', $mobile)->first();
 
             // Handle potential empty values for email, pincode, and markup
             $email_user = !empty($record_user['Email']) ? $record_user['Email'] : null;
@@ -177,7 +188,7 @@ class CsvImportController extends Controller
                 $get_update_response = $user_csv->update([
                     'name' => $record_user['Name'],
                     'email' => $email_user,
-                    'password' => bcrypt($record_user['Mobile ']),
+                    'password' => bcrypt($mobile),
                     'otp' => null,
                     'expires_at' => null,
                     'address_line_1' => $record_user['Address Line 1'],
@@ -194,10 +205,10 @@ class CsvImportController extends Controller
             {
                 // If user does not exist, create a new one
                 $get_insert_response = User::create([
-                    'mobile' => $record_user['Mobile '],
+                    'mobile' => $mobile,
                     'name' => $record_user['Name'],
                     'email' => $email_user,
-                    'password' => bcrypt($record_user['Mobile ']),
+                    'password' => bcrypt($mobile),
                     'otp' => null,
                     'expires_at' => null,
                     'address_line_1' => $record_user['Address Line 1'],
