@@ -3,46 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice</title>
+    <title>Order</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            width: 100%;
+            padding-top: 15px;
         }
         .header img {
             width: 100%;
+            display: block;
+            height: auto;
         }
-        .customer-info, .order-details {
+        .customer-info, .order-details, .order-summary {
             width: 100%;
             margin-top: 20px;
             border-collapse: collapse;
         }
-        .customer-info td, .order-details td {
+        .customer-info td, .order-details td, .order-summary th, .order-summary td {
             padding: 8px;
         }
-        .order-summary {
-            margin-top: 20px;
-            border-collapse: collapse;
-            width: 100%;
-            margin-bottom: 20px;
-        }
-        .order-summary th, .order-summary td {
-            padding: 8px;
-            border: 1px solid #ddd;
+        .order-summary th {
+            background-color: grey;
+            color: white;
         }
         .footer {
             text-align: center;
             margin-top: 50px;
-            color: red;
+            background-color: black;
+            color: grey;
+            padding: 10px;
         }
         table, th, td {
-            border: 4px solid white;
+            border: 1px solid #ddd;
             border-collapse: collapse;
         }
-        th {
-            background-color: rgb(219, 243, 219);
-        }
         td {
-            text-align: center;
+            text-align: left;
+        }
+        .order-id-section {
+            background-color: aliceblue;
+            padding: 10px;
+            text-align: right;
+        }
+        .total-in-words {
+            margin-top: 10px;
+        }
+        .right-align {
+            text-align: right;
         }
     </style>
 </head>
@@ -54,18 +66,26 @@
     </div>
 
     <!-- Customer Information -->
-    <table width="100%" class="customer-info">
+    <table class="customer-info">
         <tr>
-            <td width="60%">
-                <strong>Customer Info:</strong><br>
-                The Amazing Store<br>
-                {{ $user_name }}<br>
-                {{ $user_address1 }}@if(!empty($user_address1) && !empty($user_address2)), @endif{{ $user_address2 }}<br>
-                GSTIN: {{ $user_gstin }}<br>
-                Phone: {{ $user_mobile }}
-            </td>
-            <td width="40%" style="background-color: aliceblue; padding: 10px; text-align:right;">
-                <strong>Order ID.:</strong> {{ $order_id }}<br>
+            <td>{{ $user_name }}</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>{{ $user_address1 }}@if(!empty($user_address1) && !empty($user_address2)), @endif{{ $user_address2 }}</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>GSTIN: {{ $user_gstin }}</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Phone: {{ $user_mobile }}</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td class="order-id-section" colspan="2">
+                <strong>Order ID:</strong> {{ $order_id }}<br>
                 <strong>Order Date:</strong> {{ $order_date }}<br>
                 <strong>Order Type:</strong> {{ $type }}<br>
                 <strong>Amount:</strong> ₹ {{ $amount }}
@@ -77,40 +97,44 @@
     <table class="order-summary">
         <thead>
             <tr>
-                <th style="text-align:left;">Product Name</th>
-                <th>Quantity</th>
-                <th>Unit Price</th>
-                <th>Total</th>
+                <th>SN</th>
+                <th>Photo</th>
+                <th>Product Name</th>
+                <th>Qty</th>
+                <th>Unit Price (Rs.)</th>
+                <th>Total (Rs.)</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td style="text-align:left;">
-                    <img src="{{ Storage::url('uploads/products/' . $product_code . '.jpg') }}" alt="" style="height: 60px; width: 60px;">
-                    {{ $product_name }}<br>SPRAYER 16L<br>SKU: {{ $product_sku }}
-                </td>
+                <td>1</td>
+                <td><img src="{{ Storage::url('uploads/products/' . $product_code . '.jpg') }}" alt="" style="height: 60px; width: 60px;"></td>
+                <td>{{ $product_name }}<br>SKU: {{ $product_sku }}</td>
                 <td>{{ $product_quantity }}</td>
-                <td>{{ $product_rate }}</td>
-                <td>{{ $product_total }}</td>
+                <td>₹ {{ $product_rate }}</td>
+                <td>₹ {{ $product_total }}</td>
+            </tr>
+            <!-- Row for displaying total -->
+            <tr>
+                <td colspan="4">Total</td>
+                <td colspan="2" class="right-align">₹ {{ $product_total }}</td>
             </tr>
         </tbody>
     </table>
 
-    <!-- QR Code and Grand Total -->
-    <table width="100%" style="padding: 10px; margin-top: 20px;">
-        <tr>
-        <td width="50%">
-            {!! $qrCode !!}
-        </td>
-            <td width="50%" style="text-align:right;">
-                <h3>Grand Total: {{ $product_total }}</h3>
-            </td>
-        </tr>
-    </table>
+    <!-- Display total amount in words -->
+    <div class="total-in-words">
+        <p>Total Amount in Words: {{ $total_in_words }}</p>
+    </div>
 
-    <!-- Footer -->
-    <div class="footer">
-        <p>Thank you for Working with us</p>
+    <!-- QR Code and Footer -->
+    <div style="position: fixed; bottom: 10px; width: 100%;">
+        <div style="float: right;">
+            {!! $qrCode !!}
+        </div>
+        <div class="footer">
+            <p>Thank you for working with us</p>
+        </div>
     </div>
 
 </body>
