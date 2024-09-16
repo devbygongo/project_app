@@ -87,13 +87,15 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
     Route::get('/dashboard', [ViewController::class, 'dashboard_details']);
 
     Route::post('/generate_invoice/{orderId}', [InvoiceController::class, 'generateInvoice']);
+
+    Route::post('/generate_invoice2/{orderId}', [InvoiceController::class, 'generateInvoice2']);
 });
 
 Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user'])->group(function () {
 
     Route::get('/get_details', [ViewController::class, 'user_details']);
 
-    Route::patch('/update_user', [UpdateController::class, 'user']);
+    Route::post('/update_user', [UpdateController::class, 'user']);
 
     Route::get('/logout', [CreateController::class, 'logout']);
 

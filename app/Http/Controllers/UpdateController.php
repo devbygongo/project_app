@@ -22,24 +22,23 @@ class UpdateController extends Controller
         $request->validate([
             'mobile' => ['required', 'string'],
             'password' => 'required',
-            'name' => ['required', 'string'],
+            // 'name' => ['required', 'string'],
             
         ]);
 
         $update_user_record = User::where('id', $get_user)
         ->update([
-            'name' => $request->input('name'),
             'password' => bcrypt($request->input('password')),
-            'email' => strtolower($request->input('email')),
-            'mobile' => $request->input('mobile'),
-            'role' => $request->input('role'),
-            'address_line_1' => $request->input('address_line_1'),
-            'address_line_2' => $request->input('address_line_2'),
-            'city' => $request->input('city'),
-            'pincode' => $request->input('pincode'),
-            'gstin' => $request->input('gstin'),
-            'state' => $request->input('state'),
-            'country' => $request->input('country'),
+            // 'email' => strtolower($request->input('email')),
+            // 'mobile' => $request->input('mobile'),
+            // 'role' => $request->input('role'),
+            // 'address_line_1' => $request->input('address_line_1'),
+            // 'address_line_2' => $request->input('address_line_2'),
+            // 'city' => $request->input('city'),
+            // 'pincode' => $request->input('pincode'),
+            // 'gstin' => $request->input('gstin'),
+            // 'state' => $request->input('state'),
+            // 'country' => $request->input('country'),
         ]);
 
         if ($update_user_record == 1) {
