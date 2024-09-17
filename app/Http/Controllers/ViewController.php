@@ -717,6 +717,19 @@ class ViewController extends Controller
 
         if ($get_order_details) 
         {
+            if ($get_order_details[0]->type == 'Basic') {
+                $get_invoice_id = CounterModel::where('name', 'invoice_basic')
+                                                ->get();
+
+                $return_invoice_id = $get_invoice_id[0]->prefix.$get_invoice_id[0]->counter.$get_invoice_id[0]->postfix;
+            }
+            else {
+                $get_invoice_id = CounterModel::where('name', 'invoice_basic')
+                ->get();
+
+                $return_invoice_id = $get_invoice_id[0]->prefix.$get_invoice_id[0]->counter.$get_invoice_id[0]->postfix;
+            }
+
             $formatted_order_record = 
             [
                 'id' => $get_order_details[0]->id,
@@ -727,6 +740,7 @@ class ViewController extends Controller
                 'status' => $get_order_details[0]->status,
                 'type' => ucfirst($get_order_details[0]->type),
                 'order_invoice' => $get_order_details[0]->order_invoice,
+                'order_invoice_id' => $return_invoice_id,
                 'order_items' => $get_order_details[0]->order_items->map(function ($item) {
                     return 
                     [
