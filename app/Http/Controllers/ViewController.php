@@ -708,13 +708,50 @@ class ViewController extends Controller
 
     public function return_order($orderId)
     {
-        $get_order_details = OrderModel::where('id', $orderId)
-        ->get();
+        // \DB::enableQueryLog();
+        $get_order_details = OrderModel::with('order_items')
+                                        ->where('id', $orderId)
+                                        ->get();
+                                        // dd(\DB::getQueryLog());
 
-        return $get_order_details->isEmpty()
-        ? response()->json(['Failed to get order records!'], 400)
-        : response()->json(['message' => 'Fetch records successfully!',
-                'data' => $get_order_details], 201);
+
+        if ($get_order_details) 
+        {
+            $formatted_record = 
+            [
+                'id' => $get_order_details[0]->id,
+                'order_id' => $get_order_details[0]->order_id,
+                'user_id' => $get_order_details[0]->user_id,
+                'order_date' => $get_order_details[0]->order_date ? $get_order_details[0]->order_date : null,
+                'amount' => $get_order_details[0]->amount,
+                'status' => $get_order_details[0]->status,
+                'type' => ucfirst($get_order_details[0]->type),
+                'order_invoice' => $get_order_details[0]->order_invoice,
+                'order_items' => $get_order_details[0]->order_items->map(function ($item) {
+                    return 
+                    [
+                        'product_code' => $item->product_code,
+                        'product_name' => $item->product_name,
+                        'quantity' => $item->quantity,
+                        'rate' => $item->rate,
+                        'type' => ucfirst($item->type ?? '')  
+                    ];
+                })->toArray()
+            ];
+        }                                                                    
+        
+
+        if (empty($formatted_record)) 
+        {
+            return response()->json(['message' => 'Failed to get order records!'], 400);
+        } 
+        else 
+        {
+            return response()->json([
+                'message' => 'Fetch records successfully!',
+                'data' => $formatted_record
+            ], 200);
+        }
     }
 
     // return blade file

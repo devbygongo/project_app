@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('t_invoice', function (Blueprint $table) {
+        Schema::create('t_invoice_items', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id');
-            $table->integer('order_id');
-            $table->string('invoice_number');
-            $table->date('date');
-            $table->float('amount');
-            // $table->string('attachment');
+            $table->integer('invoice_id');
+            $table->string('product_code');
+            $table->string('product_name');
+            $table->float('rate');
+            $table->float('quantity');
+            $table->float('total');
             $table->enum('type', ['basic', 'gst']);
             $table->timestamps();
         });
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('t_invoice');
+        Schema::dropIfExists('t_invoice_items');
     }
 };

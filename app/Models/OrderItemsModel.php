@@ -29,7 +29,7 @@ class OrderItemsModel extends Model
     public function get_orders()
     {
         // return $this->belongsTo(OrderModel::class, 'orderID', 'order_id'); 
-        return $this->belongsTo(OrderModel::class, 'order_id', 'order_id'); 
+        return $this->belongsTo(OrderModel::class, 'order_id', 'id'); 
     }
 
     // Define the relationship to the Product model
