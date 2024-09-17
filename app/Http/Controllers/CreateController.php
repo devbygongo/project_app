@@ -68,7 +68,7 @@ class CreateController extends Controller
 
 
             $templateParams = [
-                'name' => 'ace_new_order_user', // Replace with your WhatsApp template name
+                'name' => 'ace_new_user_registered', // Replace with your WhatsApp template name
                 'language' => ['code' => 'en'],
                 'components' => [
                     [
@@ -94,7 +94,7 @@ class CreateController extends Controller
             $whatsAppUtility = new sendWhatsAppUtility();
             
             $response = $whatsAppUtility->sendWhatsApp('+918777623806', $templateParams, '', 'User Register');
-    dd($response);
+  
             return response()->json([
                 'message' => 'User created successfully!',
                 'data' => $create_user
