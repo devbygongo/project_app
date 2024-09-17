@@ -717,7 +717,7 @@ class ViewController extends Controller
 
         if ($get_order_details) 
         {
-            $formatted_record = 
+            $formatted_order_record = 
             [
                 'id' => $get_order_details[0]->id,
                 'order_id' => $get_order_details[0]->order_id,
@@ -741,7 +741,7 @@ class ViewController extends Controller
         }                                                                    
         
 
-        if (empty($formatted_record)) 
+        if (empty($formatted_order_record)) 
         {
             return response()->json(['message' => 'Failed to get order records!'], 400);
         } 
@@ -749,7 +749,7 @@ class ViewController extends Controller
         {
             return response()->json([
                 'message' => 'Fetch records successfully!',
-                'data' => $formatted_record
+                'data' => $formatted_order_record
             ], 200);
         }
     }
