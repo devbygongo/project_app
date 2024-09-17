@@ -232,7 +232,39 @@ class UpdateController extends Controller
                 'verified' => '1',
             ]);
 
+            $user = User::select('name', 'mobile')
+                         ->where('id', $get_id)
+                         ->first();
+
             if ($update_verify == 1) {
+
+                $templateParams = [
+                    'name' => 'ace_user_approved', // Replace with your WhatsApp template name
+                    'language' => ['code' => 'en'],
+                    'components' => [
+                        [
+                            'type' => 'body',
+                            'parameters' => [
+                                [
+                                    'type' => 'text',
+                                    'text' => $user->name,
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => $user->mobile,
+                                ],
+                            ],
+                        ]
+                    ],
+                ];
+                
+                // Directly create an instance of SendWhatsAppUtility
+                $whatsAppUtility = new sendWhatsAppUtility();
+                
+                // Send OTP via WhatsApp
+                // $response = $whatsAppUtility->sendWhatsApp("+918961043773", $templateParams, "+918961043773", 'OTP Campaign');
+                $response = $whatsAppUtility->sendWhatsApp('+918961043773', $templateParams, '', 'Approve Client');
+                
                 return response()->json([
                     'message' => 'User verified successfully!',
                     'data' => $update_verify
