@@ -99,17 +99,14 @@ class InvoiceController extends Controller
                         ],
                         [
                             'type' => 'text',
-                            // 'text' => substr($get_user_records->mobile, -10),
                             'text' => $order->order_id,
                         ],
                         [
                             'type' => 'text',
-                            // 'text' => substr($get_user_records->mobile, -10),
                             'text' => $order->amount,
                         ],
                         [
                             'type' => 'text',
-                            // 'text' => substr($get_user_records->mobile, -10),
                             'text' => Carbon::now()->format('d-m-Y'),
                         ],
                     ],
@@ -120,8 +117,51 @@ class InvoiceController extends Controller
         // Directly create an instance of SendWhatsAppUtility
         $whatsAppUtility = new sendWhatsAppUtility();
         
-        // Send OTP via WhatsApp
-        // $response = $whatsAppUtility->sendWhatsApp("+918961043773", $templateParams, "+918961043773", 'OTP Campaign');
+        $response = $whatsAppUtility->sendWhatsApp('+918961043773', $templateParams, '', 'Approve Client');
+
+        $templateParams = [
+            'name' => 'ace_new_order_admin', // Replace with your WhatsApp template name
+            'language' => ['code' => 'en'],
+            'components' => [
+                [
+                    'type' => 'header',
+                    'parameters' => [
+                        [
+                            'type' => 'document',
+                            'document' => [
+                                'link' =>  $fileUrl, // Replace with the actual URL to the PDF document
+                                'filename' => $sanitizedOrderId.'.pdf' // Optional: Set a custom file name for the PDF document
+                            ]
+                        ]
+                    ]
+                ],[
+                    'type' => 'body',
+                    'parameters' => [
+                        [
+                            'type' => 'text',
+                            'text' => $user->name,
+                        ],
+                        [
+                            'type' => 'text',
+                            'text' =>  $order->order_id,
+                        ],
+                        [
+                            'type' => 'text',
+                            'text' => substr($user->mobile, -10),
+                        ],
+                        [
+                            'type' => 'text',
+                            'text' => $order->amount,
+                        ],
+                        [
+                            'type' => 'text',
+                            'text' => Carbon::now()->format('d-m-Y'),
+                        ],
+                    ],
+                ]
+            ],
+        ];
+
         $response = $whatsAppUtility->sendWhatsApp('+918961043773', $templateParams, '', 'Approve Client');
         
 
