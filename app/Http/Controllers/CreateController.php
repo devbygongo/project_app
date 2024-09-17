@@ -16,6 +16,10 @@ use App\Models\CartModel;
 
 use App\Models\CounterModel;
 
+use App\Models\InvoiceModel;
+
+use App\Models\InvoiceItemsModel;
+
 use Illuminate\Support\Facades\Auth;
 
 use Hash;
@@ -27,7 +31,6 @@ use App\Http\Controllers\InvoiceController;
 class CreateController extends Controller
 {
     //
-
     public function user(Request $request)
     {
         $request->validate([
@@ -60,6 +63,36 @@ class CreateController extends Controller
 
 
         if (isset($create_user)) {
+
+
+            $templateParams = [
+                'name' => 'ace_new_order_user', // Replace with your WhatsApp template name
+                'language' => ['code' => 'en'],
+                'components' => [
+                    [
+                        'type' => 'body',
+                        'parameters' => [
+                            [
+                                'type' => 'text',
+                                'text' => $create_user->name,
+                            ],
+                            [
+                                'type' => 'text',
+                                'text' => $create_user->mobile,
+                            ],
+                            [
+                                'type' => 'text',
+                                'text' => $create_user->state,
+                            ],
+                        ],
+                    ]
+                ],
+            ];
+            
+            $whatsAppUtility = new sendWhatsAppUtility();
+            
+            $response = $whatsAppUtility->sendWhatsApp('+918777623806', $templateParams, '', 'User Register');
+    
             return response()->json([
                 'message' => 'User created successfully!',
                 'data' => $create_user
@@ -396,7 +429,7 @@ class CreateController extends Controller
             $data[] = $create_order_gst;
         }
 
-        $get_remove_items = CartModel::where('user_id', $userId)->delete();
+        // $get_remove_items = CartModel::where('user_id', $userId)->delete();
 
         if ($create_order_basic !== null || $create_order_gst !== null) {
 
@@ -600,4 +633,38 @@ class CreateController extends Controller
         }    
     }
 
+    public function make_invoice(Request $request)
+    {
+        $create_invoice = InvoiceModel::create([
+            'order_id' => $request->input('0.order_id'),
+            'user_id' => $request->input('0.user_id'),
+            'invoice_number' => $request->input('0.invoice_no'),
+            'date' => $request->input('0.invoice_date'),
+            'amount' => $request->input('0.amount'),
+            'type' => $request->input('0.type'),
+        ]);
+
+        $create_invoice_item = InvoiceItemsModel::create([
+            'invoice_id' => $create_invoice->id,
+            'product_code' => $request->input('0.invoice_items.product_code'),
+            'product_name' => $request->input('0.invoice_items.product_name'),
+            'quantity' => $request->input('0.invoice_items.quantity'),
+            'rate' => $request->input('0.invoice_items.rate'),
+            'total' => $request->input('0.invoice_items.total'),
+            'type' => $request->input('0.invoice_items.type'),
+        ]);
+
+        
+        if (isset($create_invoice) && isset($create_invoice_item)) {
+            return response()->json([
+                'message' => 'Insert record successfully!',
+            ], 201);
+        }
+
+        else {
+            return response()->json([
+                'message' => 'Failed to insert!',
+            ], 400);
+        }  
+    }
 }

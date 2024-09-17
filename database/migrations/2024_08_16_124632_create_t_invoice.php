@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('t_invoice', function (Blueprint $table) {
             $table->id();
             $table->integer('user_id');
-            $table->integer('order_id');
+            $table->string('order_id');
             $table->string('invoice_number');
             $table->date('date');
             $table->float('amount');
