@@ -93,7 +93,7 @@ class CreateController extends Controller
             
             $whatsAppUtility = new sendWhatsAppUtility();
             
-            $response = $whatsAppUtility->sendWhatsApp('+918777623806', $templateParams, '', 'User Register');
+            $response = $whatsAppUtility->sendWhatsApp('+918961043773', $templateParams, '', 'User Register');
   
             return response()->json([
                 'message' => 'User created successfully!',
@@ -658,6 +658,44 @@ class CreateController extends Controller
 
         
         if (isset($create_invoice) && isset($create_invoice_item)) {
+
+
+            $templateParams = [
+                'name' => 'ace_new_invoice_user', // Replace with your WhatsApp template name
+                'language' => ['code' => 'en'],
+                'components' => [
+                    [
+                        'type' => 'body',
+                        'parameters' => [
+                            [
+                                'type' => 'text',
+                                'text' => $create_invoice->user_id,
+                            ],
+                            [
+                                'type' => 'text',
+                                'text' => $create_invoice->order_id,
+                            ],
+                            [
+                                'type' => 'text',
+                                'text' => $create_invoice->invoice_number,
+                            ],
+                            [
+                                'type' => 'text',
+                                'text' => $create_invoice->date,
+                            ],
+                            [
+                                'type' => 'text',
+                                'text' => $create_invoice->amount,
+                            ],
+                        ],
+                    ]
+                ],
+            ];
+            
+            $whatsAppUtility = new sendWhatsAppUtility();
+            
+            $response = $whatsAppUtility->sendWhatsApp('+918961043773', $templateParams, '', 'User Invoice');
+
             return response()->json([
                 'message' => 'Insert record successfully!',
             ], 201);
