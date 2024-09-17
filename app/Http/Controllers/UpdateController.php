@@ -251,7 +251,7 @@ class UpdateController extends Controller
                                 ],
                                 [
                                     'type' => 'text',
-                                    'text' => $user->mobile,
+                                    'text' => substr($user->mobile, -10),
                                 ],
                             ],
                         ]
