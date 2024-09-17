@@ -41,11 +41,6 @@ class InvoiceController extends Controller
         $sanitizedOrderId = preg_replace('/[^A-Za-z0-9]+/', '-', trim($order->order_id));
         $sanitizedOrderId = trim($sanitizedOrderId, '-');
 
-        $qrCode = QrCode::format('svg')
-                        ->size(100)
-                        ->generate("Order ID: {$order->order_id}, Order Date: {$order->order_date}, Total: {$order->amount}, Order Type: {$order->type}");
-        $qrCode = preg_replace('/<\?xml.+\?>/', '', $qrCode);
-        
         $data = [
             'user' => $user,
             'order' => $order,
@@ -117,7 +112,7 @@ class InvoiceController extends Controller
         // Directly create an instance of SendWhatsAppUtility
         $whatsAppUtility = new sendWhatsAppUtility();
         
-        $response = $whatsAppUtility->sendWhatsApp('+918961043773', $templateParams, '', 'Approve Client');
+        $response = $whatsAppUtility->sendWhatsApp('+918961043773', $templateParams, '', 'User Order Invoice');
 
         $templateParams = [
             'name' => 'ace_new_order_admin', // Replace with your WhatsApp template name
@@ -162,7 +157,7 @@ class InvoiceController extends Controller
             ],
         ];
 
-        $response = $whatsAppUtility->sendWhatsApp('+918961043773', $templateParams, '', 'Approve Client');
+        $response = $whatsAppUtility->sendWhatsApp('+919966633307', $templateParams, '', 'Admin Order Invoice');
         
 
         // // Assuming additional functionality such as WhatsApp integration etc.

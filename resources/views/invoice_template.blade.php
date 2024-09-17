@@ -123,9 +123,6 @@
 
     <!-- QR Code and Footer -->
     <div style="position: fixed; bottom: 10px; width: 100%;">
-        <div style="float: right;">
-            {!! $qrCode !!}
-        </div>
         <div class="footer">
             <p>Thank you for working with us</p>
         </div>
