@@ -94,7 +94,7 @@ class CreateController extends Controller
             $whatsAppUtility = new sendWhatsAppUtility();
             
             $response = $whatsAppUtility->sendWhatsApp('+918777623806', $templateParams, '', 'User Register');
-    
+    dd($response);
             return response()->json([
                 'message' => 'User created successfully!',
                 'data' => $create_user
