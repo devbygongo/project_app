@@ -45,7 +45,6 @@ class InvoiceController extends Controller
             'user' => $user,
             'order' => $order,
             'order_items' => $order_items,
-            'qrCode' => $qrCode
         ];
 
         $html = view('invoice_template', $data)->render();
