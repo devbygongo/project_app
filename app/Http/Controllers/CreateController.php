@@ -637,46 +637,37 @@ class CreateController extends Controller
 
     public function make_invoice(Request $request)
     {
-        // $create_invoice = InvoiceModel::create([
-        //     'order_id' => $request->input('0.order_id'),
-        //     'user_id' => $request->input('0.user_id'),
-        //     'invoice_number' => $request->input('0.invoice_no'),
-        //     'date' => $request->input('0.invoice_date'),
-        //     'amount' => $request->input('0.amount'),
-        //     'type' => $request->input('0.type'),
-        // ]);
+        $data = $request->input('0'); // Access the data inside the array at index 0
 
-        // $create_invoice_item = InvoiceItemsModel::create([
-        //     'invoice_id' => $create_invoice->id,
-        //     'product_code' => $request->input('0.invoice_items.product_code'),
-        //     'product_name' => $request->input('0.invoice_items.product_name'),
-        //     'quantity' => $request->input('0.invoice_items.quantity'),
-        //     'rate' => $request->input('0.invoice_items.rate'),
-        //     'total' => $request->input('0.invoice_items.total'),
-        //     'type' => $request->input('0.invoice_items.type'),
-        // ]);
+        // Create the invoice
         $create_invoice = InvoiceModel::create([
-            'order_id' => $request->input('order_id'),
-            'user_id' => $request->input('user_id'),
-            'invoice_number' => $request->input('invoice_no'),
-            'date' => $request->input('invoice_date'),
-            'amount' => $request->input('amount'),
-            'type' => $request->input('type'),
+            'order_id' => $data['order_id'], // Access 'order_id' inside the array
+            'user_id' => $data['user_id'],
+            'invoice_number' => $data['invoice_no'],
+            'date' => $data['invoice_date'],
+            'amount' => $data['amount'],
+            'type' => $data['type'],
         ]);
-        
+
+        // Initialize an array to store created invoice items
+        $create_invoice_item = [];
+
         // Loop through the invoice items and insert each one
-        $invoice_items = $request->input('invoice_items'); // Get the invoice_items array
-        
+        $invoice_items = $data['invoice_items']; // Get the invoice_items array
+
         foreach ($invoice_items as $item) {
-            InvoiceItemsModel::create([
+            $created_item = InvoiceItemsModel::create([
                 'invoice_id' => $create_invoice->id, // Use the ID of the created invoice
-                'product_code' => $item['product_code'], // Access each item in the array
+                'product_code' => $item['product_code'],
                 'product_name' => $item['product_name'],
                 'quantity' => $item['quantity'],
                 'rate' => $item['rate'],
                 'total' => $item['total'],
                 'type' => $item['type'],
             ]);
+
+            // Add each created item to the array
+            $create_invoice_item[] = $created_item;
         }
         
         if (isset($create_invoice) && isset($create_invoice_item)) {
