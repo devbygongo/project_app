@@ -431,7 +431,7 @@ class CreateController extends Controller
             $data[] = $create_order_gst;
         }
 
-        // $get_remove_items = CartModel::where('user_id', $userId)->delete();
+        $get_remove_items = CartModel::where('user_id', $userId)->delete();
 
         if ($create_order_basic !== null || $create_order_gst !== null) {
 
@@ -659,6 +659,8 @@ class CreateController extends Controller
         
         if (isset($create_invoice) && isset($create_invoice_item)) {
 
+            $update_invoice_counter = CounterModel::where('prefix', substr($request->input('0.invoice_no'),0, 7))
+            ->increment('counter');
 
             $templateParams = [
                 'name' => 'ace_new_invoice_user', // Replace with your WhatsApp template name

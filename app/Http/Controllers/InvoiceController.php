@@ -97,11 +97,11 @@ class InvoiceController extends Controller
                         ],
                         [
                             'type' => 'text',
-                            'text' => $order->amount,
+                            'text' => Carbon::now()->format('d-m-Y'),
                         ],
                         [
                             'type' => 'text',
-                            'text' => Carbon::now()->format('d-m-Y'),
+                            'text' => $order->amount,
                         ],
                     ],
                 ]
@@ -137,19 +137,19 @@ class InvoiceController extends Controller
                         ],
                         [
                             'type' => 'text',
-                            'text' =>  $order->order_id,
+                            'text' =>  substr($user->mobile, -10),
                         ],
                         [
                             'type' => 'text',
-                            'text' => substr($user->mobile, -10),
-                        ],
-                        [
-                            'type' => 'text',
-                            'text' => $order->amount,
+                            'text' => $order->order_id,
                         ],
                         [
                             'type' => 'text',
                             'text' => Carbon::now()->format('d-m-Y'),
+                        ],
+                        [
+                            'type' => 'text',
+                            'text' => $order->amount,
                         ],
                     ],
                 ]
