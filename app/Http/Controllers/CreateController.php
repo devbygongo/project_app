@@ -638,6 +638,7 @@ class CreateController extends Controller
     public function make_invoice(Request $request)
     {
         $data = $request->input('0'); // Access the data inside the array at index 0
+        dd($request->all());
 
         // Create the invoice
         $create_invoice = InvoiceModel::create([
