@@ -637,91 +637,55 @@ class CreateController extends Controller
 
     public function make_invoice(Request $request)
     {
-        $data = $request->input('0'); // Access the data inside the array at index 0
-        echo "<pre>";
-        print_r($request->all());
+        // Decode the JSON string inside the 'data' key
+        $json_data = json_decode($request->input('data'), true);
 
-        // Create the invoice
-        $create_invoice = InvoiceModel::create([
-            'order_id' => $data['order_id'], // Access 'order_id' inside the array
-            'user_id' => $data['user_id'],
-            'invoice_number' => $data['invoice_no'],
-            'date' => $data['invoice_date'],
-            'amount' => $data['amount'],
-            'type' => $data['type'],
-        ]);
+        if (is_array($json_data) && isset($json_data[0])) 
+        {
+            $data = $json_data[0]; // Access the first element of the decoded array
 
-        // Initialize an array to store created invoice items
-        $create_invoice_item = [];
-
-        // Loop through the invoice items and insert each one
-        $invoice_items = $data['invoice_items']; // Get the invoice_items array
-
-        foreach ($invoice_items as $item) {
-            $created_item = InvoiceItemsModel::create([
-                'invoice_id' => $create_invoice->id, // Use the ID of the created invoice
-                'product_code' => $item['product_code'],
-                'product_name' => $item['product_name'],
-                'quantity' => $item['quantity'],
-                'rate' => $item['rate'],
-                'total' => $item['total'],
-                'type' => $item['type'],
+            // Create the invoice
+            $create_invoice = InvoiceModel::create([
+                'order_id' => $data['order_id'],
+                'user_id' => $data['user_id'],
+                'invoice_number' => $data['invoice_no'],
+                'date' => $data['invoice_date'],
+                'amount' => $data['amount'],
+                'type' => $data['type'],
             ]);
 
-            // Add each created item to the array
-            $create_invoice_item[] = $created_item;
-        }
-        
-        if (isset($create_invoice) && isset($create_invoice_item)) {
+            $invoice_items = $data['invoice_items']; // Get the invoice_items array
 
-            $update_invoice_counter = CounterModel::where('prefix', substr($request->input('0.invoice_no'),0, 7))
-            ->increment('counter');
+            // Initialize an array to store created invoice items
+            $created_items = [];
 
-            $templateParams = [
-                'name' => 'ace_new_invoice_user', // Replace with your WhatsApp template name
-                'language' => ['code' => 'en'],
-                'components' => [
-                    [
-                        'type' => 'body',
-                        'parameters' => [
-                            [
-                                'type' => 'text',
-                                'text' => $create_invoice->user_id,
-                            ],
-                            [
-                                'type' => 'text',
-                                'text' => $create_invoice->order_id,
-                            ],
-                            [
-                                'type' => 'text',
-                                'text' => $create_invoice->invoice_number,
-                            ],
-                            [
-                                'type' => 'text',
-                                'text' => $create_invoice->date,
-                            ],
-                            [
-                                'type' => 'text',
-                                'text' => $create_invoice->amount,
-                            ],
-                        ],
-                    ]
-                ],
-            ];
-            
-            $whatsAppUtility = new sendWhatsAppUtility();
-            
-            $response = $whatsAppUtility->sendWhatsApp('+918961043773', $templateParams, '', 'User Invoice');
+            // Loop through the invoice items and insert each one
+            foreach ($invoice_items as $item) {
+                $created_item = InvoiceItemsModel::create([
+                    'invoice_id' => $create_invoice->id,
+                    'product_code' => $item['product_code'],
+                    'product_name' => $item['product_name'],
+                    'quantity' => $item['quantity'],
+                    'rate' => $item['rate'],
+                    'total' => $item['total'],
+                    'type' => $item['type'],
+                ]);
 
+                // Add each created item to the array
+                $created_items[] = $created_item;
+            }
+
+            // Return a detailed response with the created invoice and invoice items
             return response()->json([
-                'message' => 'Insert record successfully!',
-            ], 201);
+                'message' => 'Invoice and items created successfully!',
+                'invoice' => $create_invoice, // Return the created invoice
+                'invoice_items' => $created_items // Return the created invoice items
+            ], 200);
+        } 
+        else 
+        {
+            return response()->json(['message' => 'Invalid data format'], 400);
         }
-
-        else {
-            return response()->json([
-                'message' => 'Failed to insert!',
-            ], 400);
-        }  
     }
+        
 }
