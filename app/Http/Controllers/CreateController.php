@@ -679,13 +679,13 @@ class CreateController extends Controller
             // Check if create_invoice exists and is not null, then add it to the array
             if(!empty($create_invoice))
             {
-                $data[] = $create_invoice;
+                $get_data[] = $create_invoice;
             }
 
             // Check if created_items exists and is not null, then add it to the array
             if(!empty($created_items))
             {
-                $data[] = $created_items;
+                $get_data[] = $created_items;
             }
 
             if ($create_invoice !== null || $created_items !== null) 
@@ -699,15 +699,15 @@ class CreateController extends Controller
                 $invoices = $generate_invoice->generateInvoice($create_invoice->id);
     
                 // Add invoices to the $data array under a specific key
-                $data['invoices'] = $invoices;
-
+                $get_data['invoices'] = $invoices;
             }
 
             // Return a detailed response with the created invoice and invoice items
             return response()->json([
                 'message' => 'Invoice and items created successfully!',
-                'invoice' => $create_invoice, // Return the created invoice
-                'invoice_items' => $created_items // Return the created invoice items
+                // 'invoice' => $create_invoice, // Return the created invoice
+                // 'invoice_items' => $created_items // Return the created invoice items
+                'data' => $get_data
             ], 200);
         } 
         else 
