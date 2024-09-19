@@ -68,19 +68,19 @@
         <tr>
             <td class="label">Client:</td>
             <td class="value">{{ $user->name }}</td>
-            <td class="label">Order ID:</td>
+            <td class="label">Invoie ID:</td>
             <td class="value">{{ $invoice->invoice_number }}</td>
         </tr>
         <tr>
             <td class="label">Address:</td>
             <td class="value">{{ $user->address_line_1 }}{{ !empty($user->address_line_1) && !empty($user->address_line_2) ? ', ' : '' }}{{ $user->address_line_2 }}</td>
-            <td class="label">Order Date:</td>
-            <td class="value">{{ $invoice->order_date }}</td>
+            <td class="label">Invoie Date:</td>
+            <td class="value">{{ $invoice->date }}</td>
         </tr>
         <tr>
             <td class="label">GSTIN:</td>
             <td class="value">{{ $user->gstin }}</td>
-            <td class="label">Order Type:</td>
+            <td class="label">Invoie Type:</td>
             <td class="value">{{ $invoice->type }}</td>
         </tr>
         <tr>

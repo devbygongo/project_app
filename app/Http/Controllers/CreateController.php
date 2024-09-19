@@ -686,6 +686,8 @@ class CreateController extends Controller
             if(!empty($created_items))
             {
                 $get_data[] = $created_items;
+
+                unset($created_items->updated_at, $created_items->created_at, $created_items->id);
             }
 
             if ($create_invoice !== null || $created_items !== null) 
@@ -700,6 +702,8 @@ class CreateController extends Controller
     
                 // Add invoices to the $data array under a specific key
                 $get_data['invoices'] = $invoices;
+
+                unset($create_invoice->updated_at, $create_invoice->created_at, $create_invoice->id);
             }
 
             // Return a detailed response with the created invoice and invoice items
