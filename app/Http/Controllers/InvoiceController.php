@@ -225,7 +225,7 @@ class InvoiceController extends Controller
                             'type' => 'document',
                             'document' => [
                                 'link' =>  $fileUrl, // Replace with the actual URL to the PDF document
-                                'filename' => $sanitizedOrderId.'.pdf' // Optional: Set a custom file name for the PDF document
+                                'filename' => $sanitizedInvoiceNumber.'.pdf' // Optional: Set a custom file name for the PDF document
                             ]
                         ]
                     ]
