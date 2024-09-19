@@ -234,7 +234,7 @@ class InvoiceController extends Controller
                     'parameters' => [
                         [
                             'type' => 'text',
-                            'text' => $user->name,
+                            'text' => $invoice_user->user->name,
                         ],
                         [
                             'type' => 'text',
