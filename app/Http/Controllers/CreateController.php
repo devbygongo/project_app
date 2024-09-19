@@ -671,9 +671,18 @@ class CreateController extends Controller
                 ]);
 
                 // Add each created item to the array
-                $created_items[] = $created_item;
+                $created_items[] = $created_item->toArray(); // Convert object to array for manipulation
             }
 
+            // Remove 'updated_at', 'created_at', and 'id' from each created item
+            foreach ($created_items as &$item) {
+                unset($item['updated_at'], $item['created_at'], $item['id']);
+
+                // Add the modified item to the array
+                $created_items[] = $created_item_array;
+            }
+
+            // Prepare the data array
             $get_data = [];
 
             // Check if create_invoice exists and is not null, then add it to the array
