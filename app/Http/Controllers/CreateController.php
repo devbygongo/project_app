@@ -438,7 +438,6 @@ class CreateController extends Controller
             // Iterate through the $data array and add the corresponding invoices
             foreach ($data as &$order) {
                 // Unset unwanted fields
-                unset($order->updated_at, $order->created_at, $order->id);
 
                 // Check if the current order is of type 'basic' and has an id
                 if ($order->type === 'basic') {
@@ -450,6 +449,9 @@ class CreateController extends Controller
                     // Generate invoice and append to the current order as 'pdf'
                     $order->pdf = $generate_order_invoice->generateorderInvoice($create_order_gst->id);
                 }
+
+                unset($order->updated_at, $order->created_at, $order->id);
+
             }
 
             return response()->json([
