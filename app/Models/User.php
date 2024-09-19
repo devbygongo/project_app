@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 use Laravel\Sanctum\HasApiTokens;
 
@@ -66,5 +67,11 @@ class User extends Authenticatable
     public function user_cart()
     {
         return $this->hasMany(CartModel::class);
+    }
+
+    // One User has many Invoices
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(InvoiceModel::class, 'user_id', 'id'); // Reference user_id column in invoices table
     }
 }

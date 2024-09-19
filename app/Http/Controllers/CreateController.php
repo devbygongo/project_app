@@ -326,17 +326,17 @@ class CreateController extends Controller
             // for `basic` product
             if ((count($get_basic_product)) > 0) 
             {
-                $product_basic_amount = 0;
+                $basic_amount_total = 0;
                 foreach ($get_basic_product as $basic_product) 
                 {
-                    $product_basic_amount += (($basic_product->rate) * ($basic_product->quantity));
+                    $basic_amount_total += (($basic_product->rate) * ($basic_product->quantity));
                 }
                 
                 $create_order_basic = OrderModel::create([
                     'user_id' => $userId,
                     'order_id' => $get_order_id,
                     'order_date' => Carbon::now(),
-                    'amount' => $product_basic_amount,
+                    'amount' => $basic_amount_total,
                     'type' => 'basic',
                 ]);
                 //order_table_id
@@ -350,7 +350,7 @@ class CreateController extends Controller
                         'product_name' => $basic_product->product_name,
                         'rate' => $basic_product->rate,
                         'quantity' => $basic_product->quantity,
-                        'total' => $product_basic_amount,
+                        'total' => $basic_product->rate * $basic_product->quantity,
                         'type' => $basic_product->type,
                     ]);
                 }
@@ -372,16 +372,16 @@ class CreateController extends Controller
             // for `gst` product    
             if ((count($get_gst_product)) > 0) 
             {
-                $product_gst_amount = 0;
+                $gst_amount_total = 0;
                 foreach ($get_gst_product as $gst_product) {
-                    $product_gst_amount += (($gst_product->amount) * ($gst_product->quantity));
+                    $gst_amount_total += (($gst_product->amount) * ($gst_product->quantity));
                 }
 
                 $create_order_gst = OrderModel::create([
                     'user_id' => $userId,
                     'order_id' => $get_order_id,
                     'order_date' => Carbon::now(),
-                    'amount' => $product_gst_amount,
+                    'amount' => $gst_amount_total,
                     'type' => 'gst',
                 ]);
 
@@ -394,7 +394,7 @@ class CreateController extends Controller
                         'product_name' => $gst_product->product_name,
                         'rate' => $gst_product->rate,
                         'quantity' => $gst_product->quantity,
-                        'total' => $product_gst_amount,
+                        'total' => $gst_product->rate * $gst_product->quantity,
                         'type' => $gst_product->type,
                     ]);
                 }
@@ -431,31 +431,31 @@ class CreateController extends Controller
             $data[] = $create_order_gst;
         }
 
-        // $get_remove_items = CartModel::where('user_id', $userId)->delete();
+        $get_remove_items = CartModel::where('user_id', $userId)->delete();
 
         if ($create_order_basic !== null || $create_order_gst !== null) {
 
-            $generate_invoice = new InvoiceController();
+            $generate_order_invoice = new InvoiceController();
 
              // This will store the invoices generated for display or further processing
-            $invoices = [];
+            $order_invoices = [];
 
             // Check if $create_order_basic is not null and has an id
             if (!is_null($create_order_basic) && isset($create_order_basic->id)) 
             {
                 // Generate invoice for $create_order_basic
-                $invoices['basic'] = $generate_invoice->generateInvoice($create_order_basic->id);
+                $order_invoices['basic'] = $generate_order_invoice->generateorderInvoice($create_order_basic->id);
             }
 
             // Check if $create_order_gst is not null and has an id
             if (!is_null($create_order_gst) && isset($create_order_gst->id)) 
             {
                 // Generate invoice for $create_order_gst
-                $invoices['gst'] = $generate_invoice->generateInvoice($create_order_gst->id);
+                $order_invoices['gst'] = $generate_order_invoice->generateorderInvoice($create_order_gst->id);
             }
 
             // Add invoices to the $data array under a specific key
-            $data['invoices'] = $invoices;
+            $data['invoices'] = $order_invoices;
 
             return response()->json([
                 'message' => 'Order created and Invoice generated successfully!',
@@ -638,7 +638,8 @@ class CreateController extends Controller
     public function make_invoice(Request $request)
     {
         // Decode the JSON string inside the 'data' key
-        $json_data = json_decode($request->input('data'), true);
+        // $json_data = json_decode($request->input('data'), true);
+        $json_data = $request->input('data');
 
         if (is_array($json_data) && isset($json_data[0])) 
         {
@@ -673,6 +674,35 @@ class CreateController extends Controller
 
                 // Add each created item to the array
                 $created_items[] = $created_item;
+            }
+
+            $get_data = [];
+
+            // Check if create_invoice exists and is not null, then add it to the array
+            if(!empty($create_invoice))
+            {
+                $data[] = $create_invoice;
+            }
+
+            // Check if created_items exists and is not null, then add it to the array
+            if(!empty($created_items))
+            {
+                $data[] = $created_items;
+            }
+
+            if ($create_invoice !== null || $created_items !== null) 
+            {
+
+                $generate_invoice = new InvoiceController();
+    
+                 // This will store the invoices generated for display or further processing
+                $invoices = [];
+    
+                $invoices = $generate_invoice->generateInvoice($create_invoice->id);
+    
+                // Add invoices to the $data array under a specific key
+                $data['invoices'] = $invoices;
+
             }
 
             // Return a detailed response with the created invoice and invoice items

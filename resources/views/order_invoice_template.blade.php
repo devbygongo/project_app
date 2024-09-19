@@ -69,7 +69,7 @@
             <td class="label">Client:</td>
             <td class="value">{{ $user->name }}</td>
             <td class="label">Order ID:</td>
-            <td class="value">{{ $invoice->invoice_number }}</td>
+            <td class="value">{{ $order->order_id }}</td>
         </tr>
         <tr>
             <td class="label">Address:</td>
