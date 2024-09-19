@@ -636,8 +636,7 @@ class CreateController extends Controller
     public function make_invoice(Request $request)
     {
         // Decode the JSON string inside the 'data' key
-        // $json_data = json_decode($request->input('data'), true);
-        $json_data = $request->input('data');
+        $json_data = json_decode($request->input('data'), true);
 
         if (is_array($json_data) && isset($json_data[0])) 
         {
