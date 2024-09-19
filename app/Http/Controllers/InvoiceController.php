@@ -198,7 +198,7 @@ class InvoiceController extends Controller
         $mpdf->WriteHTML($html);
 
         $publicPath = 'uploads/invoices/';
-        $fileName = 'invoice_' . $sanitizedOrderId . '.pdf';
+        $fileName = 'invoice_' . $sanitizedInvoiceNumber . '.pdf';
         $filePath = storage_path('app/public/' . $publicPath . $fileName);
 
         if (!File::isDirectory($storage_path = storage_path('app/public/' . $publicPath))) {
