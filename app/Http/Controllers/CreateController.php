@@ -374,7 +374,7 @@ class CreateController extends Controller
             {
                 $gst_amount_total = 0;
                 foreach ($get_gst_product as $gst_product) {
-                    $gst_amount_total += (($gst_product->amount) * ($gst_product->quantity));
+                    $gst_amount_total += (($gst_product->rate) * ($gst_product->quantity));
                 }
 
                 $create_order_gst = OrderModel::create([
@@ -420,48 +420,44 @@ class CreateController extends Controller
         $data = [];
 
         // Check if data_basic exists and is not null, then add it to the array
-        if(!empty($create_order_basic))
-        {
+        if (!empty($create_order_basic)) {
             $data[] = $create_order_basic;
         }
 
         // Check if data_gst exists and is not null, then add it to the array
-        if(!empty($create_order_gst))
-        {
+        if (!empty($create_order_gst)) {
             $data[] = $create_order_gst;
         }
 
+        // Remove items from the cart for the user
         $get_remove_items = CartModel::where('user_id', $userId)->delete();
 
         if ($create_order_basic !== null || $create_order_gst !== null) {
-
             $generate_order_invoice = new InvoiceController();
 
-             // This will store the invoices generated for display or further processing
-            $order_invoices = [];
+            // Iterate through the $data array and add the corresponding invoices
+            foreach ($data as &$order) {
+                // Unset unwanted fields
+                unset($order->updated_at, $order->created_at, $order->id);
 
-            // Check if $create_order_basic is not null and has an id
-            if (!is_null($create_order_basic) && isset($create_order_basic->id)) 
-            {
-                // Generate invoice for $create_order_basic
-                $order_invoices['basic'] = $generate_order_invoice->generateorderInvoice($create_order_basic->id);
+                // Check if the current order is of type 'basic' and has an id
+                if ($order->type === 'basic') {
+                    // Generate invoice and append to the current order as 'pdf'
+                    $order->pdf = $generate_order_invoice->generateorderInvoice($create_order_basic->id);
+                }
+                // Check if the current order is of type 'gst' and has an id
+                elseif ($order->type === 'gst') {
+                    // Generate invoice and append to the current order as 'pdf'
+                    $order->pdf = $generate_order_invoice->generateorderInvoice($create_order_gst->id);
+                }
             }
-
-            // Check if $create_order_gst is not null and has an id
-            if (!is_null($create_order_gst) && isset($create_order_gst->id)) 
-            {
-                // Generate invoice for $create_order_gst
-                $order_invoices['gst'] = $generate_order_invoice->generateorderInvoice($create_order_gst->id);
-            }
-
-            // Add invoices to the $data array under a specific key
-            $data['invoices'] = $order_invoices;
 
             return response()->json([
                 'message' => 'Order created and Invoice generated successfully!',
                 'data' => $data
             ], 201);
         }
+
 
         else {
             return response()->json([
