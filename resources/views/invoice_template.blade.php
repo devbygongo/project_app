@@ -54,9 +54,21 @@
         .value {
             width: 35%; /* Wider values */
         }
+        .invoice-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
+
+    <!-- Invoice Title -->
+    <div class="invoice-title">
+        Invoice
+    </div>
 
     <!-- Header Section -->
     <div class="header">
