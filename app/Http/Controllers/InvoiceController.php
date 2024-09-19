@@ -238,7 +238,7 @@ class InvoiceController extends Controller
                         ],
                         [
                             'type' => 'text',
-                            'text' => $order->order_id,
+                            'text' => $invoice_user->invoice_number,
                         ],
                         [
                             'type' => 'text',
@@ -246,7 +246,7 @@ class InvoiceController extends Controller
                         ],
                         [
                             'type' => 'text',
-                            'text' => $order->amount,
+                            'text' => $invoice_user->amount,
                         ],
                     ],
                 ]
