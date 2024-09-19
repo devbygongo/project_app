@@ -20,6 +20,7 @@ return new class extends Migration
             $table->float('amount');
             // $table->string('attachment');
             $table->enum('type', ['basic', 'gst']);
+            $table->string('invoice_file')->nullable();
             $table->timestamps();
         });
     }

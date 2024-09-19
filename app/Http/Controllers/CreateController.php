@@ -697,6 +697,8 @@ class CreateController extends Controller
                 $invoices = [];
     
                 $invoices = $generate_invoice->generateInvoice($create_invoice->id);
+
+                dd($invoices);
     
                 // Add invoices to the $data array under a specific key
                 $data['invoices'] = $invoices;

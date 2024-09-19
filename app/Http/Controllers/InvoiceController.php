@@ -54,7 +54,7 @@ class InvoiceController extends Controller
         $mpdf = new Mpdf();
         $mpdf->WriteHTML($html);
 
-        $publicPath = 'uploads/invoices/';
+        $publicPath = 'uploads/orders/';
         $fileName = 'invoice_' . $sanitizedOrderId . '.pdf';
         $filePath = storage_path('app/public/' . $publicPath . $fileName);
 
@@ -177,9 +177,9 @@ class InvoiceController extends Controller
 
         $invoice_items = InvoiceItemsModel::select('product_code', 'product_name', 'rate', 'quantity', 'total')
                                     ->where('invoice_id', $invoiceId)
-                                    ->get();                                
+                                    ->get();    
 
-        if (!$invoice_user || !$invoice_items->isEmpty()) {
+        if (!isset($invoice_user) && $invoice_items->isEmpty()) {
             return response()->json(['error' => 'Sorry, required data are not available!'], 500);
         }
 
@@ -209,9 +209,9 @@ class InvoiceController extends Controller
 
         $fileUrl = asset('storage/' . $publicPath . $fileName);
 
-        $update_order = OrderModel::where('id', $orderId)
+        $update_order = InvoiceModel::where('id', $invoiceId)
         ->update([
-            'order_invoice' => $fileUrl,
+            'invoice_file' => $fileUrl,
         ]);
 
         $templateParams = [
