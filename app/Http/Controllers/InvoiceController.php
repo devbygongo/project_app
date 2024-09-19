@@ -256,52 +256,52 @@ class InvoiceController extends Controller
         // Directly create an instance of SendWhatsAppUtility
         $whatsAppUtility = new sendWhatsAppUtility();
         
-        $response = $whatsAppUtility->sendWhatsApp('+918961043773', $templateParams, '', 'User Order Invoice');
+        $response = $whatsAppUtility->sendWhatsApp('+918961043773', $templateParams, '', 'User Invoice');
 
-        $templateParams = [
-            'name' => 'ace_new_order_admin', // Replace with your WhatsApp template name
-            'language' => ['code' => 'en'],
-            'components' => [
-                [
-                    'type' => 'header',
-                    'parameters' => [
-                        [
-                            'type' => 'document',
-                            'document' => [
-                                'link' =>  $fileUrl, // Replace with the actual URL to the PDF document
-                                'filename' => $sanitizedOrderId.'.pdf' // Optional: Set a custom file name for the PDF document
-                            ]
-                        ]
-                    ]
-                ],[
-                    'type' => 'body',
-                    'parameters' => [
-                        [
-                            'type' => 'text',
-                            'text' => $user->name,
-                        ],
-                        [
-                            'type' => 'text',
-                            'text' =>  substr($user->mobile, -10),
-                        ],
-                        [
-                            'type' => 'text',
-                            'text' => $order->order_id,
-                        ],
-                        [
-                            'type' => 'text',
-                            'text' => Carbon::now()->format('d-m-Y'),
-                        ],
-                        [
-                            'type' => 'text',
-                            'text' => $order->amount,
-                        ],
-                    ],
-                ]
-            ],
-        ];
+        // $templateParams = [
+        //     'name' => 'ace_new_order_admin', // Replace with your WhatsApp template name
+        //     'language' => ['code' => 'en'],
+        //     'components' => [
+        //         [
+        //             'type' => 'header',
+        //             'parameters' => [
+        //                 [
+        //                     'type' => 'document',
+        //                     'document' => [
+        //                         'link' =>  $fileUrl, // Replace with the actual URL to the PDF document
+        //                         'filename' => $sanitizedInvoiceNumber.'.pdf' // Optional: Set a custom file name for the PDF document
+        //                     ]
+        //                 ]
+        //             ]
+        //         ],[
+        //             'type' => 'body',
+        //             'parameters' => [
+        //                 [
+        //                     'type' => 'text',
+        //                     'text' => $user->name,
+        //                 ],
+        //                 [
+        //                     'type' => 'text',
+        //                     'text' =>  substr($user->mobile, -10),
+        //                 ],
+        //                 [
+        //                     'type' => 'text',
+        //                     'text' => $order->order_id,
+        //                 ],
+        //                 [
+        //                     'type' => 'text',
+        //                     'text' => Carbon::now()->format('d-m-Y'),
+        //                 ],
+        //                 [
+        //                     'type' => 'text',
+        //                     'text' => $order->amount,
+        //                 ],
+        //             ],
+        //         ]
+        //     ],
+        // ];
 
-        $response = $whatsAppUtility->sendWhatsApp('+919966633307', $templateParams, '', 'Admin Order Invoice');
+        // $response = $whatsAppUtility->sendWhatsApp('+919966633307', $templateParams, '', 'Admin Order Invoice');
         
 
         // // Assuming additional functionality such as WhatsApp integration etc.
