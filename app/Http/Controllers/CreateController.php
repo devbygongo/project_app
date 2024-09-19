@@ -670,50 +670,85 @@ class CreateController extends Controller
                     'type' => $item['type'],
                 ]);
 
-                // Add each created item to the array
-                $created_items[] = $created_item->toArray(); // Convert object to array for manipulation
-            }
+            //     // Add each created item to the array
+            //     $created_items[] = $created_item->toArray(); // Convert object to array for manipulation
+            // }
 
-            // Remove 'updated_at', 'created_at', and 'id' from each created item
-            foreach ($created_items as &$item) {
-                unset($item['updated_at'], $item['created_at'], $item['id']);
+            // // Remove 'updated_at', 'created_at', and 'id' from each created item
+            // foreach ($created_items as &$item) {
+            //     unset($item['updated_at'], $item['created_at'], $item['id']);
 
-                // Add the modified item to the array
-                $created_items[] = $created_item_array;
-            }
+            //     // Add the modified item to the array
+            //     $created_items[] = $created_item_array;
+            // }
 
-            // Prepare the data array
-            $get_data = [];
+            // // Prepare the data array
+            // $get_data = [];
 
-            // Check if create_invoice exists and is not null, then add it to the array
-            if(!empty($create_invoice))
-            {
-                $get_data[] = $create_invoice;
-            }
+            // // Check if create_invoice exists and is not null, then add it to the array
+            // if(!empty($create_invoice))
+            // {
+            //     $get_data[] = $create_invoice;
+            // }
 
-            // Check if created_items exists and is not null, then add it to the array
-            if(!empty($created_items))
-            {
-                $get_data[] = $created_items;
+            // // Check if created_items exists and is not null, then add it to the array
+            // if(!empty($created_items))
+            // {
+            //     $get_data[] = $created_items;
 
-                unset($created_items->updated_at, $created_items->created_at, $created_items->id);
-            }
+            //     unset($created_items->updated_at, $created_items->created_at, $created_items->id);
+            // }
 
-            if ($create_invoice !== null || $created_items !== null) 
-            {
+            // if ($create_invoice !== null || $created_items !== null) 
+            // {
 
-                $generate_invoice = new InvoiceController();
+            //     $generate_invoice = new InvoiceController();
     
-                 // This will store the invoices generated for display or further processing
-                $invoices = [];
+            //      // This will store the invoices generated for display or further processing
+            //     $invoices = [];
     
-                $invoices = $generate_invoice->generateInvoice($create_invoice->id);
+            //     $invoices = $generate_invoice->generateInvoice($create_invoice->id);
     
-                // Add invoices to the $data array under a specific key
-                $get_data['invoices'] = $invoices;
+            //     // Add invoices to the $data array under a specific key
+            //     $get_data['invoices'] = $invoices;
 
-                unset($create_invoice->updated_at, $create_invoice->created_at, $create_invoice->id);
-            }
+            //     unset($create_invoice->updated_at, $create_invoice->created_at, $create_invoice->id);
+            // }
+
+            // Add each created item to the array
+    $created_items[] = $created_item->toArray(); // Convert object to array for manipulation
+}
+
+// Generate the invoice PDF using the invoice ID
+$generate_invoice = new InvoiceController();
+$invoice_pdf = $generate_invoice->generateInvoice($create_invoice->id); // You need the invoice ID here
+
+// Prepare the data array
+$get_data = [];
+
+// Add the created invoice to $get_data, but keep the 'id' for generating the invoice PDF first
+if (!empty($create_invoice)) {
+    $invoice_array = $create_invoice->toArray();
+    unset($invoice_array['updated_at'], $invoice_array['created_at']); // Remove created_at and updated_at
+    // Do not unset 'id' here yet because we need it for the invoice generation
+    $get_data[] = $invoice_array;
+}
+
+// Add the created items to $get_data after unsetting unnecessary fields
+foreach ($created_items as &$item) {
+    unset($item['updated_at'], $item['created_at'], $item['id']); // Remove fields from each item
+}
+
+if (!empty($created_items)) {
+    $get_data[] = $created_items;
+}
+
+// Now, after the invoice PDF is generated, you can safely remove the invoice 'id'
+unset($get_data[0]['id']); // Remove 'id' from the invoice data in the final response
+
+// Add the invoice PDF link to the data
+$get_data['invoices'] = $invoice_pdf;
+
 
             // Return a detailed response with the created invoice and invoice items
             return response()->json([
