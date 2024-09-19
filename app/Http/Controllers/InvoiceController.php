@@ -179,7 +179,7 @@ class InvoiceController extends Controller
                                     ->where('invoice_id', $invoiceId)
                                     ->get();    
 
-        if (!isset($invoice_user) && $invoice_items->isEmpty()) {
+        if (!isset($invoice_user) || !isset($invoice_user->user) || $invoice_items->isEmpty()) {
             return response()->json(['error' => 'Sorry, required data are not available!'], 500);
         }
 
