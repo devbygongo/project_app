@@ -191,7 +191,7 @@ class InvoiceController extends Controller
             'invoice' => $invoice_user,
             'invoice_items' => $invoice_items,
         ];
-dd($data);
+
         $html = view('invoice_template', $data)->render();
 
         $mpdf = new Mpdf();
