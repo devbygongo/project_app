@@ -80,14 +80,15 @@ class ViewController extends Controller
         if (isset($get_product_details)) {
             return response()->json([
                 'message' => 'Fetch data successfully!',
-                'data' => $processed_prd_rec
-            ], 201);
+                'data' => $processed_prd_rec,
+                'fetch_records' => count($processed_prd_rec)
+            ], 200);
         }
 
         else {
             return response()->json([
                 'message' => 'Failed get data successfully!',
-            ], 400);
+            ], 404);
         }    
     }
 
