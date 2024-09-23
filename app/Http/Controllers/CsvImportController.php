@@ -203,7 +203,7 @@ class CsvImportController extends Controller
                     'name_in_telugu' => $record_user['Telegu'],
                     'address_line_1' => $record_user['Address Line 1'],
                     'address_line_2' => $record_user['Address Line 2'],
-                    'is_verified' => 1,
+                    'is_verified' => '1',
                     'city' => $record_user['City'],
                     'pincode' => $pincode_user,// Ensure this is a valid number
                     'gstin' => $record_user['GSTIN'],
@@ -224,7 +224,7 @@ class CsvImportController extends Controller
                     'name_in_telugu' => $record_user['Telegu'],
                     'address_line_1' => $record_user['Address Line 1'],
                     'address_line_2' => $record_user['Address Line 2'],
-                    'is_verified' => 1,
+                    'is_verified' => '1',
                     'address_line_1' => $record_user['Address Line 1'],
                     'address_line_2' => $record_user['Address Line 2'],
                     'city' => $record_user['City'],
