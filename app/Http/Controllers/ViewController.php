@@ -233,6 +233,49 @@ class ViewController extends Controller
                 'count' => count($processed_prd_lang_rec)], 201);
     }
 
+    public function get_spares($lang = 'eng', $code = null)
+    {
+        $productQuery = ProductModel::select('product_code','product_name', 'name_in_hindi','name_in_telugu','category','sub_category','product_image','basic','gst')
+                                            ->where('type', 'SPARE');
+        
+
+        if ($code !== null) {
+            $productQuery->where('machine_part_no', 'like', "%{$code}%");
+        }
+
+        $get_spare_product = $productQuery->get();
+
+        $spare_prd_rec = $get_spare_product->map(function($spare_prd_rec) use ($lang)
+        {
+            $product_name = $spare_prd_rec->product_name;
+
+            if($lang === 'hin' && !empty($spare_prd_rec->name_in_hindi))
+            {
+                $product_name = $spare_prd_rec->name_in_hindi;
+            }
+
+            elseif ($lang === 'tlg' && !empty($spare_prd_rec->name_in_telugu)) {
+                $product_name = $spare_prd_rec->name_in_telugu;
+            }
+
+            return [
+                // 'SKU' => $prd_rec->SKU,
+                'product_code' => $spare_prd_rec->product_code,
+                'product_name' => $product_name,
+                'category' => $spare_prd_rec->category,
+                'sub_category' => $spare_prd_rec->sub_category,
+                'product_image' => $spare_prd_rec->product_image,
+                'basic' => $spare_prd_rec->basic,
+                'gst' => $spare_prd_rec->gst,
+            ];
+        });
+
+
+        return isset($spare_prd_rec) && $spare_prd_rec !== null
+        ? response()->json(['Fetch data successfully!', 'data' => $spare_prd_rec, 'fetch_records' => count($spare_prd_rec)], 200)
+        : response()->json(['Failed get data'], 404); 
+    }
+
     public function categories()
     {
         // Fetch all categories with their product count

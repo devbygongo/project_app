@@ -91,6 +91,8 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
     Route::get('/return_order/{orderId}', [ViewController::class, 'return_order']);
 
     Route::post('/add_invoice', [CreateController::class, 'make_invoice']);
+
+    Route::get('/spare_product/{lang?}/{code?}', [ViewController::class, 'get_spares']);
 });
 
 Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user'])->group(function () {
