@@ -42,7 +42,7 @@ class CsvImportController extends Controller
 
         // Iterate through each record and create or update the product
         foreach ($records_csv as $record_csv) {
-            $product_csv = ProductModel::where('sku', $record_csv['SKU'])->first();
+            $product_csv = ProductModel::where('product_code', $record_csv['Product Code'])->first();
 
             $basicPrice_product = $record_csv['Basic Price'] !== '' ? $record_csv['Basic Price'] : 0;
             $gstPrice_prduct = $record_csv['GST Price'] !== '' ? $record_csv['GST Price'] : 0;
@@ -50,6 +50,7 @@ class CsvImportController extends Controller
 
             $category = $record_csv['Category'];
             $sub_category = $record_csv['Sub Category'];
+            $brand = $record_csv['Brand'] !== '' ? $record_csv['Brand'] : null;
 
             // $categoryModel = CategoryModel::firstOrCreate(['name' => $category]);
 
@@ -111,8 +112,13 @@ class CsvImportController extends Controller
                 $product_update_response = $product_csv->update([
                     'product_code' => $record_csv['Product Code'],
                     'product_name' => $record_csv['Product Name'],
+                    'name_in_hindi' => $record_csv['Name in Hindi'],
+                    'name_in_telugu' => $record_csv['Name in Telugu'],
+                    'brand' => $brand,
                     'category' => $record_csv['Category'],
                     'sub_category' => $record_csv['Sub Category'],
+                    'type' => $record_csv['Type'],
+                    'machine_part_no' => $record_csv['Machine Part No'],
                     'basic' => $basicPrice_product, // Ensure this is a valid number
                     'gst' => $gstPrice_prduct,     // Ensure this is a valid number
                     // 'product_image' => null, // Set this if you have the image URL or path
@@ -123,11 +129,15 @@ class CsvImportController extends Controller
             {
                 // If product does not exist, create a new one
                 $product_insert_response = ProductModel::create([
-                    'sku' => $record_csv['SKU'],
                     'product_code' => $record_csv['Product Code'],
                     'product_name' => $record_csv['Product Name'],
+                    'name_in_hindi' => $record_csv['Name in Hindi'],
+                    'name_in_telugu' => $record_csv['Name in Telugu'],
+                    'brand' => $brand,
                     'category' => $record_csv['Category'],
                     'sub_category' => $record_csv['Sub Category'],
+                    'type' => $record_csv['Type'],
+                    'machine_part_no' => $record_csv['Machine Part No'],
                     'basic' => $basicPrice_product, // Ensure this is a valid number
                     'gst' => $gstPrice_prduct,     // Ensure this is a valid number
                     // 'product_image' => null, // Set this if you have the image URL or path
@@ -189,10 +199,11 @@ class CsvImportController extends Controller
                     'name' => $record_user['Name'],
                     'email' => $email_user,
                     'password' => bcrypt($mobile),
-                    'otp' => null,
-                    'expires_at' => null,
+                    'name_in_hindi' => $record_user['Hindi'],
+                    'name_in_telugu' => $record_user['Telegu'],
                     'address_line_1' => $record_user['Address Line 1'],
                     'address_line_2' => $record_user['Address Line 2'],
+                    'is_verified' => 1,
                     'city' => $record_user['City'],
                     'pincode' => $pincode_user,// Ensure this is a valid number
                     'gstin' => $record_user['GSTIN'],
@@ -209,8 +220,11 @@ class CsvImportController extends Controller
                     'name' => $record_user['Name'],
                     'email' => $email_user,
                     'password' => bcrypt($mobile),
-                    'otp' => null,
-                    'expires_at' => null,
+                    'name_in_hindi' => $record_user['Hindi'],
+                    'name_in_telugu' => $record_user['Telegu'],
+                    'address_line_1' => $record_user['Address Line 1'],
+                    'address_line_2' => $record_user['Address Line 2'],
+                    'is_verified' => 1,
                     'address_line_1' => $record_user['Address Line 1'],
                     'address_line_2' => $record_user['Address Line 2'],
                     'city' => $record_user['City'],

@@ -586,9 +586,7 @@ class CreateController extends Controller
 		);
 
     }
-        
-
-
+    
         if (isset($create_cart)) {
             return response()->json([
                 'message' => 'Cart created successfully!',
