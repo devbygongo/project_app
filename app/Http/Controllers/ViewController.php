@@ -64,7 +64,7 @@ class ViewController extends Controller
 
             return [
                 'SKU' => $prd_rec->SKU,
-                'SKU' => $prd_rec->product_code,
+                'product_code' => $prd_rec->product_code,
                 'product_name' => $product_name,
                 'category' => $prd_rec->category,
                 'sub_category' => $prd_rec->sub_category,
