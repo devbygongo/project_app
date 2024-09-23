@@ -28,7 +28,7 @@ class ViewController extends Controller
     public function product()
     {
         // $get_product_details = ProductModel::select('SKU','product_code','product_name','category','sub_category','product_image','basic','gst','mark_up')->get();
-        $get_product_details = ProductModel::select('SKU','product_code','product_name','category','sub_category','product_image','basic','gst')->get();
+        $get_product_details = ProductModel::select('product_code','product_name','category','sub_category','product_image','basic','gst')->get();
         
 
         if (isset($get_product_details)) {
@@ -47,7 +47,9 @@ class ViewController extends Controller
 
     public function lng_product($lang = 'eng')
     {
-        $get_product_details = ProductModel::select('SKU','product_code','product_name', 'name_in_hindi','name_in_telugu','category','sub_category','product_image','basic','gst')->get();
+        $get_product_details = ProductModel::select('product_code','product_name', 'name_in_hindi','name_in_telugu','category','sub_category','product_image','basic','gst')
+                                            ->whereIn('type', ['MACHINE', 'ACCESSORIES'])
+                                            ->get();
         
         $processed_prd_rec = $get_product_details->map(function($prd_rec) use ($lang)
         {
@@ -63,7 +65,7 @@ class ViewController extends Controller
             }
 
             return [
-                'SKU' => $prd_rec->SKU,
+                // 'SKU' => $prd_rec->SKU,
                 'product_code' => $prd_rec->product_code,
                 'product_name' => $product_name,
                 'category' => $prd_rec->category,
@@ -106,7 +108,7 @@ class ViewController extends Controller
         $subCategory = $request->input('sub_category', null);
 
         // Build the query for products
-        $query = ProductModel::select('SKU', 'product_code', 'product_name', 'category', 'sub_category', 'product_image', 'basic', 'gst');
+        $query = ProductModel::select('product_code', 'product_name', 'category', 'sub_category', 'product_image', 'basic', 'gst');
 
         // Apply search filter if provided
         if ($search) {
@@ -174,7 +176,7 @@ class ViewController extends Controller
 
         // Build the query for products
         $query = ProductModel::select(
-            'SKU', 'product_code', 'product_name', 'name_in_hindi', 'name_in_telugu', 'category', 'sub_category', 'product_image', 'basic', 'gst'
+            'product_code', 'product_name', 'name_in_hindi', 'name_in_telugu', 'category', 'sub_category', 'product_image', 'basic', 'gst'
         );
 
         // Apply filters
@@ -208,7 +210,7 @@ class ViewController extends Controller
 
             // Return processed product data
             return [
-                'SKU' => $prd_rec->SKU,
+                // 'SKU' => $prd_rec->SKU,
                 'product_code' => $prd_rec->product_code,
                 'product_name' => $product_name,
                 'category' => $prd_rec->category,
@@ -378,7 +380,9 @@ class ViewController extends Controller
 
     public function user($lang = 'eng')
     {
-        $get_user_details = User::select('id','name', 'name_in_hindi', 'name_in_telugu', 'email','mobile','role','address_line_1','address_line_2','city','pincode','gstin','state','country', 'verified')->get();
+        $get_user_details = User::select('id','name', 'name_in_hindi', 'name_in_telugu', 'email','mobile','role','address_line_1','address_line_2','city','pincode','gstin','state','country', 'verified')
+                                ->where('role', 'user')
+                                ->get();
 
         $processed_rec_user = $get_user_details->map(function ($record) use ($lang)
         {

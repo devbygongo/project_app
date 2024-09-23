@@ -10,7 +10,7 @@ class ProductModel extends Model
     use HasFactory;
     protected $table = "t_products";
     protected $fillable = [
-        'sku',
+        // 'sku',
         'product_code',
         'product_name',
         'product_image',

@@ -31,7 +31,7 @@ class InvoiceController extends Controller
                             ->where('id', $orderId)
                             ->first();
 
-        $order_items = OrderItemsModel::with('product:product_code,sku')
+        $order_items = OrderItemsModel::with('product:product_code')
                                     ->select('product_code', 'product_name', 'rate', 'quantity', 'total')
                                     ->where('order_id', $orderId)
                                     ->get();

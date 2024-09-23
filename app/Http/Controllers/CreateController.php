@@ -244,7 +244,7 @@ class CreateController extends Controller
     public function product(Request $request)
     {
         $request->validate([
-            'sku' => 'required|unique:t_products,sku',
+            // 'sku' => 'required|unique:t_products,sku',
             'product_code' => 'required|unique:t_products,product_code',
             'product_name' => 'required',
             'product_image'=> 'required',
@@ -264,7 +264,7 @@ class CreateController extends Controller
 
 
             $create_order = ProductModel::create([
-                'sku' => $request->input('sku'),
+                // 'sku' => $request->input('sku'),
                 'product_code' => $request->input('product_code'),
                 'product_name' => $request->input('product_name'),
                 'category' => $request->input('category'),
@@ -586,7 +586,7 @@ class CreateController extends Controller
 		);
 
     }
-    
+
         if (isset($create_cart)) {
             return response()->json([
                 'message' => 'Cart created successfully!',
