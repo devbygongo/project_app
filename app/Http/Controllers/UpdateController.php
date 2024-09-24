@@ -229,7 +229,7 @@ class UpdateController extends Controller
     {
         $update_verify = User::where('id', $get_id)
             ->update([
-                'verified' => '1',
+                'is_verified' => '1',
             ]);
 
             $user = User::select('name', 'mobile')

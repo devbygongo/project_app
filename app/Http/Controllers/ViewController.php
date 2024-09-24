@@ -424,7 +424,7 @@ class ViewController extends Controller
 
     public function user($lang = 'eng')
     {
-        $get_user_details = User::select('id','name', 'name_in_hindi', 'name_in_telugu', 'email','mobile','role','address_line_1','address_line_2','city','pincode','gstin','state','country', 'verified')
+        $get_user_details = User::select('id','name', 'name_in_hindi', 'name_in_telugu', 'email','mobile','role','address_line_1','address_line_2','city','pincode','gstin','state','country', 'is_verified')
                                 ->where('role', 'user')
                                 ->get();
 
@@ -449,7 +449,7 @@ class ViewController extends Controller
                     'role' => ucfirst($record->role),
                     'address' => implode(', ', array_filter([$record->address_line_1, $record->address_line_2, $record->city, $record->state, $record->pincode, $record->country])),
                     'gstin' => $record->gstin,
-                    'verified' => $record->verified,
+                    'is_verified' => $record->is_verified,
                 ];  
         }) ;
         
