@@ -449,7 +449,7 @@ class ViewController extends Controller
                     'role' => ucfirst($record->role),
                     'address' => implode(', ', array_filter([$record->address_line_1, $record->address_line_2, $record->city, $record->state, $record->pincode, $record->country])),
                     'gstin' => $record->gstin,
-                    'is_verified' => $record->is_verified,
+                    'verified' => $record->is_verified,
                 ];  
         }) ;
         
