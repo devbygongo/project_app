@@ -20,7 +20,7 @@ class UpdateController extends Controller
         $get_user = Auth::id();
 
         $request->validate([
-            'mobile' => ['required', 'string'],
+            // 'mobile' => ['required', 'string'],
             'password' => 'required',
             // 'name' => ['required', 'string'],
             
