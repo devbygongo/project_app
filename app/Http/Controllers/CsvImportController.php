@@ -106,6 +106,14 @@ class CsvImportController extends Controller
                 }
             }
 
+            // Define the product image path and check if the image exists
+            $productImagePath = "/storage/uploads/products/{$filename}.jpg";
+            $product_imagePath_for_not_available = "/storage/uploads/products/placeholder.jpg";
+
+            if (!file_exists(public_path($productImagePath))) {
+                $productImagePath = $product_imagePath_for_not_available; // Use placeholder if image not found
+            }
+
             if ($product_csv) 
             {
                 // If product exists, update it
@@ -122,7 +130,7 @@ class CsvImportController extends Controller
                     'basic' => $basicPrice_product, // Ensure this is a valid number
                     'gst' => $gstPrice_prduct,     // Ensure this is a valid number
                     // 'product_image' => null, // Set this if you have the image URL or path
-                    'product_image' => ('/storage/uploads/products/' . $filename . '.jpg'),
+                    'product_image' => $productImagePath,
                 ]);
             } 
             else 
@@ -141,7 +149,7 @@ class CsvImportController extends Controller
                     'basic' => $basicPrice_product, // Ensure this is a valid number
                     'gst' => $gstPrice_prduct,     // Ensure this is a valid number
                     // 'product_image' => null, // Set this if you have the image URL or path
-                    'product_image' => ('/storage/uploads/products/' . $filename. '.jpg'),
+                    'product_image' => $productImagePath,
                 ]);
             }
         }   
