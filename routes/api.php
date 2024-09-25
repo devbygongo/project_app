@@ -101,6 +101,12 @@ Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user']
 
     Route::post('/update_user', [UpdateController::class, 'user']);
 
+    Route::get('/category/{lang?}', [ViewController::class, 'lng_categories']);
+
+    Route::get('/subcategory/{category?}/{lang?}', [ViewController::class, 'lng_sub_categories']);
+
+    Route::post('/get_product/{lang?}', [ViewController::class, 'lng_get_product']);
+
     Route::get('/logout', [CreateController::class, 'logout']);
 
     // Route::get('/cart_user', [ViewController::class, 'cart_user']);
