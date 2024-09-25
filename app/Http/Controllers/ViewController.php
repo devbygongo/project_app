@@ -35,13 +35,13 @@ class ViewController extends Controller
             return response()->json([
                 'message' => 'Fetch data successfully!',
                 'data' => $get_product_details
-            ], 201);
+            ], 200);
         }
 
         else {
             return response()->json([
                 'message' => 'Failed get data successfully!',
-            ], 400);
+            ], 404);
         }    
     }
 
@@ -156,12 +156,12 @@ class ViewController extends Controller
             return response()->json([
                 'message' => 'Fetch data successfully!',
                 'data' => $get_products
-            ], 201);
+            ], 200);
 
         } else {
             return response()->json([
                 'message' => 'Failed to fetch data!',
-            ], 400);
+            ], 404);
         }
     }
 
@@ -227,10 +227,10 @@ class ViewController extends Controller
 
         // Return response based on the result
         return $processed_prd_lang_rec->isEmpty()
-        ? response()->json(['Failed to fetch data!'], 400)
+        ? response()->json(['Failed to fetch data!'], 404)
         : response()->json(['message' => 'Fetch data successfully!',
                 'data' => $processed_prd_lang_rec,
-                'count' => count($processed_prd_lang_rec)], 201);
+                'count' => count($processed_prd_lang_rec)], 200);
     }
 
     public function get_spares($lang = 'eng', $code = null)
@@ -296,13 +296,13 @@ class ViewController extends Controller
                 'message' => 'Fetch data successfully!',
                 'data' => $formattedCategories,
                 'count' => count($formattedCategories),
-            ], 201);
+            ], 200);
         }
 
         else {
             return response()->json([
                 'message' => 'Failed get data successfully!',
-            ], 400);
+            ], 404);
         }    
     }
 
@@ -339,7 +339,7 @@ class ViewController extends Controller
                 'message' => 'Fetch data successfully!',
                 'data' => $formattedSubCategories,
                 'count' => count($formattedSubCategories),
-            ], 201);
+            ], 200);
         }
 
         else {
@@ -382,10 +382,10 @@ class ViewController extends Controller
         });
         
         return $formattedSubCategories->isEmpty()
-        ? response()->json(['Failed get data successfully!'], 400)
+        ? response()->json(['Failed get data successfully!'], 404)
         : response()->json(['message' => 'Fetch data successfully!',
                 'data' => $formattedSubCategories,
-                'count' => count($formattedSubCategories)], 201);
+                'count' => count($formattedSubCategories)], 200);
     }
 
     public function lng_categories($lang = 'eng')
@@ -416,10 +416,10 @@ class ViewController extends Controller
         });
         // Check if the categories are set and return response
         return $formattedCategories->isEmpty()
-        ? response()->json(['Failed get data successfully!'], 400)
+        ? response()->json(['Failed get data successfully!'], 404)
         : response()->json(['message' => 'Fetch data successfully!',
                 'data' => $formattedCategories,
-                'count' => count($formattedCategories)], 201);
+                'count' => count($formattedCategories)], 400);
     }
 
     public function user($lang = 'eng')
@@ -469,8 +469,8 @@ class ViewController extends Controller
         // }    
 
         return $processed_rec_user->isEmpty()
-        ? response()->json(['Failed get data successfully!'], 400)
-        : response()->json(['Fetch data successfully!', 'data' => $processed_rec_user], 201);
+        ? response()->json(['Failed get data successfully!'], 404)
+        : response()->json(['Fetch data successfully!', 'data' => $processed_rec_user], 200);
     }
 
     public function find_user($search = null)
@@ -490,13 +490,13 @@ class ViewController extends Controller
             return response()->json([
                 'message' => 'Fetch record successfully!',
                 'data' => $get_user_details
-            ], 201);
+            ], 200);
         }
 
         else {
             return response()->json([
                 'message' => 'Failed get data successfully!',
-            ], 400);
+            ], 404);
         }    
     }
 
@@ -511,13 +511,13 @@ class ViewController extends Controller
             return response()->json([
                 'message' => 'Fetch data successfully!',
                 'data' => $get_user_details
-            ], 201);
+            ], 200);
         }
 
         else {
             return response()->json([
                 'message' => 'Failed get data successfully!',
-            ], 400);
+            ], 404);
         }    
     }
 
@@ -530,13 +530,13 @@ class ViewController extends Controller
             return response()->json([
                 'message' => 'Fetch data successfully!',
                 'data' => $get_all_orders
-            ], 201);
+            ], 200);
         }
 
         else {
             return response()->json([
                 'message' => 'Failed get data successfully!',
-            ], 400);
+            ], 404);
         }    
     }
 
@@ -553,14 +553,14 @@ class ViewController extends Controller
         if($get_user_orders->isEmpty()) {
             return response()->json([
                 'message' => 'Sorry, no data available!',
-            ], 400);
+            ], 404);
         }
 
         else {
             return response()->json([
                 'message' => 'Fetch data successfully!',
                 'data' => $get_user_orders
-            ], 201);
+            ], 200);
         }    
     }
 
@@ -573,13 +573,13 @@ class ViewController extends Controller
             return response()->json([
                 'message' => 'Fetch data successfully!',
                 'data' => $get_all_order_items
-            ], 201);
+            ], 200);
         }
 
         else {
             return response()->json([
                 'message' => 'Failed get data successfully!',
-            ], 400);
+            ], 404);
         }    
     }
 
@@ -595,13 +595,13 @@ class ViewController extends Controller
             return response()->json([
                 'message' => 'Fetch data successfully!',
                 'data' => $get_items_for_orders
-            ], 201);
+            ], 200);
         }
 
         else {
             return response()->json([
                 'message' => 'Failed get data successfully!',
-            ], 400);
+            ], 404);
         }    
     }
 
@@ -700,13 +700,13 @@ class ViewController extends Controller
                 'message' => 'Fetch data successfully!',
                 'data' => $get_items_for_user,
                 'record count' => $cart_data_count
-            ], 201);
+            ], 200);
         }
 
         else {
             return response()->json([
                 'message' => 'Failed get data successfully!',
-            ], 400);
+            ], 404);
         }    
     }
 
@@ -718,13 +718,13 @@ class ViewController extends Controller
             return response()->json([
                 'message' => 'Fetch data successfully!',
                 'data' => $get_counter_records
-            ], 201);
+            ], 200);
         }
 
         else {
             return response()->json([
                 'message' => 'Failed get data successfully!',
-            ], 400);
+            ], 404);
         }    
     }
 
@@ -744,13 +744,13 @@ class ViewController extends Controller
             return response()->json([
                 'message' => 'Fetch records successfully!',
                 'data' => $get_dashboard_records
-            ], 201);
+            ], 200);
         }
 
         else {
             return response()->json([
                 'message' => 'Sorry, failed get records',
-            ], 400);
+            ], 404);
         }    
     }
 
