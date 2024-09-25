@@ -511,7 +511,7 @@ class CreateController extends Controller
             ], 400);
         }    
     }
-
+    
     public function cart(Request $request)
     {
         $get_user = Auth::User();
@@ -519,18 +519,19 @@ class CreateController extends Controller
         if($get_user->role == 'admin')
         {
             $request->validate([
-                // 'mobile' => 'required',
                 'user_id' => 'required',
-                // 'products_id' => 'required',
                 'product_code' => 'required',
                 'product_name' => 'required',
                 'rate' => 'required',
                 'quantity' => 'required',
-                'amount' => 'required',
                 'type' => 'required',
             ]);
+        }
 
-            // $get_user_id = User::select('id')->where('mobile', $request->input('mobile'))->get();
+        else
+        {
+            $request->merge(['user_id' => $get_user->id]);
+        }
     
             $create_cart = CartModel::updateOrCreate(
 				[
@@ -541,64 +542,18 @@ class CreateController extends Controller
 					'product_name' => $request->input('product_name'),
 					'rate' => $request->input('rate'),
 					'quantity' => $request->input('quantity'),
-					'amount' => $request->input('amount'),
+					'amount' => ($request->input('rate')) * ($request->input('quantity')),
 					'type' => $request->input('type'),
 				]
 			);
 
-        }
+            unset($create_cart['id'], $create_cart['created_at'], $create_cart['updated_at']);
 
-    else {
-        $request->validate([
-            // 'user_id' => 'required',
-            // 'products_id' => 'required',
-            'product_code' => 'required',
-            'product_name' => 'required',
-            'rate' => 'required',
-            'quantity' => 'required',
-            'amount' => 'required',
-            'type' => 'required',
-        ]);
 
-        /*$create_cart = CartModel::create([
-            'user_id' => Auth::id(),
-            // 'products_id' => $request->input('products_id'),
-            'product_code' => $request->input('product_code'),
-            'product_name' => $request->input('product_name'),
-            'rate' => $request->input('rate'),
-            'quantity' => $request->input('quantity'),
-            'amount' => $request->input('amount'),
-            'type' => $request->input('type'),
-        ]);*/
-		
-		$create_cart = CartModel::updateOrCreate(
-			[
-				'user_id' => $request->input('user_id'),
-				'product_code' => $request->input('product_code'),
-			], 
-			[
-				'product_name' => $request->input('product_name'),
-				'rate' => $request->input('rate'),
-				'quantity' => $request->input('quantity'),
-				'amount' => $request->input('amount'),
-				'type' => $request->input('type'),
-			]
-		);
+        return isset($create_cart) && $create_cart !== null
+        ? response()->json(['Cart created successfully!', 'data' => $create_cart], 201)
+        : response()->json(['Failed to create cart successfully!'], 400);
 
-    }
-
-        if (isset($create_cart)) {
-            return response()->json([
-                'message' => 'Cart created successfully!',
-                'data' => $create_cart
-            ], 201);
-        }
-
-        else {
-            return response()->json([
-                'message' => 'Failed to create order successfully!'
-            ], 400);
-        }    
     }
 
     public function counter(Request $request)
