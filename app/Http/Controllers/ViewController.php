@@ -419,7 +419,7 @@ class ViewController extends Controller
         ? response()->json(['Failed get data successfully!'], 404)
         : response()->json(['message' => 'Fetch data successfully!',
                 'data' => $formattedCategories,
-                'count' => count($formattedCategories)], 400);
+                'count' => count($formattedCategories)], 200);
     }
 
     public function user($lang = 'eng')
