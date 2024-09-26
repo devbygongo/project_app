@@ -679,8 +679,6 @@ class ViewController extends Controller
 
         else {
             //$get_items_for_user = CartModel::where('user_id', $get_user->id)->get();
-            print_r($get_user);
-            dd($get_user->id);
 			$get_items_for_user = CartModel::where('t_cart.user_id', $get_user->id)
 				->join('t_products', 't_cart.product_code', '=', 't_products.product_code')
 				->select(
@@ -702,6 +700,8 @@ class ViewController extends Controller
 
 
             $cart_data_count = count($get_items_for_user);
+
+            dd($get_items_for_user);
         }
         
 
