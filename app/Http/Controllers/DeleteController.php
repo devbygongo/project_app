@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 
 use App\Models\CartModel;
 
+use App\Models\User;
+
 class DeleteController extends Controller
 {
     //Delete Cart 
