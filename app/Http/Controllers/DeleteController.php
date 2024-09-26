@@ -45,7 +45,8 @@ class DeleteController extends Controller
     {
         // Fetch the record by ID
         $get_user = User::where('mobile', $request->input('mobile'))->first();
-
+print_r($request->input('mobile'));
+        print_r($get_user);
         // Check if the record exists
         if (!$get_user) {
             return response()->json([
