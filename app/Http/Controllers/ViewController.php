@@ -543,13 +543,13 @@ class ViewController extends Controller
     public function orders_user_id($id = null)
     {
 
-        if (Auth::check() && Auth::user()->hasRole('admin')) 
+        $get_user = Auth::User();
+
+        if ($get_user->role == 'user') 
         {
-            dd("ppp");        
+            $id = Auth::id();    
         }
-        else {
-            dd("lll");
-        }
+
         // Fetch all records if $id is null, otherwise filter by user_id
         $get_user_orders = OrderModel::when($id, function($query, $id)
         {
