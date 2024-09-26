@@ -114,7 +114,7 @@ Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user']
     // Route::get('/cart_user', [ViewController::class, 'cart_user']);
     Route::post('/add_cart', [CreateController::class, 'cart']);
 
-    Route::get('/view_cart_user/{id?}', [ViewController::class, 'cart_user']);
+    Route::get('/view_cart_user', [ViewController::class, 'cart_user']);
 
     Route::patch('/update_cart/{id}', [UpdateController::class, 'cart']);
 
