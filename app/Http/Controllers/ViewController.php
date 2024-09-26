@@ -701,7 +701,7 @@ class ViewController extends Controller
 
             $cart_data_count = count($get_items_for_user);
 
-            dd($get_items_for_user);
+            print_r($get_items_for_user);
         }
         
 
