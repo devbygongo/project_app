@@ -699,7 +699,7 @@ class ViewController extends Controller
 				->toSql();
         }
         
-
+print_r($get_items_for_user);
         if (isset($get_items_for_user)) {
             return response()->json([
                 'message' => 'Fetch data successfully!',
