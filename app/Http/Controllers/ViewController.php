@@ -698,7 +698,7 @@ class ViewController extends Controller
 				)
 				->toSql();
 
-
+print_r($get_items_for_user);
             $cart_data_count = count($get_items_for_user);
         }
         
