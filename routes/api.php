@@ -122,7 +122,7 @@ Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user']
 
     Route::post('/add_order', [CreateController::class, 'orders']);
 
-    Route::get('/view_user_order/{id?}', [ViewController::class, 'orders_user_id']);
+    Route::get('/view_user_order', [ViewController::class, 'orders_user_id']);
 
     // Route::get('/generate_invoice/{userId}/{orderId}', [InvoiceController::class, 'generateInvoice']);
     // Route::get('/generate_invoice/{orderId}', [InvoiceController::class, 'generateInvoice']);
