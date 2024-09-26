@@ -37,4 +37,33 @@ class DeleteController extends Controller
             ], 500);
         }
     }
+
+    // delete user
+    public function user(Request $request)
+    {
+        // Fetch the record by ID
+        $get_user = User::where('mobile', $request->input('mobile'))->first();
+
+        // Check if the record exists
+        if (!$get_user) {
+            return response()->json([
+                'message' => 'Sorry, User not found!',
+            ], 404);
+        }
+		        
+        else{
+            $delete_user_records = $get_user->delete();
+
+            if ($delete_user_records == true ) {
+                return response()->json([
+                    'message' => 'User deleted successfully!',
+                ], 204);
+            }
+            else{
+                return response()->json([
+                    'message' => 'Sorry, Failed to delete user',
+                ], 404);
+            }
+        }
+    }
 }
