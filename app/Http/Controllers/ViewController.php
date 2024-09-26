@@ -542,6 +542,11 @@ class ViewController extends Controller
 
     public function orders_user_id($id = null)
     {
+        $get_user_id = Auth::role();
+dd($get_user_id);
+        // if () {
+        //     # code...
+        // }
         // Fetch all records if $id is null, otherwise filter by user_id
         $get_user_orders = OrderModel::when($id, function($query, $id)
         {
