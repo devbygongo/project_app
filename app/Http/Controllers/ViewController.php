@@ -696,10 +696,9 @@ class ViewController extends Controller
 					't_products.gst',
 					't_products.product_image'
 				)
-				->toSql();
+				->get();
         }
-        
-print_r($get_items_for_user);
+    
         if (isset($get_items_for_user)) {
             return response()->json([
                 'message' => 'Fetch data successfully!',
