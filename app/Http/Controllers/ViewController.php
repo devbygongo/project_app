@@ -655,8 +655,6 @@ class ViewController extends Controller
         if($get_user->role == 'admin')
         {
             //$get_items_for_user = CartModel::where('user_id', $id)->get();
-                    \DB::enableQueryLog();
-
 			$get_items_for_user = CartModel::where('t_cart.user_id', $id)
 				->join('t_products', 't_cart.product_code', '=', 't_products.product_code')
 				->select(
@@ -675,7 +673,6 @@ class ViewController extends Controller
 					't_products.product_image'
 				)
 				->get();
-        \DB::enableQueryLog();
 
             $cart_data_count = count($get_items_for_user);
         }
@@ -700,9 +697,6 @@ class ViewController extends Controller
 					't_products.product_image'
 				)
 				->toSql();
-
-print_r($get_items_for_user);
-            $cart_data_count = count($get_items_for_user);
         }
         
 
@@ -710,7 +704,7 @@ print_r($get_items_for_user);
             return response()->json([
                 'message' => 'Fetch data successfully!',
                 'data' => $get_items_for_user,
-                'record count' => $cart_data_count
+                'record count' => count($get_items_for_user)
             ], 200);
         }
 
