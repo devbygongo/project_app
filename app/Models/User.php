@@ -16,6 +16,8 @@ class User extends Authenticatable
 
     use HasApiTokens;
 
+    use HasRoles;
+
     /**
      * The attributes that are mass assignable.
      *
