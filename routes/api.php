@@ -93,6 +93,8 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
     Route::post('/add_invoice', [CreateController::class, 'make_invoice']);
 
     Route::get('/spare_product/{lang?}/{code?}', [ViewController::class, 'get_spares']);
+
+    Route::delete('/delete_user', [DeleteController::class, 'user']);
 });
 
 Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user'])->group(function () {
@@ -123,8 +125,6 @@ Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user']
     Route::post('/add_order', [CreateController::class, 'orders']);
 
     Route::get('/view_user_order', [ViewController::class, 'orders_user_id']);
-
-    Route::delete('/delete_user', [DeleteController::class, 'user']);
 
     // Route::get('/generate_invoice/{userId}/{orderId}', [InvoiceController::class, 'generateInvoice']);
     // Route::get('/generate_invoice/{orderId}', [InvoiceController::class, 'generateInvoice']);
