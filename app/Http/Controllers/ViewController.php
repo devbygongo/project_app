@@ -696,12 +696,10 @@ class ViewController extends Controller
 					't_products.gst',
 					't_products.product_image'
 				)
-				->get();
+				->toSql();
 
 
             $cart_data_count = count($get_items_for_user);
-
-            print_r($get_items_for_user);
         }
         
 
