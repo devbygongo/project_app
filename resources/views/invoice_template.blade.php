@@ -99,7 +99,7 @@
             <td class="label">Mobile:</td>
             <td class="value">{{ $user->mobile }}</td>
             <td class="label">Amount:</td>
-            <td class="value">₹ {{ number_format($invoice->amount, 2) }}</td>
+            <td class="value">₹ {{ number_format((float) $invoice->amount, 2) }}</td>
         </tr>
     </table>
 
@@ -122,13 +122,13 @@
                     <td><img src="{{ Storage::url('uploads/products_pdf/' . $item->product_code . '.jpg') }}" alt="" style="height: 60px; width: 60px;"></td>
                     <td>{{ $item->product_name }}<br>Part No: {{ $item->product_code }}</td>
                     <td class="center-align">{{ $item->quantity }}</td>
-                    <td class="right-align">₹ {{ number_format($item->rate, 2) }}</td>
-                    <td class="right-align">₹ {{ number_format($item->total, 2) }}</td>
+                    <td class="right-align">₹ {{ number_format((float) $item->rate, 2) }}</td>
+                    <td class="right-align">₹ {{ number_format((float) $item->total, 2) }}</td>
                 </tr>
             @endforeach
             <tr>
                 <td colspan="5" class="right-align">Total</td>
-                <td class="right-align">₹ {{ number_format($invoice->amount, 2) }}</td>
+                <td class="right-align">₹ {{ number_format((float) $invoice->amount, 2) }}</td>
             </tr>
         </tbody>
     </table>
