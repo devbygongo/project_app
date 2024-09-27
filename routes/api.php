@@ -86,7 +86,9 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
 
     Route::get('/dashboard', [ViewController::class, 'dashboard_details']);
 
-    Route::post('/generate_invoice/{orderId}', [InvoiceController::class, 'generateorderInvoice']);
+    Route::get('/generate_order_invoice/{orderId}', [InvoiceController::class, 'generateorderInvoice']);
+
+    Route::get('/generate_invoice/{invoiceId}', [InvoiceController::class, 'generateInvoice']);
 
     Route::get('/return_order/{orderId}', [ViewController::class, 'return_order']);
 
