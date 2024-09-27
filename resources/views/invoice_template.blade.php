@@ -36,7 +36,8 @@
             margin-top: 50px;
             background-color: lightgrey; /* Light grey background */
             color: black; /* Black text */
-            padding: 5px; /* Thinner padding for a less bulky look */
+            padding: 10px; /* Thinner padding for a less bulky look */
+            font-size: 16px; /* Increased font size */
         }
         table, th, td {
             border: 1px solid #ddd;
@@ -60,6 +61,10 @@
             font-weight: bold;
             margin-top: 20px;
             margin-bottom: 10px;
+        }
+        /* Ensure there is space at the bottom for the footer */
+        .content {
+            margin-bottom: 100px; /* Adjust this to avoid footer overlap */
         }
     </style>
 </head>
@@ -134,11 +139,8 @@
     </table>
 
     <!-- QR Code and Footer -->
-    <div style="position: fixed; bottom: 10px; width: 100%;">
         <div class="footer">
             <p>Thank you for working with us</p>
         </div>
-    </div>
-
 </body>
 </html>
