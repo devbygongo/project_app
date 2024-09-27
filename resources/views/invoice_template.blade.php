@@ -98,7 +98,7 @@
             <td class="label">GSTIN:</td>
             <td class="value">{{ $user->gstin }}</td>
             <td class="label">Invoie Type:</td>
-            <td class="value">{{ ucfirst($invoice->type) }}</td>
+            <td class="value">{{ strtoupper($invoice->type) }}</td>
         </tr>
         <tr>
             <td class="label">Mobile:</td>
