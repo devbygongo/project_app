@@ -41,13 +41,12 @@ class DeleteController extends Controller
     }
 
     // delete user
-    public function user(Request $request)
+    public function user($id)
     {
         // Fetch the record by ID
-        $get_user = User::where('mobile', $request->input('mobile'))->first();
-print_r($request->input('mobile'));
-        print_r($get_user);
         // Check if the record exists
+        $get_user = User::find($id);
+
         if (!$get_user) {
             return response()->json([
                 'message' => 'Sorry, User not found!',
