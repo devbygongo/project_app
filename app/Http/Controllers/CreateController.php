@@ -68,7 +68,6 @@ class CreateController extends Controller
 
             $mobileNumbers = User::where('role', 'admin')->pluck('mobile')->toArray();
 
-
             $templateParams = [
                 'name' => 'ace_new_user_registered', // Replace with your WhatsApp template name
                 'language' => ['code' => 'en'],
