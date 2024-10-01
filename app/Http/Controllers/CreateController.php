@@ -66,6 +66,8 @@ class CreateController extends Controller
 
         if (isset($create_user)) {
 
+            unset($create_user['id'], $create_user['created_at'], $create_user['updated_at']);
+
             $mobileNumbers = User::where('role', 'admin')->pluck('mobile')->toArray();
 
             $templateParams = [
@@ -103,17 +105,18 @@ class CreateController extends Controller
                 // Decode the response into an array
                 $responseArray = json_decode($response, true);
 
-                // Check if the response has an error or was successful
-                if (isset($responseArray['error'])) {
-                    return response()->json([
-                        'message' => 'Error!',
-                    ], 503);
-                } else {
-                    return response()->json([
-                        'message' => 'User registered successfully!',
-                        'data' => $create_user
-                    ], 201);
-                }  
+                    // Check if the response has an error or was successful
+                    if (isset($responseArray['error'])) 
+                    {
+                        return response()->json([
+                            'message' => 'Error!',
+                        ], 503);
+                    } 
+                return response()->json([
+                    'message' => 'User registered successfully!',
+                    'data' => $create_user
+                ], 201);
+                
             }
         }
 
