@@ -235,6 +235,9 @@ class UpdateController extends Controller
             $user = User::select('name', 'mobile')
                          ->where('id', $get_id)
                          ->first();
+            
+            $mobileNumbers = User::where('role', 'admin')->pluck('mobile')->toArray();
+
 
             if ($update_verify == 1) {
 
@@ -262,13 +265,29 @@ class UpdateController extends Controller
                 $whatsAppUtility = new sendWhatsAppUtility();
                 
                 // Send OTP via WhatsApp
-                // $response = $whatsAppUtility->sendWhatsApp("+918961043773", $templateParams, "+918961043773", 'OTP Campaign');
-                $response = $whatsAppUtility->sendWhatsApp('+918961043773', $templateParams, '', 'Approve Client');
-                
-                return response()->json([
-                    'message' => 'User verified successfully!',
-                    'data' => $update_verify
-                ], 200);
+
+                foreach ($mobileNumbers as $mobileNumber) 
+                {
+                    // Send message for each number
+                    
+                    $response = $whatsAppUtility->sendWhatsApp($mobileNumber, $templateParams, '', 'Approve Client');
+
+                    // Decode the response into an array
+                    $responseArray = json_decode($response, true);
+
+                    // Check if the response has an error or was successful
+                    if (isset($responseArray['error'])) {
+                        return response()->json([
+                            'message' => 'Error!',
+                        ], 503);
+                    } else {
+                        return response()->json([
+                            'message' => 'User verified successfully!',
+                            'data' => $update_verify
+                        ], 200);
+                       
+                    }
+                }   
             }
     
             else {

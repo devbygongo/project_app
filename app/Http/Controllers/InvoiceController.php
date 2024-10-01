@@ -36,6 +36,8 @@ class InvoiceController extends Controller
                                     ->where('order_id', $orderId)
                                     ->get();
 
+        $mobileNumbers = User::where('role', 'admin')->pluck('mobile')->toArray();
+
         if (!$user || !$order || $order_items->isEmpty()) {
             return response()->json(['error' => 'Sorry, required data are not available!'], 500);
         }
@@ -113,7 +115,7 @@ class InvoiceController extends Controller
         // Directly create an instance of SendWhatsAppUtility
         $whatsAppUtility = new sendWhatsAppUtility();
         
-        $response = $whatsAppUtility->sendWhatsApp('+918961043773', $templateParams, '', 'User Order Invoice');
+        $response = $whatsAppUtility->sendWhatsApp($user->mobile, $templateParams, '', 'User Order Invoice');
 
         $templateParams = [
             'name' => 'ace_new_order_admin', // Replace with your WhatsApp template name
@@ -158,8 +160,17 @@ class InvoiceController extends Controller
             ],
         ];
 
-        $response = $whatsAppUtility->sendWhatsApp('+919966633307', $templateParams, '', 'Admin Order Invoice');
-        
+        foreach ($mobileNumbers as $mobileNumber) 
+        {
+            // Send message for each number
+            $response = $whatsAppUtility->sendWhatsApp($mobileNumber, $templateParams, '', 'Admin Order Invoice');
+
+            // Check if the response has an error or was successful
+            if (isset($responseArray['error'])) 
+            {
+                echo"Failed to send order to Whatsapp!";
+            }
+        }
 
         // // Assuming additional functionality such as WhatsApp integration etc.
         // return $mpdf->Output('invoice.pdf', 'I');
