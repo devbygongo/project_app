@@ -22,7 +22,7 @@ return new class extends Migration
             // $table->date('log_user');
             $table->enum('status', ['pending', 'partial', 'paid']);
             $table->enum('type', ['basic', 'gst']);
-            $table->string('order_invoice')->unique();
+            $table->string('order_invoice')->nullable();
             $table->timestamps();
         });
     }

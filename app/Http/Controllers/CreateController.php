@@ -66,6 +66,8 @@ class CreateController extends Controller
 
         if (isset($create_user)) {
 
+            $mobileNumbers = User::where('role', 'admin')->pluck('mobile')->toArray();
+
 
             $templateParams = [
                 'name' => 'ace_new_user_registered', // Replace with your WhatsApp template name
@@ -93,19 +95,33 @@ class CreateController extends Controller
             
             $whatsAppUtility = new sendWhatsAppUtility();
             
-            $response = $whatsAppUtility->sendWhatsApp('+918961043773', $templateParams, '', 'User Register');
-  
-            return response()->json([
-                'message' => 'User created successfully!',
-                'data' => $create_user
-            ], 201);
+            foreach ($mobileNumbers as $mobileNumber)
+            {
+                // Send message for each number
+
+                $response = $whatsAppUtility->sendWhatsApp($mobileNumber, $templateParams, '', 'User Register');
+
+                // Decode the response into an array
+                $responseArray = json_decode($response, true);
+
+                // Check if the response has an error or was successful
+                if (isset($responseArray['error'])) {
+                    return response()->json([
+                        'message' => 'Error!',
+                    ], 503);
+                } else {
+                    return response()->json([
+                        'message' => 'User registered successfully!',
+                        'data' => $create_user
+                    ], 201);
+                }  
+            }
         }
 
         else {
             return response()->json([
                 'message' => 'Failed to create successfully!',
-                'data' => $create_user
-            ], 400);
+            ], 500);
         }    
     }
 
