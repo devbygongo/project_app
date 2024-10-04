@@ -41,8 +41,14 @@ class DeleteController extends Controller
     }
 
     // delete user
-    public function user($id)
+    public function user($id = null)
     {
+        $getRole = (Auth::user())->role;
+
+        if ($getRole == 'user') {
+            $id = Auth::id();
+        }
+
         // Fetch the record by ID
         // Check if the record exists
         $get_user = User::find($id);
@@ -52,7 +58,7 @@ class DeleteController extends Controller
                 'message' => 'Sorry, User not found!',
             ], 404);
         }
-		        
+               
         else{
             $delete_user_records = $get_user->delete();
 
