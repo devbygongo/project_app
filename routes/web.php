@@ -12,6 +12,11 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/account-deletion', function () {
+    return view('account-deletion');
+});
+
+
 // Route::get('/login', function(){})->name('login.view');
 Route::get('/login_blade', [ViewController::class, 'login_view'])->name('login.view');
 
