@@ -58,7 +58,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
 
     Route::get('/view_order', [ViewController::class, 'orders']);
     
-    Route::post('/view_user_order/{id?}', [ViewController::class, 'orders_user_id']);
+    Route::get('/view_user_order/{id?}', [ViewController::class, 'orders_user_id']);
     
     Route::post('/add_order_items', [CreateController::class, 'orders_items']);
     
