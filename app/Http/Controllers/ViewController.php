@@ -580,7 +580,6 @@ class ViewController extends Controller
     public function orders()
     {
         $get_all_orders = OrderModel::with('user')->get();
-        
 
         if (isset($get_all_orders)) {
             return response()->json([
@@ -596,14 +595,17 @@ class ViewController extends Controller
         }    
     }
 
-    public function orders_user_id($id = null)
+    public function orders_user_id(Request $request, $id = null)
     {
 
         $get_user = Auth::User();
+        $user_id = $request->input('user_id');
 
         if ($get_user->role == 'user') 
         {
             $id = Auth::id();    
+        }else{
+            $id = $user_id;
         }
 
         // Fetch all records if $id is null, otherwise filter by user_id
