@@ -624,7 +624,7 @@ class ViewController extends Controller
 
         else {
             return response()->json([
-                'message' => 'Fetch data successfully!',
+                'message' => 'Fetched data successfully!',
                 'data' => $get_user_orders
             ], 200);
         }    
