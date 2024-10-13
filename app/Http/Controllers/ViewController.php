@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\DB;
+
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Auth;
@@ -108,8 +110,34 @@ class ViewController extends Controller
         $category = $request->input('category', null);
         $subCategory = $request->input('sub_category', null);
 
-        // Build the query for products
-        $query = ProductModel::select('product_code', 'product_name', 'category', 'sub_category', 'product_image', 'basic', 'gst');
+        // Get the user type
+		$user_type = User::select('type')->where('id', $user_id)->first();
+
+		if ($user_type && $user_type->type == 'special') {
+			// If user type is 'special', select special columns but alias them as 'basic' and 'gst'
+			$query = ProductModel::select(
+				'product_code', 
+				'product_name', 
+				'category', 
+				'sub_category', 
+				'product_image', 
+				DB::raw('special_basic as basic'), 
+				DB::raw('special_gst as gst')
+			);
+		} else {
+			// Default columns for non-special users
+			$query = ProductModel::select(
+				'product_code', 
+				'product_name', 
+				'category', 
+				'sub_category', 
+				'product_image', 
+				'basic', 
+				'gst'
+			);
+		}
+
+
 
         // Apply search filter if provided
         if ($search) {
@@ -175,10 +203,32 @@ class ViewController extends Controller
         $category = $request->input('category', null);
         $subCategory = $request->input('sub_category', null);
 
-        // Build the query for products
-        $query = ProductModel::select(
-            'product_code', 'product_name', 'name_in_hindi', 'name_in_telugu', 'category', 'sub_category', 'product_image', 'basic', 'gst'
-        );
+        // Get the user type
+		$user_type = User::select('type')->where('id', $user_id)->first();
+
+		if ($user_type && $user_type->type == 'special') {
+			// If user type is 'special', select special columns but alias them as 'basic' and 'gst'
+			$query = ProductModel::select(
+				'product_code', 
+				'product_name', 
+				'category', 
+				'sub_category', 
+				'product_image', 
+				DB::raw('special_basic as basic'), 
+				DB::raw('special_gst as gst')
+			);
+		} else {
+			// Default columns for non-special users
+			$query = ProductModel::select(
+				'product_code', 
+				'product_name', 
+				'category', 
+				'sub_category', 
+				'product_image', 
+				'basic', 
+				'gst'
+			);
+		}
 
         // Apply filters
         if ($search) {
@@ -281,15 +331,19 @@ class ViewController extends Controller
         // Fetch all categories with their product count
         $categories = CategoryModel::withCount('get_products')->get();
 
-        // Format the categories data for a JSON response
-        $formattedCategories = $categories->map(function ($category) {
-            return [
-                'category_id' => $category->id,
-                'category_name' => $category->name,
-                'category_image' => $category->image,
-                'products_count' => $category->get_products_count,
-            ];
-        });
+        // Filter and format the categories data for a JSON response
+		$formattedCategories = $categories->map(function ($category) {
+			// Only include categories with products_count > 0
+			if ($category->get_products_count > 0) {
+				return [
+					'category_id' => $category->id,
+					'category_name' => $category->name,
+					'category_image' => $category->image,
+					'products_count' => $category->get_products_count,
+				];
+			}
+			return null; // Return null for categories with 0 products
+		})->filter(); // Remove null values
 
         if (isset($formattedCategories)) {
             return response()->json([
@@ -389,38 +443,40 @@ class ViewController extends Controller
     }
 
     public function lng_categories($lang = 'eng')
-    {
-        // Fetch all categories with their product count
-        $categories = CategoryModel::withCount('get_products')->get();
+	{
+		// Fetch all categories with their product count
+		$categories = CategoryModel::withCount('get_products')->get();
 
-        // Format the categories data for a JSON response
-        $formattedCategories = $categories->map(function ($category) use ($lang) {
+		// Format and filter the categories data for a JSON response
+		$formattedCategories = $categories->map(function ($category) use ($lang) {
+			$category_name = $category->name;
 
-            $category_name = $category->name;
+			// Set category name based on language
+			if ($lang === 'hin' && !empty($category->name_in_hindi)) {
+				$category_name = $category->name_in_hindi;
+			} elseif ($lang === 'tlg' && !empty($category->name_in_telugu)) {
+				$category_name = $category->name_in_telugu;
+			}
 
-            if($lang === 'hin' && !empty($category->name_in_hindi))
-            {
-                $category_name = $category->name_in_hindi;
-            }
+			// Return category details if products count > 0, otherwise return null
+			return $category->get_products_count > 0 ? [
+				'category_id' => $category->id,
+				'category_name' => $category_name,
+				'category_image' => $category->image,
+				'products_count' => $category->get_products_count,
+			] : null;
+		})->filter(); // Filter out null values
 
-            elseif ($lang === 'tlg' && !empty($category->name_in_telugu)) 
-            {
-                $category_name = $category->name_in_telugu;
-            }
-            return [
-                'category_id' => $category->id,
-                'category_name' => $category_name,
-                'category_image' => $category->image,
-                'products_count' => $category->get_products_count,
-            ];
-        });
-        // Check if the categories are set and return response
-        return $formattedCategories->isEmpty()
-        ? response()->json(['Failed get data successfully!'], 404)
-        : response()->json(['message' => 'Fetch data successfully!',
-                'data' => $formattedCategories,
-                'count' => count($formattedCategories)], 200);
-    }
+		// Check if the filtered categories are empty and return response
+		return $formattedCategories->isEmpty()
+			? response()->json(['message' => 'No categories with products found!'], 404)
+			: response()->json([
+				'message' => 'Fetch data successfully!',
+				'data' => $formattedCategories->values(), // Re-index filtered array
+				'count' => $formattedCategories->count(),
+			], 200);
+	}
+
 
     public function user($lang = 'eng')
     {

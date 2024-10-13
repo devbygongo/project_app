@@ -1,21 +1,13 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
-
 use App\Models\ProductModel;
-
 use App\Models\User;
-
 use League\Csv\Reader;
-
 use League\Csv\Statement;
-
 use Hash;
-
 use App\Models\CategoryModel;
-
 use App\Models\SubCategoryModel;
 
 class CsvImportController extends Controller
@@ -46,65 +38,13 @@ class CsvImportController extends Controller
 
             $basicPrice_product = $record_csv['Basic Price'] !== '' ? $record_csv['Basic Price'] : 0;
             $gstPrice_prduct = $record_csv['GST Price'] !== '' ? $record_csv['GST Price'] : 0;
+			$basicPrice_product_special = $record_csv['Special Basic Price'] !== '' ? $record_csv['Special Basic Price'] : 0;
+            $gstPrice_prduct_special = $record_csv['Special GST Price'] !== '' ? $record_csv['Special GST Price'] : 0;
             $filename = $record_csv['Product Code'];
 
             $category = $record_csv['Category'];
             $sub_category = $record_csv['Sub Category'];
             $brand = $record_csv['Brand'] !== '' ? $record_csv['Brand'] : null;
-
-            // $categoryModel = CategoryModel::firstOrCreate(['name' => $category]);
-
-            $categoryNameSanitized = str_replace([' ', '/', '\\', ':', '*'], '_', strtolower($category));
-            $imagePath = "/storage/uploads/category/{$categoryNameSanitized}.jpg";
-            $category_imagePath_for_not_avaliable = "/storage/uploads/category/placeholder.jpg";
-
-            if (file_exists(public_path($imagePath))) 
-            {
-                $categoryModel = CategoryModel::updateOrCreate([
-                    'name' => $category,
-                ], [
-                    'image' => $imagePath,
-                ]);
-            }
-            else 
-            {
-                $categoryModel = CategoryModel::updateOrCreate([
-                    'name' => $category,
-                ], [
-                    'image' => $category_imagePath_for_not_avaliable,
-                ]);
-            }
-
-            // Get the category ID for future use
-            $category_id = $categoryModel->id;
-
-            if (($sub_category != '')) 
-            {
-                // $subCategoryModel = SubCategoryModel::firstOrCreate([
-
-                $subcategoryNameSanitized = str_replace([' ', '/', '\\', ':', '*'], '_', strtolower($sub_category));
-                $subCategoryImagePath  = "/storage/uploads/category/{$subcategoryNameSanitized}.jpg";
-                $sub_category_imagePath_for_not_avaliable = "/storage/uploads/sub_category/placeholder.jpg";
-
-                if (file_exists(public_path($subCategoryImagePath))) 
-                {
-                    $subCategoryModel = SubCategoryModel::updateOrCreate([
-                        'name' => $sub_category,
-                        'category_id' => $category_id, // Include category_id in the search/creation criteria
-                        'image' => $imagePath,
-                    ]);
-                }
-                else 
-                {
-                    // Optionally continue without setting the image
-                    $subCategoryModel = SubCategoryModel::updateOrCreate([
-                        'name' => $sub_category,
-                        'category_id' => $category_id,
-                    ], [
-                        'image' => $sub_category_imagePath_for_not_avaliable,
-                    ]);
-                }
-            }
 
             // Define the product image path and check if the image exists
             $productImagePath = "/storage/uploads/products/{$filename}.jpg";
@@ -129,6 +69,8 @@ class CsvImportController extends Controller
                     'machine_part_no' => $record_csv['Machine Part No'],
                     'basic' => $basicPrice_product, // Ensure this is a valid number
                     'gst' => $gstPrice_prduct,     // Ensure this is a valid number
+                    'special_basic' => $basicPrice_product_special,     // Ensure this is a valid number
+                    'special_gst' => $gstPrice_prduct_special,     // Ensure this is a valid number
                     // 'product_image' => null, // Set this if you have the image URL or path
                     'product_image' => $productImagePath,
                 ]);
@@ -148,6 +90,8 @@ class CsvImportController extends Controller
                     'machine_part_no' => $record_csv['Machine Part No'],
                     'basic' => $basicPrice_product, // Ensure this is a valid number
                     'gst' => $gstPrice_prduct,     // Ensure this is a valid number
+					'special_basic' => $basicPrice_product_special,     // Ensure this is a valid number
+                    'special_gst' => $gstPrice_prduct_special,     // Ensure this is a valid number
                     // 'product_image' => null, // Set this if you have the image URL or path
                     'product_image' => $productImagePath,
                 ]);
@@ -173,7 +117,6 @@ class CsvImportController extends Controller
         $csv_user = Reader::createFromString($csvContent_user);
 
         $csv_user->setHeaderOffset(0); // Set the header offset
-        
 
         $records_user = (new Statement())->process($csv_user);
 
@@ -198,7 +141,7 @@ class CsvImportController extends Controller
             // Handle potential empty values for email, pincode, and markup
             $email_user = !empty($record_user['Email']) ? $record_user['Email'] : null;
             $pincode_user = $record_user['Pincode'] !== '' ? $record_user['Pincode'] : 0;
-            $markup_user = $record_user['Mark Up'] !== '' ? $record_user['Mark Up'] : 0;
+            $markup_user = $record_user['Type'] !== '' ? strtolower($record_user['Type']) : 'normal';
 
             if ($user_csv) 
             {
@@ -217,7 +160,7 @@ class CsvImportController extends Controller
                     'gstin' => $record_user['GSTIN'],
                     'state' => $record_user['State'],
                     'country' => $record_user['Country'],
-                    'markup' => $markup_user, // Ensure this is a valid number
+                    'type' => $markup_user, // Ensure this is a valid number
                 ]);
             } 
             else 
@@ -250,6 +193,80 @@ class CsvImportController extends Controller
         }
         else {
             return response()->json(['message' => 'Sorry, failed to imported successfully'], 400);
+        }
+    }
+
+    public function importCategory()
+    {
+        // URL of the CSV file from Google Sheets
+        $get_product_category_url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQaU_DTPcjgHGqqE_THQNQuisDEsIXH2PJwGaNOGd5ND5F7mVXpgS5KJ7lv4pgRyb9vUtGk_GTPSTDo/pub?gid=736987385&single=true&output=csv';
+
+        // Fetch the CSV content using file_get_contents
+        $csvContent_category = file_get_contents($get_product_category_url);
+
+        // Fetch and parse the CSV
+        $csv_category = Reader::createFromString($csvContent_category);
+
+        $csv_category->setHeaderOffset(0); // Set the header offset
+        
+
+        $records_csv = (new Statement())->process($csv_category);
+
+        $get_insert_response = null;
+        $get_update_response = null;
+
+        // Iterate through each record and create or update the product
+        foreach ($records_csv as $record_csv) {
+
+            $category_csv = categoryModel::where('name', $record_csv['name'])->first();
+			
+			//die(json_encode($record_csv));
+
+            $category = $record_csv['name'];
+            $category_image = '';
+
+            $categoryNameSanitized = str_replace([' ', '/', '\\', ':', '*', '&'], '_', strtolower(str_replace(' & ', '_', $category)));
+
+
+            $imagePath = "/storage/uploads/category/{$categoryNameSanitized}.jpg";
+            $category_imagePath_for_not_avaliable = "/storage/uploads/category/placeholder.jpg";
+
+            if (file_exists(public_path($imagePath))) 
+            {
+                $category_image = $imagePath;
+            }
+            else 
+            {
+                $category_image = $category_imagePath_for_not_avaliable;
+            }
+
+            if ($category_csv) 
+            {
+                // If category exists, update it
+                $get_update_response = $category_csv->update([
+                    'name' => $record_csv['name'],
+                    'image' => $category_image,
+                    'name_in_hindi' => $record_csv['name_in_hindi'],
+                    'name_in_telugu' => $record_csv['name_in_telugu'],
+                ]);
+            } 
+            else 
+            {
+                // If user does not exist, create a new one
+                $get_insert_response = categoryModel::create([
+                    'name' => $record_csv['name'],
+                    'image' => $category_image,
+                    'name_in_hindi' => $record_csv['name_in_hindi'],
+                    'name_in_telugu' => $record_csv['name_in_telugu'],
+                ]);
+            }
+        }   
+
+        if ($get_update_response == 1 || isset($get_insert_response)) {
+            return response()->json(['message' => 'Categories imported successfully'], 200);
+        }
+        else {
+            return response()->json(['message' => 'Sorry, failed to import data'], 400);
         }
     }
 }

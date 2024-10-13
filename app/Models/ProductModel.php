@@ -23,6 +23,8 @@ class ProductModel extends Model
         'machine_part_no',
         'basic',
         'gst',
+        'special_basic',
+        'special_gst',
         'mark_up',
     ];
 
