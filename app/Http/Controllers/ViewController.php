@@ -608,7 +608,6 @@ class ViewController extends Controller
             $id = $user_id;
         }
 
-        die($id);
 
         // Fetch all records if $id is null, otherwise filter by user_id
         $get_user_orders = OrderModel::when($id, function($query, $id)
@@ -617,6 +616,9 @@ class ViewController extends Controller
             return $query->where('user_id', $id);
             
         })->get();   
+
+        die($get_user_orders);
+
 
         if($get_user_orders->isEmpty()) {
             return response()->json([
