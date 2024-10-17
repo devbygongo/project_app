@@ -599,37 +599,35 @@ class ViewController extends Controller
     {
         $get_user = Auth::User();
 
-        if($get_user->role == 'user') {
+        if ($get_user->role == 'user') {
             $id = $get_user->id;
-        }
-        else 
-        {
+        } else {
             $request->validate([
                 'user_id' => 'required',
             ]);
             $id = $request->input('user_id');
         }
-        // Fetch all records if $id is null, otherwise filter by user_id
-        $get_user_orders = OrderModel::when($id, function($query, $id)
-        {
+
+        // Fetch all orders and their associated order items
+        $get_user_orders = OrderModel::when($id, function ($query, $id) {
             // If $id is not null, filter by user_id
             return $query->where('user_id', $id);
-            
-        })->get();   
+        })
+        ->with('order_items') // Load order items relationship
+        ->get();
 
-        if($get_user_orders->isEmpty()) {
+        if ($get_user_orders->isEmpty()) {
             return response()->json([
                 'message' => 'Sorry, no data available!',
             ], 404);
-        }
-
-        else {
+        } else {
             return response()->json([
                 'message' => 'Fetched data successfully!',
                 'data' => $get_user_orders
             ], 200);
-        }    
+        }
     }
+
 
     public function order_items()
     {
