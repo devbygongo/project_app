@@ -76,11 +76,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
 
     Route::delete('/delete_cart/{id}', [DeleteController::class, 'cart']);
 
-    Route::get('/fetch_products', [CsvImportController::class, 'importProduct']);
-
-    Route::get('/fetch_users', [CsvImportController::class, 'importUser']);
-	
-    Route::get('/fetch_categories', [CsvImportController::class, 'importCategory']);
+    
 
     Route::post('/add_counter', [CreateController::class, 'counter']);
 
@@ -136,10 +132,11 @@ Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user']
     // Route::get('/generate_invoice/{orderId}', [InvoiceController::class, 'generateInvoice']);
 
 });
+
+Route::get('/fetch_products', [CsvImportController::class, 'importProduct']);
+Route::get('/fetch_users', [CsvImportController::class, 'importUser']);
+Route::get('/fetch_categories', [CsvImportController::class, 'importCategory']);
+
 Route::post('/login/{otp?}', [CreateController::class, 'login']);
-
 Route::post('/register_user', [CreateController::class, 'user']);
-
-// Route::get('/view_user', [ViewController::class, 'user']);
-
 Route::post('/get_otp', [UpdateController::class, 'generate_otp']);
