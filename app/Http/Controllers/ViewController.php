@@ -215,7 +215,9 @@ class ViewController extends Controller
 				'sub_category', 
 				'product_image', 
 				DB::raw('special_basic as basic'), 
-				DB::raw('special_gst as gst')
+				DB::raw('special_gst as gst'),
+                'out_of_stock',
+                'yet_to_launch'
 			);
 		} else {
 			// Default columns for non-special users
@@ -226,7 +228,9 @@ class ViewController extends Controller
 				'sub_category', 
 				'product_image', 
 				'basic', 
-				'gst'
+				'gst',
+                'out_of_stock',
+                'yet_to_launch'
 			);
 		}
 

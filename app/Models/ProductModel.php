@@ -26,6 +26,8 @@ class ProductModel extends Model
         'special_basic',
         'special_gst',
         'mark_up',
+        'out_of_stock',
+        'yet_to_launch',
     ];
 
     public function transactions()
