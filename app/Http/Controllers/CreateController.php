@@ -562,6 +562,7 @@ class CreateController extends Controller
 					'quantity' => $request->input('quantity'),
 					'amount' => ($request->input('rate')) * ($request->input('quantity')),
 					'type' => $request->input('type'),
+					'remarks' => $request->input('remarks'),
 				]
 			);
 

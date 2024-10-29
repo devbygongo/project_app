@@ -272,6 +272,7 @@ class ViewController extends Controller
                 'in_cart' => $cart_item ? true : false,
                 'cart_quantity' => $cart_item->quantity ?? null,
                 'cart_type' => $cart_item->type ?? null,
+                'cart_remarks' => $cart_item->remarks ?? null,
             ];
         });
 
@@ -734,6 +735,7 @@ class ViewController extends Controller
 					't_cart.quantity',
 					't_cart.amount',
 					't_cart.type',
+					't_cart.remarks',
 					't_cart.created_at',
 					't_cart.updated_at',
 					't_products.basic',
@@ -758,6 +760,7 @@ class ViewController extends Controller
 					't_cart.quantity',
 					't_cart.amount',
 					't_cart.type',
+					't_cart.remarks',
 					't_cart.created_at',
 					't_cart.updated_at',
 					't_products.basic',

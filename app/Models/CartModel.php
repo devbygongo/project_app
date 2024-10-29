@@ -20,6 +20,7 @@ class CartModel extends Model
         'quantity',
         'amount',
         'type',
+        'remarks',
     ];
 
     public function get_users()
