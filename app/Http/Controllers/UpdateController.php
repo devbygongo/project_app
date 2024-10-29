@@ -190,6 +190,7 @@ class UpdateController extends Controller
                     'product_code' => $request->input('product_code'),
                     'quantity' => $request->input('quantity'),
                     'type' => $request->input('type'),
+                    'remarks' => $request->input('remarks'),
                 ]);
         }
         else {
@@ -208,6 +209,7 @@ class UpdateController extends Controller
                     'product_code' => $request->input('product_code'),
                     'quantity' => $request->input('quantity'),
                     'type' => $request->input('type'),
+                    'remarks' => $request->input('remarks'),
                 ]);
         }
 
