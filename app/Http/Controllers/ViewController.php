@@ -273,6 +273,8 @@ class ViewController extends Controller
                 'product_image' => $prd_rec->product_image,
                 'basic' => $prd_rec->basic,
                 'gst' => $prd_rec->gst,
+                'out_of_stock' => $prd_rec->out_of_stock,
+                'yet_to_launch' => $prd_rec->yet_to_launch,
                 'in_cart' => $cart_item ? true : false,
                 'cart_quantity' => $cart_item->quantity ?? null,
                 'cart_type' => $cart_item->type ?? null,
