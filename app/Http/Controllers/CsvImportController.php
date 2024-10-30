@@ -34,12 +34,24 @@ class CsvImportController extends Controller
 
         // Iterate through each record and create or update the product
         foreach ($records_csv as $record_csv) {
+
+            // Check if 'Yet to Launch' is 1, delete the product if it exists
+            if ($record_csv['Delete'] == 1) {
+                $product_csv = ProductModel::where('product_code', $record_csv['Product Code'])->first();
+                if ($product_csv) {
+                    $product_csv->delete();
+                }
+                continue; // Skip to the next record
+            }
+            
             $product_csv = ProductModel::where('product_code', $record_csv['Product Code'])->first();
 
             $basicPrice_product = $record_csv['Basic Price'] !== '' ? $record_csv['Basic Price'] : 0;
             $gstPrice_prduct = $record_csv['GST Price'] !== '' ? $record_csv['GST Price'] : 0;
 			$basicPrice_product_special = $record_csv['Special Basic Price'] !== '' ? $record_csv['Special Basic Price'] : 0;
             $gstPrice_prduct_special = $record_csv['Special GST Price'] !== '' ? $record_csv['Special GST Price'] : 0;
+            $basicPrice_product_outstation = $record_csv['Outstation Basic Price'] !== '' ? $record_csv['Outstation Basic Price'] : 0;
+            $gstPrice_prduct_outstation = $record_csv['Outstation GST Price'] !== '' ? $record_csv['Outstation GST Price'] : 0;
             $filename = $record_csv['Product Code'];
 
             $category = $record_csv['Category'];
@@ -71,6 +83,10 @@ class CsvImportController extends Controller
                     'gst' => $gstPrice_prduct,     // Ensure this is a valid number
                     'special_basic' => $basicPrice_product_special,     // Ensure this is a valid number
                     'special_gst' => $gstPrice_prduct_special,     // Ensure this is a valid number
+                    'outstation_basic' => $basicPrice_product_outstation,     // Ensure this is a valid number
+                    'outstation_gst' => $gstPrice_prduct_outstation,     // Ensure this is a valid number
+                    'out_of_stock' => $record_csv['Out of Stock'], 
+                    'yet_to_launch' => $record_csv['Yet to Launch'],
                     // 'product_image' => null, // Set this if you have the image URL or path
                     'product_image' => $productImagePath,
                 ]);
@@ -92,6 +108,10 @@ class CsvImportController extends Controller
                     'gst' => $gstPrice_prduct,     // Ensure this is a valid number
 					'special_basic' => $basicPrice_product_special,     // Ensure this is a valid number
                     'special_gst' => $gstPrice_prduct_special,     // Ensure this is a valid number
+                    'outstation_basic' => $basicPrice_product_outstation,     // Ensure this is a valid number
+                    'outstation_gst' => $gstPrice_prduct_outstation,     // Ensure this is a valid number
+                    'out_of_stock' => $record_csv['Out of Stock'], 
+                    'yet_to_launch' => $record_csv['Yet to Launch'],
                     // 'product_image' => null, // Set this if you have the image URL or path
                     'product_image' => $productImagePath,
                 ]);

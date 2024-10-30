@@ -219,7 +219,20 @@ class ViewController extends Controller
                 'out_of_stock',
                 'yet_to_launch'
 			);
-		} else {
+		} else if ($user_type && $user_type->type == 'outstation') {
+                // If user type is 'special', select special columns but alias them as 'basic' and 'gst'
+                $query = ProductModel::select(
+                    'product_code', 
+                    'product_name', 
+                    'category', 
+                    'sub_category', 
+                    'product_image', 
+                    DB::raw('outstation_basic as basic'), 
+                    DB::raw('outstation_basic as gst'),
+                    'out_of_stock',
+                    'yet_to_launch'
+                );
+        } else {
 			// Default columns for non-special users
 			$query = ProductModel::select(
 				'product_code', 
