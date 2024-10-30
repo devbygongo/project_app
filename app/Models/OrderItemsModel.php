@@ -23,6 +23,7 @@ class OrderItemsModel extends Model
         'quantity',
         // 'line_total',
         'total',
+        'remarks',
         'type',
     ];
 

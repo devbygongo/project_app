@@ -330,7 +330,7 @@ class CreateController extends Controller
         $create_order_basic = null;
         $create_order_gst = null;
 
-        $get_basic_product = CartModel::select('amount', 'quantity', 'product_code', 'product_name', 'rate', 'type')
+        $get_basic_product = CartModel::select('amount', 'quantity', 'product_code', 'product_name', 'rate', 'type', 'remarks')
                                        ->where('user_id', $userId)
                                        ->where('type', 'basic')
                                        ->get();
@@ -370,13 +370,14 @@ class CreateController extends Controller
                         'quantity' => $basic_product->quantity,
                         'total' => $basic_product->rate * $basic_product->quantity,
                         'type' => $basic_product->type,
+                        'remarks' => $basic_product->remarks,
                     ]);
                 }
             }
 
         }
 
-        $get_gst_product = CartModel::select('amount', 'quantity', 'product_code', 'product_name', 'rate', 'type')
+        $get_gst_product = CartModel::select('amount', 'quantity', 'product_code', 'product_name', 'rate', 'type', 'remarks')
                                       ->where('user_id', $userId)
                                       ->where('type', 'gst')
                                       ->get();
@@ -414,6 +415,7 @@ class CreateController extends Controller
                         'quantity' => $gst_product->quantity,
                         'total' => $gst_product->rate * $gst_product->quantity,
                         'type' => $gst_product->type,
+                        'remarks' => $gst_product->remarks,
                     ]);
                 }
                 
@@ -513,6 +515,7 @@ class CreateController extends Controller
                 'quantity' => $request->input('quantity'),
                 // 'line_total' => $request->input('line_total'),
                 'total' => $request->input('total'),
+                'remarks' => $request->input('remarks'),
             ]);
 
 
