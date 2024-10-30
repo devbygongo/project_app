@@ -36,7 +36,7 @@ class CsvImportController extends Controller
         foreach ($records_csv as $record_csv) {
 
             // Check if 'Yet to Launch' is 1, delete the product if it exists
-            if ($record_csv['Delete'] == 1) {
+            if ($record_csv['Delete'] == 'TRUE') {
                 $product_csv = ProductModel::where('product_code', $record_csv['Product Code'])->first();
                 if ($product_csv) {
                     $product_csv->delete();
@@ -85,8 +85,8 @@ class CsvImportController extends Controller
                     'special_gst' => $gstPrice_prduct_special,     // Ensure this is a valid number
                     'outstation_basic' => $basicPrice_product_outstation,     // Ensure this is a valid number
                     'outstation_gst' => $gstPrice_prduct_outstation,     // Ensure this is a valid number
-                    'out_of_stock' => $record_csv['Out of Stock'], 
-                    'yet_to_launch' => $record_csv['Yet to Launch'],
+                    'out_of_stock' => $record_csv['Out of Stock'] === 'TRUE' ? 1 : 0,
+                    'yet_to_launch' => $record_csv['Yet to Launch'] === 'TRUE' ? 1 : 0,
                     // 'product_image' => null, // Set this if you have the image URL or path
                     'product_image' => $productImagePath,
                 ]);
@@ -110,8 +110,8 @@ class CsvImportController extends Controller
                     'special_gst' => $gstPrice_prduct_special,     // Ensure this is a valid number
                     'outstation_basic' => $basicPrice_product_outstation,     // Ensure this is a valid number
                     'outstation_gst' => $gstPrice_prduct_outstation,     // Ensure this is a valid number
-                    'out_of_stock' => $record_csv['Out of Stock'], 
-                    'yet_to_launch' => $record_csv['Yet to Launch'],
+                    'out_of_stock' => $record_csv['Out of Stock'] === 'TRUE' ? 1 : 0,
+                    'yet_to_launch' => $record_csv['Yet to Launch'] === 'TRUE' ? 1 : 0,
                     // 'product_image' => null, // Set this if you have the image URL or path
                     'product_image' => $productImagePath,
                 ]);
