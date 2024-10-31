@@ -154,7 +154,7 @@ class CreateController extends Controller
                     $user = User::where('mobile', $request->mobile)->first();
 
                     // Check if user is verified
-                    if ($user->verified == '0') {
+                    if ($user->is_verified == '0') {
                         return response()->json([
                             'success' => false,
                             'message' => 'Account not verified.',
@@ -191,7 +191,7 @@ class CreateController extends Controller
                 $user = Auth::user();
 
                 // Check if user is verified
-                if ($user->verified == '0') {
+                if ($user->is_verified == '0') {
                     return response()->json([
                         'success' => false,
                         'message' => 'Account not verified.',
