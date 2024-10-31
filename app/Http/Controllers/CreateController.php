@@ -140,7 +140,7 @@ class CreateController extends Controller
             if ($otpRecord) {
                 // Validate OTP and expiry
                 if (!$otpRecord || $otpRecord->otp != $otp) {
-                    return response()->json(['message' => 'Invalid OTP.'], 200);
+                    return response()->json(['message' => 'Invalid OTP.'], 400);
                 }
 
                 if ($otpRecord->expires_at < now()) {
