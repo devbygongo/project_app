@@ -522,6 +522,7 @@ class ViewController extends Controller
                     'name' => $name,
                     'email' => $record->email,
                     'mobile' => $record->mobile,
+                    'city' => $record->city,
                     'role' => ucfirst($record->role),
                     'address' => implode(', ', array_filter([$record->address_line_1, $record->address_line_2, $record->city, $record->state, $record->pincode, $record->country])),
                     'gstin' => $record->gstin,
