@@ -117,7 +117,7 @@ class InvoiceController extends Controller
         // Directly create an instance of SendWhatsAppUtility
         $whatsAppUtility = new sendWhatsAppUtility();
         
-        // $response = $whatsAppUtility->sendWhatsApp($user->mobile, $templateParams, '', 'User Order Invoice');
+        $response = $whatsAppUtility->sendWhatsApp($user->mobile, $templateParams, '', 'User Order Invoice');
         $response = $whatsAppUtility->sendWhatsApp('+917003541353', $templateParams, '', 'User Order Invoice');
 
         $templateParams = [
