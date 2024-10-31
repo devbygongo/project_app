@@ -47,21 +47,21 @@ class CreateController extends Controller
             'pincode' => 'required',
         ]);
         
-            $create_user = User::create([
-                'name' => $request->input('name'),
-                'password' => bcrypt($request->input('password')),
-                'email' => strtolower($request->input('email')),
-                'mobile' => $request->input('mobile'),
-                'role' => $request->input('role'),
-                'address_line_1' => $request->input('address_line_1'),
-                'address_line_2' => $request->input('address_line_2'),
-                'city' => $request->input('city'),
-                'pincode' => $request->input('pincode'),
-                'gstin' => $request->input('gstin'),
-                'state' => $request->input('state'),
-                'country' => $request->input('country'),
-                // 'category_discount' => $request->input('category_discount'),
-            ]);
+        $create_user = User::create([
+            'name' => $request->input('name'),
+            'password' => bcrypt($request->input('password')),
+            'email' => strtolower($request->input('email')),
+            'mobile' => $request->input('mobile'),
+            'role' => 'user',
+            'address_line_1' => $request->input('address_line_1'),
+            'address_line_2' => $request->input('address_line_2'),
+            'city' => $request->input('city'),
+            'pincode' => $request->input('pincode'),
+            'gstin' => $request->input('gstin'),
+            'state' => $request->input('state'),
+            'country' => $request->input('country'),
+            // 'category_discount' => $request->input('category_discount'),
+        ]);
 
 
         if (isset($create_user)) {
