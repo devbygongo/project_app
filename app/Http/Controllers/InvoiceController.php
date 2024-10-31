@@ -23,7 +23,7 @@ class InvoiceController extends Controller
     {
         // $get_user = Auth::id();
         
-        $order = OrderModel::select('user_id','order_id', 'amount', 'order_date')
+        $order = OrderModel::select('user_id','order_id', 'amount', 'order_date','type')
                             ->where('id', $orderId)
                             ->first();
 
@@ -124,7 +124,7 @@ class InvoiceController extends Controller
 
         foreach ($mobileNumbers as $mobileNumber) 
         {
-            if($mobileNumber == '+918961043773')
+            if($mobileNumber == '+918961043773' || true)
             {
                 // Send message for each number
                 $response = $whatsAppUtility->sendWhatsApp($mobileNumber, $templateParams, '', 'Admin Order Invoice');
