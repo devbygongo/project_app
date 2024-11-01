@@ -140,11 +140,17 @@ class CreateController extends Controller
             if ($otpRecord) {
                 // Validate OTP and expiry
                 if (!$otpRecord || $otpRecord->otp != $otp) {
-                    return response()->json(['message' => 'Invalid OTP.'], 400);
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Invalid Credentials.',
+                    ], 200);
                 }
 
                 if ($otpRecord->expires_at < now()) {
-                    return response()->json(['message' => 'OTP has expired.'], 400);
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'OTP has expired.',
+                    ], 200);
                 } else {
                     // Remove OTP record after successful validation
                     User::where('mobile', $request->mobile)->update(['otp' => null, 'expires_at' => null]);
@@ -156,9 +162,8 @@ class CreateController extends Controller
                     if ($user->is_verified == '0') {
                         return response()->json([
                             'success' => false,
-                            'message' => 'Account not verified.',
-                            'errors' => ['error' => 'Please verify your account to proceed.'],
-                        ], 403);
+                            'message' => 'Account not verified, you will receive a notification once your account is verified.',
+                        ], 200);
                     }
 
                     // Generate a Sanctum token
@@ -177,8 +182,8 @@ class CreateController extends Controller
             } else {
                 return response()->json([
                     'success' => false,
-                    'message' => 'User not registered.',
-                ], 401);
+                    'message' => 'Invalid Credentials.',
+                ], 200);
             }
         } else {
             $request->validate([
@@ -193,9 +198,8 @@ class CreateController extends Controller
                 if ($user->is_verified == '0') {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Account not verified.',
-                        'errors' => ['error' => 'Please verify your account to proceed.'],
-                    ], 403);
+                        'message' => 'Account not verified, you will receive a notification once your account is verified.',
+                    ], 200);
                 }
 
                 // Generate a Sanctum token
@@ -213,9 +217,8 @@ class CreateController extends Controller
             } else {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Unauthorized.',
-                    'errors' => ['error' => 'Invalid credentials.'],
-                ], 401);
+                    'message' => 'Invalid Credentials.',
+                ], 200);
             }
         }
     }

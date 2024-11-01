@@ -266,30 +266,24 @@ class UpdateController extends Controller
                 // Directly create an instance of SendWhatsAppUtility
                 $whatsAppUtility = new sendWhatsAppUtility();
                 
-                // Send OTP via WhatsApp
+                $response = $whatsAppUtility->sendWhatsApp($user->mobile, $templateParams, '', 'Approve Client');
+                $response = $whatsAppUtility->sendWhatsApp('918961043773', $templateParams, '', 'Approve Client');
 
-                foreach ($mobileNumbers as $mobileNumber) 
-                {
-                    // Send message for each number
+                // Decode the response into an array
+                $responseArray = json_decode($response, true);
+
+                // Check if the response has an error or was successful
+                if (isset($responseArray['error'])) {
+                    return response()->json([
+                        'message' => 'Error!',
+                    ], 503);
+                } else {
+                    return response()->json([
+                        'message' => 'User verified successfully!',
+                        'data' => $update_verify
+                    ], 200);
                     
-                    $response = $whatsAppUtility->sendWhatsApp($mobileNumber, $templateParams, '', 'Approve Client');
-
-                    // Decode the response into an array
-                    $responseArray = json_decode($response, true);
-
-                    // Check if the response has an error or was successful
-                    if (isset($responseArray['error'])) {
-                        return response()->json([
-                            'message' => 'Error!',
-                        ], 503);
-                    } else {
-                        return response()->json([
-                            'message' => 'User verified successfully!',
-                            'data' => $update_verify
-                        ], 200);
-                       
-                    }
-                }   
+                }
             }
     
             else {
