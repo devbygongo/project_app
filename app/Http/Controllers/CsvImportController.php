@@ -169,12 +169,10 @@ class CsvImportController extends Controller
                 $get_update_response = $user_csv->update([
                     'name' => $record_user['Name'],
                     'email' => $email_user,
-                    'password' => bcrypt($mobile),
                     'name_in_hindi' => $record_user['Hindi'],
                     'name_in_telugu' => $record_user['Telegu'],
                     'address_line_1' => $record_user['Address Line 1'],
                     'address_line_2' => $record_user['Address Line 2'],
-                    'is_verified' => '1',
                     'city' => $record_user['City'],
                     'pincode' => $pincode_user,// Ensure this is a valid number
                     'gstin' => $record_user['GSTIN'],
