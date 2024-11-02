@@ -228,7 +228,7 @@ class ViewController extends Controller
                     'sub_category', 
                     'product_image', 
                     DB::raw('outstation_basic as basic'), 
-                    DB::raw('outstation_basic as gst'),
+                    DB::raw('outstation_gst as gst'),
                     'out_of_stock',
                     'yet_to_launch'
                 );
