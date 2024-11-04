@@ -638,6 +638,7 @@ class ViewController extends Controller
             // Eager load product relationship and append the product_image field
             $query->with('product:id,product_code,product_image');
         }])
+        ->orderBy('created_at', 'desc')
         ->get();
 
         // Modify the order items to append the product image directly
