@@ -500,7 +500,7 @@ class ViewController extends Controller
 
     public function user($lang = 'eng')
     {
-        $get_user_details = User::select('id','name', 'name_in_hindi', 'name_in_telugu', 'email','mobile','role','address_line_1','address_line_2','city','pincode','gstin','state','country', 'is_verified')
+        $get_user_details = User::select('id','name', 'name_in_hindi', 'name_in_telugu', 'email','mobile','role','address_line_1','address_line_2','city','pincode','gstin','state','country', 'is_verified', 'type')
                                 ->where('role', 'user')
                                 ->get();
 
