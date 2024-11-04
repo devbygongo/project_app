@@ -734,5 +734,49 @@ class CreateController extends Controller
             return response()->json(['message' => 'Invalid data format'], 400);
         }
     }
+
+    // make products image upload
+    public function uploadProductsImage(Request $request)
+    {
+        $request->validate([
+            'product_code' => 'required|integer',
+            'product_image' => 'required|mimes:jpg'
+        ]);
+
+        $productCode = $request->input('product_code');
+        $file = $request->file('product_image');
+
+        // Rename file to product_code.jpg
+        $filename = $productCode. '.jpg';
+
+        // Define directories
+        $productPath = public_path('storage/products');
+        $productPdfPath = public_path('storage/products_pdf');
+
+        // Create directories if they don't exist
+        if(!file_exists($productPath))
+        {
+        mkdir($productPath, 0755, true);
+        }
+
+        // Create directories if they don't exist
+        if(!file_exists($productPdfPath))
+        {
+        mkdir($productPdfPath, 0755, true);
+        }
+
+        // Save the file in both directories
+        try{
+            $file->move($productPath, $filename);
+            copy($productPath . '/' . $filename, $productPdfPath . '/' .$filename);
+        }
+
+        catch(\Exception $e)
+        {
+            return response()->json(['error' => 'Failed to upload the file: ' . $e->getMessage()], 500);
+        }
+
+        return response()->json(['message' => 'File uploaded successfully.'], 200);
+    }
         
 }

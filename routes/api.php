@@ -95,6 +95,8 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
     Route::get('/spare_product/{lang?}/{code?}', [ViewController::class, 'get_spares']);
 
     Route::delete('/delete_user/{id}', [DeleteController::class, 'user']);
+
+    Route::post('/upload_product', [CreateController::class, 'uploadProductsImage']);
 });
 
 Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user'])->group(function () {
