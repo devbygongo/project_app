@@ -40,11 +40,11 @@ class InvoiceController extends Controller
 
         $mobileNumbers = User::where('role', 'admin')->pluck('mobile')->toArray();
 
-        print_r($user);
-        echo "<pre>";
-        print_r($order);
-        echo"<pre>";
-        print_r($order_items);
+        // print_r($user);
+        // echo "<pre>";
+        // print_r($order);
+        // echo"<pre>";
+        // print_r($order_items);
 
         if (!$user || !$order || $order_items->isEmpty()) {
             return response()->json(['error' => 'Sorry, required data are not available!'], 500);
@@ -81,7 +81,7 @@ class InvoiceController extends Controller
             'order_invoice' => $fileUrl,
         ]);
 
-        if($request->input('send_message') != 1)
+        if($request->input('send_message') != 1 && false)
         {
             // Directly create an instance of SendWhatsAppUtility
             $whatsAppUtility = new sendWhatsAppUtility();
