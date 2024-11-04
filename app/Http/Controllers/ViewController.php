@@ -601,7 +601,7 @@ class ViewController extends Controller
 
     public function orders()
     {
-        $get_all_orders = OrderModel::with('user')->get();
+        $get_all_orders = OrderModel::with('user')->orderBy('created_at', 'desc')->get();
 
         if (isset($get_all_orders)) {
             return response()->json([
