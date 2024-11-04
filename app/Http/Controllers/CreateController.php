@@ -784,6 +784,5 @@ class CreateController extends Controller
         return ($update_file_name == 1)
         ? response()->json(['message' => 'New products file updated successfully!', 'data' => $update_file_name], 200)
         : response()->json(['message' => 'No changes detected.'], 304);
-    }
-        
+    }  
 }
