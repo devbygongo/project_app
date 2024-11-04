@@ -739,7 +739,7 @@ class CreateController extends Controller
     public function uploadProductsImage(Request $request)
     {
         $request->validate([
-            'product_code' => 'required|integer',
+            'product_code' => 'required|integer|exists:t_products,product_code',
             'product_image' => 'required|mimes:jpg'
         ]);
 
