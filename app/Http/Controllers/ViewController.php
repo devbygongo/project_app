@@ -501,7 +501,7 @@ class ViewController extends Controller
     public function user($lang = 'eng')
     {
         $get_user_details = User::select('id','name', 'name_in_hindi', 'name_in_telugu', 'email','mobile','role','address_line_1','address_line_2','city','pincode','gstin','state','country', 'is_verified', 'type')
-                                ->where('role', 'user')
+                                ->where('role', 'user')->orderBy('updated_at', 'desc')
                                 ->get();
 
         $processed_rec_user = $get_user_details->map(function ($record) use ($lang)
@@ -660,8 +660,6 @@ class ViewController extends Controller
             ], 200);
         }
     }
-
-
 
     public function order_items()
     {
