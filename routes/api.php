@@ -29,7 +29,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
 
     Route::get('/fetch_user/{search?}', [ViewController::class, 'find_user']);
 
-    Route::patch('/make_verify/{id}', [UpdateController::class, 'verify_user']);
+    Route::post('/make_verify/{id}', [UpdateController::class, 'verify_user']);
 
     Route::post('/update_user', [UpdateController::class, 'user']);
 

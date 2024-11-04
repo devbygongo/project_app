@@ -227,11 +227,12 @@ class UpdateController extends Controller
         }    
     }
 
-    public function verify_user($get_id)
+    public function verify_user(Request $request, $get_id)
     {
         $update_verify = User::where('id', $get_id)
             ->update([
                 'is_verified' => '1',
+                'type' => $request->input('type'),
             ]);
 
             $user = User::select('name', 'mobile')
