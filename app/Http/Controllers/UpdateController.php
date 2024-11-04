@@ -273,6 +273,7 @@ class UpdateController extends Controller
                 
                 $response = $whatsAppUtility->sendWhatsApp($user->mobile, $templateParams, '', 'Approve Client');
                 $response = $whatsAppUtility->sendWhatsApp('918961043773', $templateParams, '', 'Approve Client');
+                $response = $whatsAppUtility->sendWhatsApp('919966633307', $templateParams, '', 'Approve Client');
 
                 // Decode the response into an array
                 $responseArray = json_decode($response, true);
