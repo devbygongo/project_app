@@ -139,9 +139,6 @@ Route::get('/fetch_products', [CsvImportController::class, 'importProduct']);
 Route::get('/fetch_users', [CsvImportController::class, 'importUser']);
 Route::get('/fetch_categories', [CsvImportController::class, 'importCategory']);
 
-Route::get('/generate_order_invoice/{orderId}', [InvoiceController::class, 'generateorderInvoice']);
-
-
 Route::post('/login/{otp?}', [CreateController::class, 'login']);
 Route::post('/register_user', [CreateController::class, 'user']);
 Route::post('/get_otp', [UpdateController::class, 'generate_otp']);
