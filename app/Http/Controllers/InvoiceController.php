@@ -40,12 +40,6 @@ class InvoiceController extends Controller
 
         $mobileNumbers = User::where('role', 'admin')->pluck('mobile')->toArray();
 
-        print_r($user);
-        echo "<pre>";
-        print_r($order);
-        echo"<pre>";
-        print_r($order_items);
-
         if (!$user || !$order || $order_items->isEmpty()) {
             return response()->json(['error' => 'Sorry, required data are not available!'], 500);
         }
