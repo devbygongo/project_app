@@ -750,8 +750,8 @@ class CreateController extends Controller
         $filename = $productCode. '.jpg';
 
         // Define directories
-        $productPath = public_path('storage/products');
-        $productPdfPath = public_path('storage/products_pdf');
+        $productPath = public_path('storage/uploads/products');
+        $productPdfPath = public_path('storage/uploads/products_pdf');
 
         // Create directories if they don't exist
         if(!file_exists($productPath))
@@ -776,7 +776,14 @@ class CreateController extends Controller
             return response()->json(['error' => 'Failed to upload the file: ' . $e->getMessage()], 500);
         }
 
-        return response()->json(['message' => 'File uploaded successfully.'], 200);
+        $update_file_name = ProductModel::where('product_code', $request->input('product_code'))
+                                        ->update([
+                                            'product_image' => "/storage/uploads/products/{$filename}",
+                                        ]);
+        
+        return ($update_file_name == 1)
+        ? response()->json(['message' => 'New products file updated successfully!', 'data' => $update_file_name], 200)
+        : response()->json(['message' => 'No changes detected.'], 304);
     }
         
 }

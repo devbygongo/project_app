@@ -229,6 +229,10 @@ class UpdateController extends Controller
 
     public function verify_user(Request $request, $get_id)
     {
+        $request->validate([
+            'type' => 'nullable|string|regex:/^[a-zA-Z\s]*$/',
+        ]);
+
         $update_verify = User::where('id', $get_id)
             ->update([
                 'is_verified' => '1',
