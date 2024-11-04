@@ -332,11 +332,11 @@ class CreateController extends Controller
                                        ->where('type', 'basic')
                                        ->get();
 
-        $get_counter_data = CounterModel::select('prefix', 'counter', 'postfix')->where('name', 'order_basic')->get();
+        $get_counter_basic = CounterModel::select('prefix', 'counter', 'postfix')->where('name', 'order_basic')->get();
 
-        if ($get_counter_data) 
+        if ($get_counter_basic) 
         {
-            $get_order_id = $get_counter_data[0]->prefix.$get_counter_data[0]->counter.$get_counter_data[0]->postfix;
+            $get_order_id = $get_counter_basic[0]->prefix.$get_counter_basic[0]->counter.$get_counter_basic[0]->postfix;
     
             // for `basic` product
             if ((count($get_basic_product)) > 0) 
@@ -379,11 +379,11 @@ class CreateController extends Controller
                                       ->where('type', 'gst')
                                       ->get();
 
-        $get_counter_data = CounterModel::select('prefix', 'counter', 'postfix')->where('name', 'order_gst')->get();
+        $get_counter_gst = CounterModel::select('prefix', 'counter', 'postfix')->where('name', 'order_gst')->get();
 
-        if ($get_counter_data) 
+        if ($get_counter_gst) 
         {
-            $get_order_id = $get_counter_data[0]->prefix.$get_counter_data[0]->counter.$get_counter_data[0]->postfix;
+            $get_order_id = $get_counter_gst[0]->prefix.$get_counter_gst[0]->counter.$get_counter_gst[0]->postfix;
 
             // for `gst` product    
             if ((count($get_gst_product)) > 0) 
@@ -422,7 +422,7 @@ class CreateController extends Controller
         if ($create_order_basic != null) {
             $update_cart = CounterModel::where('name', 'order_basic')
             ->update([
-                'counter' => (($get_counter_data[0]->counter)+1),
+                'counter' => (($get_counter_basic[0]->counter)+1),
             ]);
         }
 
@@ -430,7 +430,7 @@ class CreateController extends Controller
         {
             $update_cart = CounterModel::where('name', 'order_gst')
                                         ->update([
-                                         'counter' => (($get_counter_data[0]->counter)+1),
+                                         'counter' => (($get_counter_gst[0]->counter)+1),
             ]);
         }
 
