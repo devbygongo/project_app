@@ -58,7 +58,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
 
     Route::get('/view_order', [ViewController::class, 'orders']);
 
-    Route::psot('/update_order', [UpdateController::class, 'edit_order']);
+    Route::post('/update_order', [UpdateController::class, 'edit_order']);
     
     Route::post('/view_user_order/{id?}', [ViewController::class, 'orders_user_id']);
     
