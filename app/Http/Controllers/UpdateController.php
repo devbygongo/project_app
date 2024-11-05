@@ -247,15 +247,15 @@ class UpdateController extends Controller
 
             // Find the user by ID and toggle is_verified
             $user = User::findOrFail($get_id);
-            $user->is_verified = $user->is_verified == 1 ? 0 : 1;
+            $user->is_verified = $user->is_verified == '1' ? '0' : '1';
             $user->type = $request->input('type');
-            $user->save();
+            $update_verify = $user->save();
 
             // Retrieve the name and mobile of the user
             $userData = $user->only(['name', 'mobile']);
 
 
-            if ($update_verify == 1) {
+            if ($update_verify == true) {
 
                 $templateParams = [
                     'name' => 'ace_user_approved', // Replace with your WhatsApp template name
