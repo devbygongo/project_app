@@ -233,17 +233,26 @@ class UpdateController extends Controller
             'type' => 'nullable|string|regex:/^[a-zA-Z\s]*$/',
         ]);
 
-        $update_verify = User::where('id', $get_id)
-            ->update([
-                'is_verified' => '1',
-                'type' => $request->input('type'),
-            ]);
+        // $update_verify = User::where('id', $get_id)
+        //     ->update([
+        //         'is_verified' => '1',
+        //         'type' => $request->input('type'),
+        //     ]);
 
-            $user = User::select('name', 'mobile')
-                         ->where('id', $get_id)
-                         ->first();
+        //     $user = User::select('name', 'mobile')
+        //                  ->where('id', $get_id)
+        //                  ->first();
             
-            $mobileNumbers = User::where('role', 'admin')->pluck('mobile')->toArray();
+            // $mobileNumbers = User::where('role', 'admin')->pluck('mobile')->toArray();
+
+            // Find the user by ID and toggle is_verified
+            $user = User::findOrFail($get_id);
+            $user->is_verified = $user->is_verified == 1 ? 0 : 1;
+            $user->type = $request->input('type');
+            $user->save();
+            
+            // Retrieve the name and mobile of the user
+            $userData = $user->only(['name', 'mobile']);
 
 
             if ($update_verify == 1) {
