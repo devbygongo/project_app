@@ -314,4 +314,9 @@ class UpdateController extends Controller
                 ], 400);
             }    
     }
+
+    public function edit_order(Request $request)
+    {
+        dd($request);
+    }
 }
