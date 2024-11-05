@@ -317,6 +317,6 @@ class UpdateController extends Controller
 
     public function edit_order(Request $request, $id)
     {
-        dd($request);
+        print_r($request->toArray());
     }
 }
