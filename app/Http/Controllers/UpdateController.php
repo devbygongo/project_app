@@ -250,7 +250,7 @@ class UpdateController extends Controller
             $user->is_verified = $user->is_verified == 1 ? 0 : 1;
             $user->type = $request->input('type');
             $user->save();
-            
+
             // Retrieve the name and mobile of the user
             $userData = $user->only(['name', 'mobile']);
 
@@ -292,18 +292,25 @@ class UpdateController extends Controller
                     return response()->json([
                         'message' => 'Error!',
                     ], 503);
-                } else {
+                } else 
+                {
+                    // return response()->json([
+                    //     'message' => 'User verified successfully!',
+                    //     'data' => $update_verify
+                    // ], 200);
+                  // Check if the user is now verified or unverified
+                    $statusMessage = $user->is_verified == 1 ? 'User verified successfully!' : 'User unverified successfully!';
+
                     return response()->json([
-                        'message' => 'User verified successfully!',
-                        'data' => $update_verify
+                        'message' => $statusMessage,
+                        'data' => $user->is_verified, // Returns the is_verified status (1 or 0)
                     ], 200);
-                    
                 }
             }
     
             else {
                 return response()->json([
-                    'message' => 'Failed to verify the user'
+                    'message' => 'Sorry, failed to update'
                 ], 400);
             }    
     }
