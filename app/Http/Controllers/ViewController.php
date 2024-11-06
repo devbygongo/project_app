@@ -152,8 +152,6 @@ class ViewController extends Controller
 			);
 		}
 
-
-
         // Apply search filter if provided
         if ($search) {
             $query->where('product_name', 'like', "%{$search}%");
@@ -213,10 +211,21 @@ class ViewController extends Controller
         // Retrieve input parameters with defaults
         $offset = max(0, (int) $request->input('offset', 0));
         $limit = max(1, (int) $request->input('limit', 10));
-        $user_id = $request->input('user_id');
+        // $user_id = $request->input('user_id');
         $search = $request->input('search', null);
         $category = $request->input('category', null);
         $subCategory = $request->input('sub_category', null);
+
+        $get_user = Auth::User();
+
+        if ($get_user->role == 'user') {
+            $user_id = $get_user->id;
+        } else {
+            $request->validate([
+                'user_id' => 'required',
+            ]);
+            $user_id = $request->input('user_id');
+        }
 
         // Get the user type
 		$user_type = User::select('type')->where('id', $user_id)->first();

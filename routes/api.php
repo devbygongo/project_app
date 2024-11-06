@@ -78,8 +78,6 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
 
     Route::delete('/delete_cart/{id}', [DeleteController::class, 'cart']);
 
-    
-
     Route::post('/add_counter', [CreateController::class, 'counter']);
 
     Route::get('/view_counter', [ViewController::class, 'counter']);
