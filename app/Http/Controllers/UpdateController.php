@@ -8,6 +8,10 @@ use App\Models\User;
 
 use App\Models\CartModel;
 
+use App\Models\OrderModel;
+
+use App\Models\OrderItemsModel;
+
 use App\Utils\sendWhatsAppUtility;
 
 use Illuminate\Support\Facades\Auth;
@@ -317,10 +321,59 @@ class UpdateController extends Controller
 
     public function edit_order(Request $request, $id)
     {
-        $data = ($request->toArray());
+        // Validate incoming request data
+        $request->validate([
+            'order_id' => 'required|string',
+            'order_type' => 'required|string',
+            'user_id' => 'required|integer',
+            'amount' => 'required|numeric',
+            'items' => 'required|array',
+            'items.*.product_code' => 'required|string',
+            'items.*.product_name' => 'required|string',
+            'items.*.quantity' => 'required|integer',
+            'items.*.rate' => 'required|numeric',
+            'items.*.total' => 'required|numeric',
+            'items.*.remarks' => 'nullable|string',
+        ]);
+
+        // Find the order by its ID
+        $order = OrderModel::find($id);
+
+        if (!$order) {
+            return response()->json([
+                'message' => 'Order not found!'
+            ], 404);
+        }
+
+        // Update the order details
+        $order->amount = $request->input('amount');
+        $order->save();
+
+        // Remove existing order items for the given order ID
+        OrderItemsModel::where('order_id', $id)->delete();
+
+        // Add the updated items to the order
+        $items = $request->input('items');
+        foreach ($items as $item) {
+            OrderItemsModel::create([
+                'order_id' => $id,
+                'product_code' => $item['product_code'],
+                'product_name' => $item['product_name'],
+                'quantity' => $item['quantity'],
+                'rate' => $item['rate'],
+                'total' => $item['total'],
+                'type' => strtolower($request->input('order_type')),
+                'remarks' => $item['remarks'] ?? '',
+            ]);
+        }
+
+        $generate_order_invoice->generateorderInvoice($id);
 
         return response()->json([
-            'message' => $data
-        ], 400);
+            'message' => 'Order updated successfully!',
+            'order' => $order,
+            'items' => $items
+        ], 200);
     }
+
 }

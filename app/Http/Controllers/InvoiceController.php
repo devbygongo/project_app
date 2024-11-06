@@ -165,7 +165,7 @@ class InvoiceController extends Controller
                 ]
             ],
         ];
-
+        
         foreach ($mobileNumbers as $mobileNumber) 
         {
             if($mobileNumber == '+918961043773' || true)
