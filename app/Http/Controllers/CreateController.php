@@ -166,6 +166,7 @@ class CreateController extends Controller
 
                     // Remove OTP record after successful validation
                     User::where('mobile', $request->mobile)->update(['otp' => null, 'expires_at' => null]);
+                    
 
                     // Generate a Sanctum token
                     $token = $user->createToken('API TOKEN')->plainTextToken;
