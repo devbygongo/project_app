@@ -317,6 +317,10 @@ class UpdateController extends Controller
 
     public function edit_order(Request $request, $id)
     {
-        print_r($request->toArray());
+        $data = ($request->toArray());
+
+        return response()->json([
+            'message' => $data
+        ], 400);
     }
 }
