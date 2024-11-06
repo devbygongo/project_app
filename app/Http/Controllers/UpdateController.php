@@ -233,29 +233,29 @@ class UpdateController extends Controller
             'type' => 'nullable|string|regex:/^[a-zA-Z\s]*$/',
         ]);
 
-        // $update_verify = User::where('id', $get_id)
-        //     ->update([
-        //         'is_verified' => '1',
-        //         'type' => $request->input('type'),
-        //     ]);
+        $update_verify = User::where('id', $get_id)
+             ->update([
+                 'is_verified' => '1',
+                 'type' => $request->input('type'),
+             ]);
 
-        //     $user = User::select('name', 'mobile')
-        //                  ->where('id', $get_id)
-        //                  ->first();
+             $user = User::select('name', 'mobile')
+                          ->where('id', $get_id)
+                          ->first();
             
             // $mobileNumbers = User::where('role', 'admin')->pluck('mobile')->toArray();
 
             // Find the user by ID and toggle is_verified
-            $user = User::findOrFail($get_id);
-            $user->is_verified = $user->is_verified == '1' ? '0' : '1';
-            $user->type = $request->input('type');
-            $update_verify = $user->save();
+            //$user = User::findOrFail($get_id);
+            //$user->is_verified = '1';
+            //$user->type = $request->input('type');
+            //$update_verify = $user->save();
 
             // Retrieve the name and mobile of the user
-            $userData = $user->only(['name', 'mobile']);
+            //$userData = $user->only(['name', 'mobile']);
 
 
-            if ($update_verify == true) {
+            if ($update_verify == 1) {
 
                 $templateParams = [
                     'name' => 'ace_user_approved', // Replace with your WhatsApp template name
@@ -294,17 +294,17 @@ class UpdateController extends Controller
                     ], 503);
                 } else 
                 {
-                    // return response()->json([
-                    //     'message' => 'User verified successfully!',
-                    //     'data' => $update_verify
-                    // ], 200);
-                  // Check if the user is now verified or unverified
-                    $statusMessage = $user->is_verified == 1 ? 'User verified successfully!' : 'User unverified successfully!';
-
                     return response()->json([
-                        'message' => $statusMessage,
-                        'data' => $user->is_verified, // Returns the is_verified status (1 or 0)
-                    ], 200);
+                         'message' => 'User verified successfully!',
+                         'data' => $update_verify
+                     ], 200);
+                  // Check if the user is now verified or unverified
+                    //$statusMessage = $user->is_verified == 1 ? 'User verified successfully!' : 'User unverified successfully!';
+
+                    //return response()->json([
+                        //'message' => $statusMessage,
+                        //'data' => $user->is_verified, // Returns the is_verified status (1 or 0)
+                    //], 200);
                 }
             }
     
