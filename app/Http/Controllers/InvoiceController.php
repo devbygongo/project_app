@@ -48,8 +48,11 @@ class InvoiceController extends Controller
         
 
         if (!$user || !$order || $order_items->isEmpty()) {
+            print_r("mmm");
             return response()->json(['error' => 'Sorry, required data are not available!'], 500);
         }
+        print_r("ppp");
+
 
         $sanitizedOrderId = preg_replace('/[^A-Za-z0-9]+/', '-', trim($order->order_id));
         $sanitizedOrderId = trim($sanitizedOrderId, '-');
