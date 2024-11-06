@@ -137,6 +137,9 @@ Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user']
 
 });
 
+Route::get('/generate_order_invoice/{orderId}', [InvoiceController::class, 'generateorderInvoice']);
+
+
 Route::get('/fetch_products', [CsvImportController::class, 'importProduct']);
 Route::get('/fetch_users', [CsvImportController::class, 'importUser']);
 Route::get('/fetch_categories', [CsvImportController::class, 'importCategory']);
