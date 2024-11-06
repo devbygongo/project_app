@@ -152,8 +152,6 @@ class CreateController extends Controller
                         'message' => 'OTP has expired.',
                     ], 200);
                 } else {
-                    // Remove OTP record after successful validation
-                    User::where('mobile', $request->mobile)->update(['otp' => null, 'expires_at' => null]);
 
                     // Retrieve the user
                     $user = User::where('mobile', $request->mobile)->first();
@@ -165,6 +163,9 @@ class CreateController extends Controller
                             'message' => 'Account not verified, you will receive a notification once your account is verified.',
                         ], 200);
                     }
+
+                    // Remove OTP record after successful validation
+                    User::where('mobile', $request->mobile)->update(['otp' => null, 'expires_at' => null]);
 
                     // Generate a Sanctum token
                     $token = $user->createToken('API TOKEN')->plainTextToken;
