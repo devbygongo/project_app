@@ -12,6 +12,8 @@ use App\Models\OrderModel;
 
 use App\Models\OrderItemsModel;
 
+use App\Http\Controllers\InvoiceController;
+
 use App\Utils\sendWhatsAppUtility;
 
 use Illuminate\Support\Facades\Auth;
@@ -366,6 +368,8 @@ class UpdateController extends Controller
                 'remarks' => $item['remarks'] ?? '',
             ]);
         }
+
+        $generate_order_invoice = new InvoiceController();
 
         $generate_order_invoice->generateorderInvoice($id);
 
