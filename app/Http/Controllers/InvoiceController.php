@@ -16,6 +16,10 @@ use Illuminate\Support\Facades\File;
 use App\Utils\sendWhatsAppUtility;
 use Carbon\Carbon;
 
+ini_set('memory_limit', '512M'); // Adjust as needed
+set_time_limit(300); // Increase timeout to 5 minutes or as needed
+
+
 class InvoiceController extends Controller
 {
     //
@@ -26,48 +30,42 @@ class InvoiceController extends Controller
         $order = OrderModel::select('user_id','order_id', 'amount', 'order_date','type')
                             ->where('id', $orderId)
                             ->first();
+		
+		
 
         $get_user = $order->user_id;
         
         $user = User::select('name', 'mobile', 'email', 'address_line_1', 'address_line_2', 'gstin')
                     ->where('id', $get_user)
                     ->first();
-
+		
 
         $order_items = OrderItemsModel::with('product:product_code')
                                     ->select('product_code', 'product_name', 'rate', 'quantity', 'total', 'remarks')
                                     ->where('order_id', $orderId)
                                     ->get();
-
         $mobileNumbers = User::where('role', 'admin')->pluck('mobile')->toArray();
-
-        // print_r(!$user);
-        // echo "<pre>";
-        // print_r(!$order);
-        // echo"<pre>";
-        // print_r($order_items);
-        // dd($order_items->isEmpty());
         
 
         if (!$user || !$order || $order_items->isEmpty()) {
-            // print_r("not-live");
-
             return response()->json(['error' => 'Sorry, required data are not available!'], 500);
         }
-        // print_r("live");
 
         $sanitizedOrderId = preg_replace('/[^A-Za-z0-9]+/', '-', trim($order->order_id));
         $sanitizedOrderId = trim($sanitizedOrderId, '-');
 
+		//die($sanitizedOrderId);
+		
         $data = [
             'user' => $user,
             'order' => $order,
             'order_items' => $order_items,
         ];
+		$mpdf = new Mpdf();
 
-        $html = view('order_invoice_template', $data)->render();
+        /*$html = view('order_invoice_template', $data)->render();
 
-        $mpdf = new Mpdf();
+        
         $mpdf->WriteHTML($html);
 
         $publicPath = 'uploads/orders/';
@@ -78,7 +76,42 @@ class InvoiceController extends Controller
             File::makeDirectory($storage_path, 0755, true);
         }
 
-        $mpdf->Output($filePath, 'F');
+        $mpdf->Output($filePath, 'F');*/
+		
+		// Load initial HTML for header and customer information.
+		// Render the header
+		$headerHtml = view('order_invoice_template_header', ['user' => $user, 'order' => $order])->render();
+		$mpdf->WriteHTML($headerHtml);
+
+		$chunkSize = 10;
+		$orderItems = collect($order_items)->chunk($chunkSize);
+
+		foreach ($orderItems as $chunk) {
+			foreach ($chunk as $index => $item) {
+				// Render each item row individually
+				$htmlChunk = view('order_invoice_template_items', compact('item', 'index'))->render();
+				$mpdf->WriteHTML($htmlChunk);
+			}
+			ob_flush();
+			flush();
+		}
+
+
+		// Render the footer
+		$footerHtml = view('order_invoice_template_footer', ['order' => $order])->render();
+		$mpdf->WriteHTML($footerHtml);
+
+		// Output the PDF
+		$publicPath = 'uploads/orders/';
+		$fileName = 'invoice_' . $sanitizedOrderId . '.pdf';
+		$filePath = storage_path('app/public/' . $publicPath . $fileName);
+
+		if (!File::isDirectory($storage_path = storage_path('app/public/' . $publicPath))) {
+			File::makeDirectory($storage_path, 0755, true);
+		}
+
+		$mpdf->Output($filePath, 'F');
+
 
         $fileUrl = asset('storage/' . $publicPath . $fileName);
 
