@@ -321,6 +321,33 @@ class UpdateController extends Controller
             }    
     }
 
+    public function unverify_user(Request $request, $get_id)
+    {
+
+        $update_verify = User::where('id', $get_id)
+             ->update([
+                 'is_verified' => '0',
+             ]);
+
+             $user = User::select('name', 'mobile')
+                          ->where('id', $get_id)
+                          ->first();
+
+            if ($update_verify == 1) {
+
+                return response()->json([
+                        'message' => 'User verified successfully!',
+                        'data' => $update_verify
+                    ], 200);
+            }
+    
+            else {
+                return response()->json([
+                    'message' => 'Sorry, failed to update'
+                ], 400);
+            }    
+    }
+
     public function edit_order(Request $request, $id)
     {
         // Validate incoming request data
