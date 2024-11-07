@@ -264,8 +264,8 @@ class ViewController extends Controller
                 'category', 
                 'sub_category', 
                 'product_image', 
-                0, 
-                0,
+                '0', 
+                '0',
                 'out_of_stock',
                 'yet_to_launch'
             );
