@@ -201,7 +201,7 @@ class CsvImportController extends Controller
                     'gstin' => $record_user['GSTIN'],
                     'state' => $record_user['State'],
                     'country' => $record_user['Country'],
-                    'markup' => $markup_user, // Ensure this is a valid number
+                    'type' => $markup_user, // Ensure this is a valid number
                 ]);
             }
         }   
