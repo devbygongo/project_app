@@ -257,6 +257,8 @@ class ViewController extends Controller
                     'yet_to_launch'
                 );
         } else if ($user_type && $user_type->type == 'zeroprice') {
+
+
             // If user type is 'special', select special columns but alias them as 'basic' and 'gst'
             $query = ProductModel::select(
                 'product_code', 
@@ -264,11 +266,12 @@ class ViewController extends Controller
                 'category', 
                 'sub_category', 
                 'product_image', 
-                '0', 
-                '0',
+                DB::raw('0 as basic'), 
+                DB::raw('0 as gst'), 
                 'out_of_stock',
                 'yet_to_launch'
             );
+
         } else {
 			// Default columns for non-special users
 			$query = ProductModel::select(
