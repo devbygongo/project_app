@@ -32,7 +32,7 @@
     </tr>
     <tr>
         <td>Address:</td><td>{{ $user->address_line_1 }} {{ $user->address_line_2 }}</td>
-        <td>Order Date:</td><td>{{ Carbon::parse($order->order_date)->format('d-m-Y') }}</td>
+        <td>Order Date:</td><td>{{ \Carbon\Carbon::parse($order->order_date)->format('d-m-Y') }}</td>
     </tr>
     <tr>
         <td>Mobile:</td><td>{{ $user->mobile }}</td>
