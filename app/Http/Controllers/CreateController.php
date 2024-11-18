@@ -158,6 +158,45 @@ class CreateController extends Controller
 
                     // Check if user is verified
                     if ($user->is_verified == '0') {
+
+                        $whatsAppUtility = new sendWhatsAppUtility();
+
+                        $templateParams = [
+                            'name' => 'ace_login_attempt', // Replace with your WhatsApp template name
+                            'language' => ['code' => 'en'],
+                            'components' => [
+                                [
+                                    'type' => 'body',
+                                    'parameters' => [
+                                        [
+                                            'type' => 'text',
+                                            'text' => $user->name,
+                                        ],
+                                        [
+                                            'type' => 'text',
+                                            'text' =>  substr($user->mobile, -10),
+                                        ]
+                                    ],
+                                ]
+                            ],
+                        ];
+
+                        $mobileNumbers = User::where('role', 'admin')->pluck('mobile')->toArray();
+                        foreach ($mobileNumbers as $mobileNumber) 
+                        {
+                            if($mobileNumber == '+918961043773' || true)
+                            {
+                                // Send message for each number
+                                $response = $whatsAppUtility->sendWhatsApp($mobileNumber, $templateParams, '', 'Admin Order Invoice');
+
+                                // Check if the response has an error or was successful
+                                if (isset($responseArray['error'])) 
+                                {
+                                    echo "Failed to send order to Whatsapp!";
+                                }
+                            }
+                        }
+                        
                         return response()->json([
                             'success' => false,
                             'message' => 'Account not verified, you will receive a notification once your account is verified.',
