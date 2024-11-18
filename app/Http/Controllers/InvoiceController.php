@@ -256,7 +256,7 @@ class InvoiceController extends Controller
                             ],
                             [
                                 'type' => 'text',
-                                'text' => $order->order_date->format('d-m-Y'),
+                                'text' => $order->order_date,
                             ],
                             [
                                 'type' => 'text',
@@ -310,7 +310,7 @@ class InvoiceController extends Controller
                             ],
                             [
                                 'type' => 'text',
-                                'text' => $order->order_date->format('d-m-Y'),
+                                'text' => $order->order_date,
                             ],
                             [
                                 'type' => 'text',
