@@ -123,7 +123,7 @@ class InvoiceController extends Controller
         // Directly create an instance of SendWhatsAppUtility
         $whatsAppUtility = new sendWhatsAppUtility();
 
-        if($is_edited)
+        if(!$is_edited)
         {
             $templateParams = [
                 'name' => 'ace_new_order_admin', // Replace with your WhatsApp template name
