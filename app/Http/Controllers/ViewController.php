@@ -784,22 +784,23 @@ class ViewController extends Controller
     {
         $get_user = Auth::User();
 
-        $user_type = User::select('type')->where('id', $get_user->id)->first();
-        $basic_column = 'basic';
-        $gst_column = 'gst';
-
-        if ($user_type && $user_type->type == 'special') {
-            $basic_column = 'special_basic';
-            $gst_column = 'special_gst';
-        } elseif ($user_type && $user_type->type == 'outstation') {
-            $basic_column = 'outstation_basic';
-            $gst_column = 'outstation_gst';
-        } elseif ($user_type && $user_type->type == 'zeroprice') {
-            $basic_column = DB::raw('0 as basic');
-            $gst_column = DB::raw('0 as gst');
-        }
-
         if ($get_user->role == 'admin') {
+
+            $user_type = User::select('type')->where('id', $id)->first();
+            $basic_column = 'basic';
+            $gst_column = 'gst';
+
+            if ($user_type && $user_type->type == 'special') {
+                $basic_column = DB::raw('special_basic as basic');
+                $gst_column = DB::raw('special_gst as gst');
+            } elseif ($user_type && $user_type->type == 'outstation') {
+                $basic_column = DB::raw('outstation_basic as basic');
+                $gst_column = DB::raw('outstation_gst as gst');
+            } elseif ($user_type && $user_type->type == 'zeroprice') {
+                $basic_column = DB::raw('0 as basic');
+                $gst_column = DB::raw('0 as gst');
+            }
+            
             $get_items_for_user = CartModel::where('t_cart.user_id', $id)
                 ->join('t_products', 't_cart.product_code', '=', 't_products.product_code')
                 ->select(
@@ -822,6 +823,22 @@ class ViewController extends Controller
 
             $cart_data_count = count($get_items_for_user);
         } else {
+
+            $user_type = User::select('type')->where('id', $get_user->id)->first();
+            $basic_column = 'basic';
+            $gst_column = 'gst';
+
+            if ($user_type && $user_type->type == 'special') {
+                $basic_column = DB::raw('special_basic as basic');
+                $gst_column = DB::raw('special_gst as gst');
+            } elseif ($user_type && $user_type->type == 'outstation') {
+                $basic_column = DB::raw('outstation_basic as basic');
+                $gst_column = DB::raw('outstation_gst as gst');
+            } elseif ($user_type && $user_type->type == 'zeroprice') {
+                $basic_column = DB::raw('0 as basic');
+                $gst_column = DB::raw('0 as gst');
+            }
+            
             $get_items_for_user = CartModel::where('t_cart.user_id', $get_user->id)
                 ->join('t_products', 't_cart.product_code', '=', 't_products.product_code')
                 ->select(
@@ -842,6 +859,7 @@ class ViewController extends Controller
                 )
                 ->get();
         }
+
 
     
         if (isset($get_items_for_user)) {
