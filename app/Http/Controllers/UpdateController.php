@@ -374,6 +374,13 @@ class UpdateController extends Controller
             ], 404);
         }
 
+        // Check if the order belongs to the provided user_id
+        if ($order->user_id !== $request->input('user_id')) {
+            return response()->json([
+                'message' => 'Unauthorized action. This order does not belong to the specified user.'
+            ], 403);
+        }
+
         // Update the order details
         $order->amount = $request->input('amount');
         $order->save();
@@ -397,7 +404,6 @@ class UpdateController extends Controller
         }
 
         $generate_order_invoice = new InvoiceController();
-
         $generate_order_invoice->generateorderInvoice($id);
 
         return response()->json([
@@ -406,5 +412,33 @@ class UpdateController extends Controller
             'items' => $items
         ], 200);
     }
+
+    public function complete_order(Request $request, $id)
+    {
+        // Validate incoming request data
+        $request->validate([
+            'order_id' => 'required|string'
+        ]);
+
+        // Find the order by its ID
+        $order = OrderModel::find($id);
+
+        if (!$order) {
+            return response()->json([
+                'message' => 'Order not found!'
+            ], 404);
+        }
+
+        // Update the status of the order to 'completed'
+        $order->status = 'completed';
+        $order->save();
+
+        return response()->json([
+            'message' => 'Order status updated to completed successfully!',
+            'order' => $order
+        ], 200);
+    }
+
+
 
 }
