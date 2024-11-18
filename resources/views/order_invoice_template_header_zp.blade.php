@@ -39,7 +39,7 @@
     </tr>
     <tr>
         <td>Mobile:</td><td>{{ $user->mobile }}</td>
-        <td>Type:</td><td>{{ strtoupper($order->type) }}</td>
+        <td></td><td></td>
     </tr>
 </table>
 
@@ -50,8 +50,7 @@
             <th>Photo</th>
             <th>Product Name</th>
             <th class="center-align">Qty</th>
-            <th class="right-align">Unit Price (Rs.)</th>
-            <th class="right-align">Total (Rs.)</th>
+            <th class="right-align">Type</th>
         </tr>
     </thead>
     <tbody>

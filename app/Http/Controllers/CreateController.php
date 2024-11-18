@@ -28,6 +28,8 @@ use Carbon\Carbon;
 
 use App\Http\Controllers\InvoiceController;
 
+use App\Http\Controllers\InvoiceControllerZP;
+
 use App\Utils\sendWhatsAppUtility;
 
 class CreateController extends Controller
@@ -365,166 +367,263 @@ class CreateController extends Controller
             $userId = $request->input('user_id');
         }
 
-        $create_order_basic = null;
-        $create_order_gst = null;
+        $current_user = User::select('type')->where('id', $userId)->first();
+        $user_type = $current_user->type;
 
-        $get_basic_product = CartModel::select('amount', 'quantity', 'product_code', 'product_name', 'rate', 'type', 'remarks')
-                                       ->where('user_id', $userId)
-                                       ->where('type', 'basic')
-                                       ->get();
-
-        $get_counter_basic = CounterModel::select('prefix', 'counter', 'postfix')->where('name', 'order_basic')->get();
-
-        if ($get_counter_basic) 
+        if($user_type == 'zeroprice')
         {
-            $get_order_id = $get_counter_basic[0]->prefix.$get_counter_basic[0]->counter.$get_counter_basic[0]->postfix;
+
+            $get_product = CartModel::select('amount', 'quantity', 'product_code', 'product_name', 'rate', 'type', 'remarks')
+                                        ->where('user_id', $userId)
+                                        ->get();
+
+            $get_counter = CounterModel::select('prefix', 'counter', 'postfix')->where('name', 'order_zeroprice')->get();
+
+            if ($get_counter) 
+            {
+                $get_order_id = $get_counter[0]->prefix.$get_counter[0]->counter.$get_counter[0]->postfix;
+        
+                // for `basic` product
+                if ((count($get_product)) > 0) 
+                {
+                    $amount_total = 0;
+                    foreach ($get_product as $product) 
+                    {
+                        $amount_total += (($product->rate) * ($product->quantity));
+                    }
+                    
+                    $create_order = OrderModel::create([
+                        'user_id' => $userId,
+                        'order_id' => $get_order_id,
+                        'order_date' => Carbon::now(),
+                        'amount' => $amount_total,
+                        'type' => 'basic',
+                    ]);
+                    //order_table_id
+
+                    foreach ($get_product as $product) 
+                    {
+                        // save every item in order_items with order_table_id
+                        $create_order_items = OrderItemsModel::create([
+                            'order_id' => $create_order->id,
+                            'product_code' => $product->product_code,
+                            'product_name' => $product->product_name,
+                            'rate' => $product->rate,
+                            'quantity' => $product->quantity,
+                            'total' => $product->rate * $product->quantity,
+                            'type' => $product->type,
+                            'remarks' => $product->remarks,
+                        ]);
+                    }
+                }
+
+                if ($create_order != null) {
+                    $update_cart = CounterModel::where('name', 'order_zeroprice')
+                    ->update([
+                        'counter' => (($get_counter[0]->counter)+1),
+                    ]);
+                }
+
+                $data = [];
+
+                // Check if data_basic exists and is not null, then add it to the array
+                if (!empty($create_order)) {
+                    $data[] = $create_order;
+                }
+
+                // Remove items from the cart for the user
+                $get_remove_items = CartModel::where('user_id', $userId)->delete();
+
+                if ($create_order !== null ) {
+                    $generate_order_zp = new InvoiceControllerZP();
     
-            // for `basic` product
-            if ((count($get_basic_product)) > 0) 
+                    // Iterate through the $data array and add the corresponding invoices
+                    foreach ($data as &$order) {
+                        // Unset unwanted fields
+    
+                        $order->pdf = $generate_order_zp->generateorderInvoiceZP($create_order->id);
+                        unset($order->updated_at, $order->created_at, $order->id);
+    
+                    }
+    
+                    return response()->json([
+                        'message' => 'Order created and Invoice generated successfully!',
+                        'data' => $data
+                    ], 201);
+                }
+    
+    
+                else {
+                    return response()->json([
+                        'message' => 'Sorry, failed to create order!',
+                        'data' => 'Error!'
+                    ], 400);
+                }  
+
+            }
+        }else{
+
+            $create_order_basic = null;
+            $create_order_gst = null;
+
+            $get_basic_product = CartModel::select('amount', 'quantity', 'product_code', 'product_name', 'rate', 'type', 'remarks')
+                                        ->where('user_id', $userId)
+                                        ->where('type', 'basic')
+                                        ->get();
+
+            $get_counter_basic = CounterModel::select('prefix', 'counter', 'postfix')->where('name', 'order_basic')->get();
+
+            if ($get_counter_basic) 
             {
-                $basic_amount_total = 0;
-                foreach ($get_basic_product as $basic_product) 
+                $get_order_id = $get_counter_basic[0]->prefix.$get_counter_basic[0]->counter.$get_counter_basic[0]->postfix;
+        
+                // for `basic` product
+                if ((count($get_basic_product)) > 0) 
                 {
-                    $basic_amount_total += (($basic_product->rate) * ($basic_product->quantity));
-                }
-                
-                $create_order_basic = OrderModel::create([
-                    'user_id' => $userId,
-                    'order_id' => $get_order_id,
-                    'order_date' => Carbon::now(),
-                    'amount' => $basic_amount_total,
-                    'type' => 'basic',
-                ]);
-                //order_table_id
-
-                foreach ($get_basic_product as $basic_product) 
-                {
-                    // save every item in order_items with order_table_id
-                    $create_order_items = OrderItemsModel::create([
-                        'order_id' => $create_order_basic->id,
-                        'product_code' => $basic_product->product_code,
-                        'product_name' => $basic_product->product_name,
-                        'rate' => $basic_product->rate,
-                        'quantity' => $basic_product->quantity,
-                        'total' => $basic_product->rate * $basic_product->quantity,
-                        'type' => $basic_product->type,
-                        'remarks' => $basic_product->remarks,
+                    $basic_amount_total = 0;
+                    foreach ($get_basic_product as $basic_product) 
+                    {
+                        $basic_amount_total += (($basic_product->rate) * ($basic_product->quantity));
+                    }
+                    
+                    $create_order_basic = OrderModel::create([
+                        'user_id' => $userId,
+                        'order_id' => $get_order_id,
+                        'order_date' => Carbon::now(),
+                        'amount' => $basic_amount_total,
+                        'type' => 'basic',
                     ]);
+                    //order_table_id
+
+                    foreach ($get_basic_product as $basic_product) 
+                    {
+                        // save every item in order_items with order_table_id
+                        $create_order_items = OrderItemsModel::create([
+                            'order_id' => $create_order_basic->id,
+                            'product_code' => $basic_product->product_code,
+                            'product_name' => $basic_product->product_name,
+                            'rate' => $basic_product->rate,
+                            'quantity' => $basic_product->quantity,
+                            'total' => $basic_product->rate * $basic_product->quantity,
+                            'type' => $basic_product->type,
+                            'remarks' => $basic_product->remarks,
+                        ]);
+                    }
                 }
+
             }
 
-        }
+            $get_gst_product = CartModel::select('amount', 'quantity', 'product_code', 'product_name', 'rate', 'type', 'remarks')
+                                        ->where('user_id', $userId)
+                                        ->where('type', 'gst')
+                                        ->get();
 
-        $get_gst_product = CartModel::select('amount', 'quantity', 'product_code', 'product_name', 'rate', 'type', 'remarks')
-                                      ->where('user_id', $userId)
-                                      ->where('type', 'gst')
-                                      ->get();
+            $get_counter_gst = CounterModel::select('prefix', 'counter', 'postfix')->where('name', 'order_gst')->get();
 
-        $get_counter_gst = CounterModel::select('prefix', 'counter', 'postfix')->where('name', 'order_gst')->get();
-
-        if ($get_counter_gst) 
-        {
-            $get_order_id = $get_counter_gst[0]->prefix.$get_counter_gst[0]->counter.$get_counter_gst[0]->postfix;
-
-            // for `gst` product    
-            if ((count($get_gst_product)) > 0) 
+            if ($get_counter_gst) 
             {
-                $gst_amount_total = 0;
-                foreach ($get_gst_product as $gst_product) {
-                    $gst_amount_total += (($gst_product->rate) * ($gst_product->quantity));
-                }
+                $get_order_id = $get_counter_gst[0]->prefix.$get_counter_gst[0]->counter.$get_counter_gst[0]->postfix;
 
-                $create_order_gst = OrderModel::create([
-                    'user_id' => $userId,
-                    'order_id' => $get_order_id,
-                    'order_date' => Carbon::now(),
-                    'amount' => $gst_amount_total,
-                    'type' => 'gst',
-                ]);
+                // for `gst` product    
+                if ((count($get_gst_product)) > 0) 
+                {
+                    $gst_amount_total = 0;
+                    foreach ($get_gst_product as $gst_product) {
+                        $gst_amount_total += (($gst_product->rate) * ($gst_product->quantity));
+                    }
 
-                 //order_table_id
-                 foreach ($get_gst_product as $gst_product) {
-                    // save every item in order_items with order_table_id
-                    $create_order_items = OrderItemsModel::create([
-                        'order_id' => $create_order_gst->id,
-                        'product_code' => $gst_product->product_code,
-                        'product_name' => $gst_product->product_name,
-                        'rate' => $gst_product->rate,
-                        'quantity' => $gst_product->quantity,
-                        'total' => $gst_product->rate * $gst_product->quantity,
-                        'type' => $gst_product->type,
-                        'remarks' => $gst_product->remarks,
+                    $create_order_gst = OrderModel::create([
+                        'user_id' => $userId,
+                        'order_id' => $get_order_id,
+                        'order_date' => Carbon::now(),
+                        'amount' => $gst_amount_total,
+                        'type' => 'gst',
                     ]);
+
+                    //order_table_id
+                    foreach ($get_gst_product as $gst_product) {
+                        // save every item in order_items with order_table_id
+                        $create_order_items = OrderItemsModel::create([
+                            'order_id' => $create_order_gst->id,
+                            'product_code' => $gst_product->product_code,
+                            'product_name' => $gst_product->product_name,
+                            'rate' => $gst_product->rate,
+                            'quantity' => $gst_product->quantity,
+                            'total' => $gst_product->rate * $gst_product->quantity,
+                            'type' => $gst_product->type,
+                            'remarks' => $gst_product->remarks,
+                        ]);
+                    }
+                    
                 }
-                
-            }
-        }
-
-        if ($create_order_basic != null) {
-            $update_cart = CounterModel::where('name', 'order_basic')
-            ->update([
-                'counter' => (($get_counter_basic[0]->counter)+1),
-            ]);
-        }
-
-        if($create_order_gst != null)
-        {
-            $update_cart = CounterModel::where('name', 'order_gst')
-                                        ->update([
-                                         'counter' => (($get_counter_gst[0]->counter)+1),
-            ]);
-        }
-
-        $data = [];
-
-        // Check if data_basic exists and is not null, then add it to the array
-        if (!empty($create_order_basic)) {
-            $data[] = $create_order_basic;
-        }
-
-        // Check if data_gst exists and is not null, then add it to the array
-        if (!empty($create_order_gst)) {
-            $data[] = $create_order_gst;
-        }
-
-        // Remove items from the cart for the user
-        $get_remove_items = CartModel::where('user_id', $userId)->delete();
-
-        if ($create_order_basic !== null || $create_order_gst !== null) {
-            $generate_order_invoice = new InvoiceController();
-
-            // Iterate through the $data array and add the corresponding invoices
-            foreach ($data as &$order) {
-                // Unset unwanted fields
-
-                // Check if the current order is of type 'basic' and has an id
-                if ($order->type === 'basic') {
-                    // Generate invoice and append to the current order as 'pdf'
-                    $order->pdf = $generate_order_invoice->generateorderInvoice($create_order_basic->id);
-                }
-                // Check if the current order is of type 'gst' and has an id
-                elseif ($order->type === 'gst') {
-                    // Generate invoice and append to the current order as 'pdf'
-                    $order->pdf = $generate_order_invoice->generateorderInvoice($create_order_gst->id);
-                }
-
-                unset($order->updated_at, $order->created_at, $order->id);
-
             }
 
-            return response()->json([
-                'message' => 'Order created and Invoice generated successfully!',
-                'data' => $data
-            ], 201);
-        }
+            if ($create_order_basic != null) {
+                $update_cart = CounterModel::where('name', 'order_basic')
+                ->update([
+                    'counter' => (($get_counter_basic[0]->counter)+1),
+                ]);
+            }
+
+            if($create_order_gst != null)
+            {
+                $update_cart = CounterModel::where('name', 'order_gst')
+                                            ->update([
+                                            'counter' => (($get_counter_gst[0]->counter)+1),
+                ]);
+            }
+
+            $data = [];
+
+            // Check if data_basic exists and is not null, then add it to the array
+            if (!empty($create_order_basic)) {
+                $data[] = $create_order_basic;
+            }
+
+            // Check if data_gst exists and is not null, then add it to the array
+            if (!empty($create_order_gst)) {
+                $data[] = $create_order_gst;
+            }
+
+            // Remove items from the cart for the user
+            $get_remove_items = CartModel::where('user_id', $userId)->delete();
+
+            if ($create_order_basic !== null || $create_order_gst !== null) {
+                $generate_order_invoice = new InvoiceController();
+
+                // Iterate through the $data array and add the corresponding invoices
+                foreach ($data as &$order) {
+                    // Unset unwanted fields
+
+                    // Check if the current order is of type 'basic' and has an id
+                    if ($order->type === 'basic') {
+                        // Generate invoice and append to the current order as 'pdf'
+                        $order->pdf = $generate_order_invoice->generateorderInvoice($create_order_basic->id);
+                    }
+                    // Check if the current order is of type 'gst' and has an id
+                    elseif ($order->type === 'gst') {
+                        // Generate invoice and append to the current order as 'pdf'
+                        $order->pdf = $generate_order_invoice->generateorderInvoice($create_order_gst->id);
+                    }
+
+                    unset($order->updated_at, $order->created_at, $order->id);
+
+                }
+
+                return response()->json([
+                    'message' => 'Order created and Invoice generated successfully!',
+                    'data' => $data
+                ], 201);
+            }
 
 
-        else {
-            return response()->json([
-                'message' => 'Sorry, failed to create order!',
-                'data' => 'Error!'
-            ], 400);
-        }    
+            else {
+                return response()->json([
+                    'message' => 'Sorry, failed to create order!',
+                    'data' => 'Error!'
+                ], 400);
+            }  
+        }  
     }
 
     public function orders_items(Request $request)
