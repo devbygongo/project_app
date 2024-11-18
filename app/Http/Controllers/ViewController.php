@@ -542,56 +542,44 @@ class ViewController extends Controller
 
     public function user($lang = 'eng')
     {
-        $get_user_details = User::select('id','name', 'name_in_hindi', 'name_in_telugu', 'email','mobile','role','address_line_1','address_line_2','city','pincode','gstin','state','country', 'is_verified', 'type', 'app_status')
+        $get_user_details = User::select('id', 'name', 'name_in_hindi', 'name_in_telugu', 'email', 'mobile', 'role', 'address_line_1', 'address_line_2', 'city', 'pincode', 'gstin', 'state', 'country', 'is_verified', 'type', 'app_status')
                                 ->where('role', 'user')->orderBy('updated_at', 'desc')
                                 ->get();
-
-        $processed_rec_user = $get_user_details->map(function ($record) use ($lang)
-        {
+    
+        $processed_rec_user = $get_user_details->map(function ($record) use ($lang) {
             $name = $record->name;
-
-            if($lang == 'hin' && !empty($record->name_in_hindi))
-            {
+    
+            if ($lang == 'hin' && !empty($record->name_in_hindi)) {
                 $name = $record->name_in_hindi;
-            }
-            elseif ($lang == 'tlg' && !empty($record->name_in_telugu)) 
-            {
+            } elseif ($lang == 'tlg' && !empty($record->name_in_telugu)) {
                 $name = $record->name_in_telugu;
             }
-
-                return [
-                    'id' => $record->id,
-                    'name' => $name,
-                    'email' => $record->email,
-                    'mobile' => $record->mobile,
-                    'city' => $record->city,
-                    'role' => ucfirst($record->role),
-                    'address' => implode(', ', array_filter([$record->address_line_1, $record->address_line_2, $record->city, $record->state, $record->pincode, $record->country])),
-                    'gstin' => $record->gstin,
-                    'type' => $record->type,
-                    'app_status' => $record->app_status,
-                    'verified' => $record->is_verified,
-                ];  
-        }) ;
-        
-        
-
-        // if (isset($get_user_details)) {
-        //     return response()->json([
-        //         'message' => 'Fetch data successfully!',
-        //         'data' => $get_user_details
-        //     ], 201);
-        // }
-
-        // else {
-        //     return response()->json([
-        //         'message' => 'Failed get data successfully!',
-        //     ], 400);
-        // }    
-
+    
+            return [
+                'id' => $record->id,
+                'name' => $name,
+                'email' => $record->email,
+                'mobile' => $record->mobile,
+                'city' => $record->city,
+                'role' => ucfirst($record->role),
+                'address' => implode(', ', array_filter([$record->address_line_1, $record->address_line_2, $record->city, $record->state, $record->pincode, $record->country])),
+                'gstin' => $record->gstin,
+                'type' => $record->type,
+                'app_status' => $record->app_status,
+                'verified' => $record->is_verified,
+            ];
+        });
+    
+        $types = [
+            ['value' => 'normal', 'name' => 'Normal'],
+            ['value' => 'special', 'name' => 'Special'],
+            ['value' => 'outstation', 'name' => 'Outstation'],
+            ['value' => 'zeroprice', 'name' => 'Zero Price'],
+        ];
+    
         return $processed_rec_user->isEmpty()
-        ? response()->json(['Failed get data successfully!'], 404)
-        : response()->json(['Fetch data successfully!', 'data' => $processed_rec_user], 200);
+            ? response()->json(['Failed get data successfully!'], 404)
+            : response()->json(['Fetch data successfully!', 'data' => $processed_rec_user, 'types' => $types], 200);
     }
 
     public function find_user($search = null)
