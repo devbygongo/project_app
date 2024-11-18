@@ -39,7 +39,7 @@ class InvoiceControllerZP extends Controller
 		
 
         $order_items = OrderItemsModel::with('product:product_code')
-                                    ->select('product_code', 'product_name', 'rate', 'quantity', 'total', 'remarks')
+                                    ->select('product_code', 'product_name', 'rate', 'quantity', 'total', 'remarks', 'type')
                                     ->where('order_id', $orderId)
                                     ->get();
         $mobileNumbers = User::where('role', 'admin')->pluck('mobile')->toArray();
@@ -96,7 +96,7 @@ class InvoiceControllerZP extends Controller
 
 
 		// Render the footer
-		$footerHtml = view('order_invoice_template_footer', ['order' => $order])->render();
+		$footerHtml = view('order_invoice_template_footer_zp', ['order' => $order])->render();
 		$mpdf->WriteHTML($footerHtml);
 
 		// Output the PDF
