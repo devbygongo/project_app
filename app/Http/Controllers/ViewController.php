@@ -784,54 +784,65 @@ class ViewController extends Controller
     {
         $get_user = Auth::User();
 
-        if($get_user->role == 'admin')
-        {
-            //$get_items_for_user = CartModel::where('user_id', $id)->get();
-			$get_items_for_user = CartModel::where('t_cart.user_id', $id)
-				->join('t_products', 't_cart.product_code', '=', 't_products.product_code')
-				->select(
-					't_cart.id',
-					't_cart.user_id',
-					't_cart.product_code',
-					't_cart.product_name',
-					't_cart.rate',
-					't_cart.quantity',
-					't_cart.amount',
-					't_cart.type',
-					't_cart.remarks',
-					't_cart.created_at',
-					't_cart.updated_at',
-					't_products.basic',
-					't_products.gst',
-					't_products.product_image'
-				)
-				->get();
+        $user_type = User::select('type')->where('id', $get_user->id)->first();
+        $basic_column = 'basic';
+        $gst_column = 'gst';
+
+        if ($user_type && $user_type->type == 'special') {
+            $basic_column = 'special_basic';
+            $gst_column = 'special_gst';
+        } elseif ($user_type && $user_type->type == 'outstation') {
+            $basic_column = 'outstation_basic';
+            $gst_column = 'outstation_gst';
+        } elseif ($user_type && $user_type->type == 'zeroprice') {
+            $basic_column = DB::raw('0 as basic');
+            $gst_column = DB::raw('0 as gst');
+        }
+
+        if ($get_user->role == 'admin') {
+            $get_items_for_user = CartModel::where('t_cart.user_id', $id)
+                ->join('t_products', 't_cart.product_code', '=', 't_products.product_code')
+                ->select(
+                    't_cart.id',
+                    't_cart.user_id',
+                    't_cart.product_code',
+                    't_cart.product_name',
+                    't_cart.rate',
+                    't_cart.quantity',
+                    't_cart.amount',
+                    't_cart.type',
+                    't_cart.remarks',
+                    't_cart.created_at',
+                    't_cart.updated_at',
+                    't_products.product_image',
+                    $basic_column,
+                    $gst_column
+                )
+                ->get();
 
             $cart_data_count = count($get_items_for_user);
+        } else {
+            $get_items_for_user = CartModel::where('t_cart.user_id', $get_user->id)
+                ->join('t_products', 't_cart.product_code', '=', 't_products.product_code')
+                ->select(
+                    't_cart.id',
+                    't_cart.user_id',
+                    't_cart.product_code',
+                    't_cart.product_name',
+                    't_cart.rate',
+                    't_cart.quantity',
+                    't_cart.amount',
+                    't_cart.type',
+                    't_cart.remarks',
+                    't_cart.created_at',
+                    't_cart.updated_at',
+                    't_products.product_image',
+                    $basic_column,
+                    $gst_column
+                )
+                ->get();
         }
 
-        else {
-            //$get_items_for_user = CartModel::where('user_id', $get_user->id)->get();
-			$get_items_for_user = CartModel::where('t_cart.user_id', $get_user->id)
-				->join('t_products', 't_cart.product_code', '=', 't_products.product_code')
-				->select(
-					't_cart.id',
-					't_cart.user_id',
-					't_cart.product_code',
-					't_cart.product_name',
-					't_cart.rate',
-					't_cart.quantity',
-					't_cart.amount',
-					't_cart.type',
-					't_cart.remarks',
-					't_cart.created_at',
-					't_cart.updated_at',
-					't_products.basic',
-					't_products.gst',
-					't_products.product_image'
-				)
-				->get();
-        }
     
         if (isset($get_items_for_user)) {
             return response()->json([
