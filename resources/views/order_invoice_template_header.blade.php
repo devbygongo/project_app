@@ -9,7 +9,7 @@
         body { font-family: 'Arial', sans-serif; margin: 0; padding: 0; }
         .header { width: 100%; padding-top: 15px; }
         .header img { width: 100%; height: auto; }
-        .customer-info, .order-summary { width: 100%; margin-top: 20px; border-collapse: collapse; }
+        .customer-info, .order-summary { width: 100%; margin-top: 20px; border-collapse: collapse; border: 1px solid #ddd;}
         .order-summary th, .order-summary td { padding: 8px; border: 1px solid #ddd; }
         .center-align { text-align: center; }
         .right-align { text-align: right; }
@@ -32,11 +32,15 @@
     </tr>
     <tr>
         <td>Address:</td><td>{{ $user->address_line_1 }} {{ $user->address_line_2 }}</td>
-        <td>Order Date:</td><td>{{ $order->order_date }}</td>
+        <td>Order Date:</td><td>{{ Carbon::parse($order->order_date)->format('d-m-Y') }}</td>
     </tr>
     <tr>
         <td>Mobile:</td><td>{{ $user->mobile }}</td>
         <td>Amount:</td><td>₹ {{ number_format((float)$order->amount, 2) }}</td>
+    </tr>
+    <tr>
+        <td></td><td></td>
+        <td>Order Type:</td><td>{{ $order->type }}</td>
     </tr>
 </table>
 
