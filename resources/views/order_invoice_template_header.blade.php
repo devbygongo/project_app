@@ -37,7 +37,7 @@
     </tr>
     <tr>
         <td>Mobile:</td><td>{{ $user->mobile }}</td>
-        <td>Type:</td><td>{{ $order->type }}</td>
+        <td>Type:</td><td>{{ strtoupper($order->type) }}</td>
     </tr>
 </table>
 
