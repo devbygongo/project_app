@@ -256,7 +256,7 @@ class InvoiceController extends Controller
                             ],
                             [
                                 'type' => 'text',
-                                'text' => Carbon::parse($order->order_date)->format('d-m-Y'),
+                                'text' => $order->order_date->format('d-m-Y'),
                             ],
                             [
                                 'type' => 'text',
@@ -310,7 +310,7 @@ class InvoiceController extends Controller
                             ],
                             [
                                 'type' => 'text',
-                                'text' => Carbon::parse($order->order_date)->format('d-m-Y'),
+                                'text' => $order->order_date->format('d-m-Y'),
                             ],
                             [
                                 'type' => 'text',
