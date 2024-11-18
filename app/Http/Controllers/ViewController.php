@@ -220,6 +220,8 @@ class ViewController extends Controller
 
         if ($get_user->role == 'user') {
             $user_id = $get_user->id;
+            // Update the app_status column
+            User::where('id', $user_id)->update(['app_status' => 1]);
         } else {
             $request->validate([
                 'user_id' => 'required',
@@ -540,7 +542,7 @@ class ViewController extends Controller
 
     public function user($lang = 'eng')
     {
-        $get_user_details = User::select('id','name', 'name_in_hindi', 'name_in_telugu', 'email','mobile','role','address_line_1','address_line_2','city','pincode','gstin','state','country', 'is_verified', 'type')
+        $get_user_details = User::select('id','name', 'name_in_hindi', 'name_in_telugu', 'email','mobile','role','address_line_1','address_line_2','city','pincode','gstin','state','country', 'is_verified', 'type', 'app_status')
                                 ->where('role', 'user')->orderBy('updated_at', 'desc')
                                 ->get();
 
@@ -567,6 +569,7 @@ class ViewController extends Controller
                     'address' => implode(', ', array_filter([$record->address_line_1, $record->address_line_2, $record->city, $record->state, $record->pincode, $record->country])),
                     'gstin' => $record->gstin,
                     'type' => $record->type,
+                    'app_status' => $record->app_status,
                     'verified' => $record->is_verified,
                 ];  
         }) ;

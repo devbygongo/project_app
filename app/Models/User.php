@@ -39,6 +39,7 @@ class User extends Authenticatable
         'state',
         'country',
         'type',
+        'app_status',
         // 'category_discount',
     ];
 
