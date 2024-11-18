@@ -15,6 +15,7 @@
         .right-align { text-align: right; }
         .footer { text-align: center; background-color: lightgrey; color: black; padding: 10px; font-size: 16px; }
         .order-title { text-align: center; font-size: 24px; font-weight: bold; margin: 20px 0 10px; }
+        .customer-info td { border: 1px solid #ddd; padding: 2px; }
     </style>
 </head>
 <body>
@@ -36,11 +37,7 @@
     </tr>
     <tr>
         <td>Mobile:</td><td>{{ $user->mobile }}</td>
-        <td>Amount:</td><td>₹ {{ number_format((float)$order->amount, 2) }}</td>
-    </tr>
-    <tr>
-        <td></td><td></td>
-        <td>Order Type:</td><td>{{ $order->type }}</td>
+        <td>Type:</td><td>{{ $order->type }}</td>
     </tr>
 </table>
 
