@@ -404,7 +404,7 @@ class UpdateController extends Controller
         }
 
         $generate_order_invoice = new InvoiceController();
-        $generate_order_invoice->generateorderInvoice($id);
+        $generate_order_invoice->generateorderInvoice($id, true);
 
         return response()->json([
             'message' => 'Order updated successfully!',
