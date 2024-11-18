@@ -26,6 +26,8 @@
     <img src="{{ asset('storage/uploads/s1.jpg') }}" alt="Logo">
 </div>
 
+
+
 <table class="customer-info">
     <tr>
         <td>Client:</td><td>{{ $user->name }}</td>
@@ -37,7 +39,7 @@
     </tr>
     <tr>
         <td>Mobile:</td><td>{{ $user->mobile }}</td>
-        <td>Type:</td><td>{{ strtoupper($order->type) }}</td>
+        <td>Type :</td><td>{{ strtoupper($order->type) }}</td>
     </tr>
 </table>
 
