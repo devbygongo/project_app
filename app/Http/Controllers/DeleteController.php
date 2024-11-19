@@ -57,8 +57,9 @@ class DeleteController extends Controller
 
         if (!$get_user) {
             return response()->json([
+                'success' => false,
                 'message' => 'Sorry, User not found!',
-            ], 404);
+            ], 200);
         }
                
         else{
@@ -66,13 +67,15 @@ class DeleteController extends Controller
 
             if ($delete_user_records == true ) {
                 return response()->json([
-                    'message' => 'User deleted successfully!',
-                ], 204);
+                    'success' => true,
+                    'message' => 'User Deleted Successfully.',
+                ], 200);
             }
             else{
                 return response()->json([
-                    'message' => 'Sorry, Failed to delete user',
-                ], 404);
+                    'success' => false,
+                    'message' => 'Sorry, Failed to delete user!',
+                ], 200);
             }
         }
     }
