@@ -356,12 +356,12 @@ class ViewController extends Controller
             $user_type = User::select('type')->where('id', $user_id)->first();
         }
         else{
-            $request->validate([
-                'user_id' => 'required',
-            ]);
-            $user_id = $request->input('user_id');
-            $user_type = User::select('type')->where('id', $user_id)->first();
-            // $user_type = (object) ['type' => 'normal'];
+            // $request->validate([
+            //     'user_id' => 'required',
+            // ]);
+            // $user_id = $request->input('user_id');
+            // $user_type = User::select('type')->where('id', $user_id)->first();
+            $user_type = (object) ['type' => 'normal'];
         }
 
         // Base query for products
