@@ -355,7 +355,7 @@ class ViewController extends Controller
             // Fetch user type
             $user_type = User::select('type')->where('id', $user_id)->first();
         }else{
-            $user_type = 'zeroprice';
+            $user_type = (object) ['type' => 'zeroprice'];
         }
 
         // Base query for products
