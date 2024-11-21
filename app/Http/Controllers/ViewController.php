@@ -345,7 +345,7 @@ class ViewController extends Controller
                 'count' => count($processed_prd_lang_rec)], 200);
     }
 
-    public function get_spares($lang = 'eng', $code = null)
+    public function get_spares(Request $request, $lang = 'eng', $code = null)
     {
 
         $get_user = Auth::User();
