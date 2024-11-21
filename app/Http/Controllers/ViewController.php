@@ -348,18 +348,16 @@ class ViewController extends Controller
     public function get_spares($lang = 'eng', $code = null)
     {
 
-        // $get_user = Auth::User();
+        $get_user = Auth::User();
 
-        // if ($get_user->role == 'user') {
-        //     $user_id = $get_user->id;
-        //     // Update the app_status column
-        //     User::where('id', $user_id)->update(['app_status' => 1]);
-        // } else {
-        //     $request->validate([
-        //         'user_id' => 'required',
-        //     ]);
-        //     $user_id = $request->input('user_id');
-        // }
+        if ($get_user->role == 'user') {
+            $user_id = $get_user->id;
+        } else {
+            $request->validate([
+                'user_id' => 'required',
+            ]);
+            $user_id = $request->input('user_id');
+        }
 
         $productQuery = ProductModel::select('product_code','product_name', 'name_in_hindi','name_in_telugu','category','sub_category','product_image','basic','gst')
                                             ->where('type', 'SPARE');
