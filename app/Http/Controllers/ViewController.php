@@ -427,6 +427,88 @@ class ViewController extends Controller
             : response()->json(['message' => 'Failed to get data'], 404);
     }
 
+    public function get_spares_new(Request $request, $lang = 'eng', $code = null)
+    {
+        $get_user = Auth::User();
+
+        if ($get_user->role == 'user') {
+            $user_id = $get_user->id;
+
+            // Fetch user type
+            $user_type = User::select('type')->where('id', $user_id)->first();
+        }
+        else{
+            $request->validate([
+                'user_id' => 'required',
+            ]);
+            $user_id = $request->input('user_id');
+            $user_type = User::select('type')->where('id', $user_id)->first();
+            // $user_type = (object) ['type' => 'normal'];
+        }
+
+        // Base query for products
+        $productQuery = ProductModel::select('product_code', 'product_name', 'name_in_hindi', 'name_in_telugu', 'category', 'sub_category', 'product_image', 'out_of_stock', 'yet_to_launch');
+
+        // Add pricing columns dynamically based on user type
+        if ($user_type && $user_type->type == 'special') {
+            $productQuery->addSelect(
+                DB::raw('special_basic as basic'), 
+                DB::raw('special_gst as gst')
+            );
+        } elseif ($user_type && $user_type->type == 'outstation') {
+            $productQuery->addSelect(
+                DB::raw('outstation_basic as basic'), 
+                DB::raw('outstation_gst as gst')
+            );
+        } elseif ($user_type && $user_type->type == 'zeroprice') {
+            $productQuery->addSelect(
+                DB::raw('0 as basic'), 
+                DB::raw('0 as gst')
+            );
+        } else {
+            $productQuery->addSelect('basic', 'gst');
+        }
+
+        // Filter products by type and optionally machine part number
+        $productQuery->where('type', 'SPARE');
+
+        if ($code !== null) {
+            $productQuery->where('machine_part_no', 'like', "%{$code}%");
+        }
+
+        // Execute query
+        $get_spare_product = $productQuery->get();
+
+        // Map the results for the response
+        $spare_prd_rec = $get_spare_product->map(function ($spare_prd_rec) use ($lang) {
+            $product_name = $spare_prd_rec->product_name;
+
+            // Language-specific product names
+            if ($lang === 'hin' && !empty($spare_prd_rec->name_in_hindi)) {
+                $product_name = $spare_prd_rec->name_in_hindi;
+            } elseif ($lang === 'tlg' && !empty($spare_prd_rec->name_in_telugu)) {
+                $product_name = $spare_prd_rec->name_in_telugu;
+            }
+
+            return [
+                'product_code' => $spare_prd_rec->product_code,
+                'product_name' => $product_name,
+                'category' => $spare_prd_rec->category,
+                'sub_category' => $spare_prd_rec->sub_category,
+                'product_image' => $spare_prd_rec->product_image,
+                'basic' => $spare_prd_rec->basic,
+                'gst' => $spare_prd_rec->gst,
+                'out_of_stock' => $spare_prd_rec->out_of_stock,
+                'yet_to_launch' => $spare_prd_rec->yet_to_launch,
+            ];
+        });
+
+        // Return response
+        return isset($spare_prd_rec) && $spare_prd_rec->isNotEmpty()
+            ? response()->json(['message' => 'Fetch data successfully!', 'data' => $spare_prd_rec, 'fetch_records' => count($spare_prd_rec)], 200)
+            : response()->json(['message' => 'Failed to get data'], 404);
+    }
+
 
     public function categories()
     {
