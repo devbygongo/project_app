@@ -384,81 +384,16 @@ class ViewController extends Controller
                 $product_name = $spare_prd_rec->name_in_telugu;
             }
 
-            $user_type = User::select('type')->where('id', $user_id)->first();
-
-            if ($user_type && $user_type->type == 'special') {
-                // Special user pricing
-                $query = ProductModel::select(
-                    'product_code', 
-                    'product_name', 
-                    'category', 
-                    'sub_category', 
-                    'product_image', 
-                    DB::raw('special_basic as basic'), 
-                    DB::raw('special_gst as gst'),
-                    'out_of_stock',
-                    'yet_to_launch'
-                );
-            } elseif ($user_type && $user_type->type == 'outstation') {
-                // Outstation user pricing
-                $query = ProductModel::select(
-                    'product_code', 
-                    'product_name', 
-                    'category', 
-                    'sub_category', 
-                    'product_image', 
-                    DB::raw('outstation_basic as basic'), 
-                    DB::raw('outstation_gst as gst'),
-                    'out_of_stock',
-                    'yet_to_launch'
-                );
-            } elseif ($user_type && $user_type->type == 'zeroprice') {
-                // Zero price user pricing
-                $query = ProductModel::select(
-                    'product_code', 
-                    'product_name', 
-                    'category', 
-                    'sub_category', 
-                    'product_image', 
-                    DB::raw('0 as basic'), 
-                    DB::raw('0 as gst'), 
-                    'out_of_stock',
-                    'yet_to_launch'
-                );
-            } else {
-                // Default pricing
-                $query = ProductModel::select(
-                    'product_code', 
-                    'product_name', 
-                    'category', 
-                    'sub_category', 
-                    'product_image', 
-                    'basic', 
-                    'gst',
-                    'out_of_stock',
-                    'yet_to_launch'
-                );
-            }
-
-            $products = $query->get();
-
-            // Formatting the return array
-            $response = [];
-            foreach ($products as $product) {
-                $response[] = [
-                    'product_code' => $product->product_code,
-                    'product_name' => $product->product_name,
-                    'category' => $product->category,
-                    'sub_category' => $product->sub_category,
-                    'product_image' => $product->product_image,
-                    'basic' => $product->basic,
-                    'gst' => $product->gst,
-                    'out_of_stock' => $product->out_of_stock,
-                    'yet_to_launch' => $product->yet_to_launch,
-                ];
-            }
-
-            return $response;
+            return [
+                // 'SKU' => $prd_rec->SKU,
+                'product_code' => $spare_prd_rec->product_code,
+                'product_name' => $product_name,
+                'category' => $spare_prd_rec->category,
+                'sub_category' => $spare_prd_rec->sub_category,
+                'product_image' => $spare_prd_rec->product_image,
+                'basic' => $spare_prd_rec->basic,
+                'gst' => $spare_prd_rec->gst,
+            ];
 
         });
 
