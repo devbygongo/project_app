@@ -690,15 +690,15 @@ class ViewController extends Controller
             $last_viewed = '';
 
             if ($differenceInSeconds < 60) {
-                $last_viewed = $differenceInSeconds . ' seconds ago';
+                $last_viewed = (int) $differenceInSeconds . ' seconds ago';
             } elseif ($differenceInSeconds < 3600) {
-                $minutes = floor($differenceInSeconds / 60);
+                $minutes = (int) floor($differenceInSeconds / 60);
                 $last_viewed = $minutes . ' minutes ago';
             } elseif ($differenceInSeconds < 86400) {
-                $hours = floor($differenceInSeconds / 3600);
+                $hours = (int) floor($differenceInSeconds / 3600);
                 $last_viewed = $hours . ' hours ago';
             } else {
-                $days = floor($differenceInSeconds / 86400);
+                $days = (int) floor($differenceInSeconds / 86400);
                 $last_viewed = $days . ' days ago';
             }
     
