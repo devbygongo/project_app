@@ -715,7 +715,7 @@ class ViewController extends Controller
      * @param string|null $lastViewed
      * @return string
      */
-    function formatLastViewed($lastViewed)
+    public function formatLastViewed($lastViewed)
     {
         if (!$lastViewed) {
             return '';
