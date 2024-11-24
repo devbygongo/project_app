@@ -221,7 +221,11 @@ class ViewController extends Controller
         if ($get_user->role == 'user') {
             $user_id = $get_user->id;
             // Update the app_status column
-            User::where('id', $user_id)->update(['app_status' => 1]);
+            User::where('id', $user_id)->update([
+                'app_status' => 1,
+                'last_viewed' => now(), // Set the current timestamp
+            ]);
+            
         } else {
             $request->validate([
                 'user_id' => 'required',
@@ -665,7 +669,7 @@ class ViewController extends Controller
     public function user($lang = 'eng')
     {
         $get_user_details = User::select('id', 'name', 'name_in_hindi', 'name_in_telugu', 'email', 'mobile', 'role', 'address_line_1', 'address_line_2', 'city', 'pincode', 'gstin', 'state', 'country', 'is_verified', 'type', 'app_status')
-                                ->where('role', 'user')->orderBy('updated_at', 'desc')
+                                ->where('role', 'user')->orderBy('name', 'asc')
                                 ->get();
     
         $processed_rec_user = $get_user_details->map(function ($record) use ($lang) {
@@ -689,6 +693,7 @@ class ViewController extends Controller
                 'type' => $record->type,
                 'app_status' => $record->app_status,
                 'verified' => $record->is_verified,
+                'last_viewed' => $record->app_status == 1 ? formatLastViewed($record->last_viewed) : '',
             ];
         });
     
@@ -702,6 +707,37 @@ class ViewController extends Controller
         return $processed_rec_user->isEmpty()
             ? response()->json(['Failed get data successfully!'], 404)
             : response()->json(['Fetch data successfully!', 'data' => $processed_rec_user, 'types' => $types], 200);
+    }
+
+    /**
+     * Format the last_viewed time difference into human-readable text.
+     *
+     * @param string|null $lastViewed
+     * @return string
+     */
+    function formatLastViewed($lastViewed)
+    {
+        if (!$lastViewed) {
+            return '';
+        }
+
+        $currentTimestamp = now(); // Laravel helper for the current timestamp
+        $lastViewedTimestamp = \Carbon\Carbon::parse($lastViewed);
+
+        $differenceInSeconds = $currentTimestamp->diffInSeconds($lastViewedTimestamp);
+
+        if ($differenceInSeconds < 60) {
+            return $differenceInSeconds . ' seconds ago';
+        } elseif ($differenceInSeconds < 3600) {
+            $minutes = floor($differenceInSeconds / 60);
+            return $minutes . ' minutes ago';
+        } elseif ($differenceInSeconds < 86400) {
+            $hours = floor($differenceInSeconds / 3600);
+            return $hours . ' hours ago';
+        } else {
+            $days = floor($differenceInSeconds / 86400);
+            return $days . ' days ago';
+        }
     }
 
     public function find_user($search = null)
