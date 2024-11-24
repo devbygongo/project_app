@@ -27,6 +27,32 @@ use App\Models\SubCategoryModel;
 class ViewController extends Controller
 {
     //
+
+    public function formatLastViewed($lastViewed)
+    {
+        if (!$lastViewed) {
+            return '';
+        }
+
+        $currentTimestamp = now(); // Laravel helper for the current timestamp
+        $lastViewedTimestamp = \Carbon\Carbon::parse($lastViewed);
+
+        $differenceInSeconds = $currentTimestamp->diffInSeconds($lastViewedTimestamp);
+
+        if ($differenceInSeconds < 60) {
+            return $differenceInSeconds . ' seconds ago';
+        } elseif ($differenceInSeconds < 3600) {
+            $minutes = floor($differenceInSeconds / 60);
+            return $minutes . ' minutes ago';
+        } elseif ($differenceInSeconds < 86400) {
+            $hours = floor($differenceInSeconds / 3600);
+            return $hours . ' hours ago';
+        } else {
+            $days = floor($differenceInSeconds / 86400);
+            return $days . ' days ago';
+        }
+    }
+
     public function product()
     {
         // $get_product_details = ProductModel::select('SKU','product_code','product_name','category','sub_category','product_image','basic','gst','mark_up')->get();
@@ -696,37 +722,6 @@ class ViewController extends Controller
                 'last_viewed' => $record->app_status == 1 ? formatLastViewed($record->last_viewed) : '',
             ];
         });
-
-        /**
-         * Format the last_viewed time difference into human-readable text.
-         *
-         * @param string|null $lastViewed
-         * @return string
-         */
-        function formatLastViewed($lastViewed)
-        {
-            if (!$lastViewed) {
-                return '';
-            }
-
-            $currentTimestamp = now(); // Laravel helper for the current timestamp
-            $lastViewedTimestamp = \Carbon\Carbon::parse($lastViewed);
-
-            $differenceInSeconds = $currentTimestamp->diffInSeconds($lastViewedTimestamp);
-
-            if ($differenceInSeconds < 60) {
-                return $differenceInSeconds . ' seconds ago';
-            } elseif ($differenceInSeconds < 3600) {
-                $minutes = floor($differenceInSeconds / 60);
-                return $minutes . ' minutes ago';
-            } elseif ($differenceInSeconds < 86400) {
-                $hours = floor($differenceInSeconds / 3600);
-                return $hours . ' hours ago';
-            } else {
-                $days = floor($differenceInSeconds / 86400);
-                return $days . ' days ago';
-            }
-        }
     
         $types = [
             ['value' => 'normal', 'name' => 'Normal'],
