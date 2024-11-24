@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
-
 use Illuminate\Support\Facades\DB;
 
 use Illuminate\Http\Request;
@@ -29,31 +27,6 @@ use App\Models\SubCategoryModel;
 class ViewController extends Controller
 {
     //
-
-    public function formatLastViewed($lastViewed)
-    {
-        if (!$lastViewed) {
-            return '';
-        }
-
-        $currentTimestamp = now(); // Laravel helper for the current timestamp
-        $lastViewedTimestamp = \Carbon\Carbon::parse($lastViewed);
-
-        $differenceInSeconds = $currentTimestamp->diffInSeconds($lastViewedTimestamp);
-
-        if ($differenceInSeconds < 60) {
-            return $differenceInSeconds . ' seconds ago';
-        } elseif ($differenceInSeconds < 3600) {
-            $minutes = floor($differenceInSeconds / 60);
-            return $minutes . ' minutes ago';
-        } elseif ($differenceInSeconds < 86400) {
-            $hours = floor($differenceInSeconds / 3600);
-            return $hours . ' hours ago';
-        } else {
-            $days = floor($differenceInSeconds / 86400);
-            return $days . ' days ago';
-        }
-    }
 
     public function product()
     {
