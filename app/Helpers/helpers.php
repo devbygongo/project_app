@@ -1,3 +1,5 @@
+<?php
+
 use Carbon\Carbon;
 
 if (!function_exists('formatLastViewed')) {
@@ -26,3 +28,5 @@ if (!function_exists('formatLastViewed')) {
         }
     }
 }
+
+?>
