@@ -681,6 +681,26 @@ class ViewController extends Controller
             } elseif ($lang == 'tlg' && !empty($record->name_in_telugu)) {
                 $name = $record->name_in_telugu;
             }
+
+            $currentTimestamp = now();
+            $lastViewedTimestamp = Carbon::parse($record->last_viewed);
+
+            $differenceInSeconds = $currentTimestamp->diffInSeconds($lastViewedTimestamp);
+
+            $last_viewed = '';
+
+            if ($differenceInSeconds < 60) {
+                $last_viewed = $differenceInSeconds . ' seconds ago';
+            } elseif ($differenceInSeconds < 3600) {
+                $minutes = floor($differenceInSeconds / 60);
+                $last_viewed = $minutes . ' minutes ago';
+            } elseif ($differenceInSeconds < 86400) {
+                $hours = floor($differenceInSeconds / 3600);
+                $last_viewed = $hours . ' hours ago';
+            } else {
+                $days = floor($differenceInSeconds / 86400);
+                $last_viewed = $days . ' days ago';
+            }
     
             return [
                 'id' => $record->id,
@@ -694,7 +714,7 @@ class ViewController extends Controller
                 'type' => $record->type,
                 'app_status' => $record->app_status,
                 'verified' => $record->is_verified,
-                'last_viewed' => $record->app_status == 1 ? formatLastViewed($record->last_viewed) : '',
+                'last_viewed' => $record->app_status == 1 ? $last_viewed : '',
             ];
         });
     
