@@ -683,7 +683,7 @@ class ViewController extends Controller
             }
 
             $currentTimestamp = now();
-            $lastViewedTimestamp = Carbon::parse($record->last_viewed);
+            $lastViewedTimestamp = \Carbon\Carbon::parse($record->last_viewed);
 
             $differenceInSeconds = $currentTimestamp->diffInSeconds($lastViewedTimestamp);
 
