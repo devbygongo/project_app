@@ -150,7 +150,7 @@ class ReportController extends Controller
         $adminMobileNumbers = User::where('role', 'admin')->pluck('mobile')->toArray();
 
         foreach ($adminMobileNumbers as $mobileNumber) {
-            if($mobileNumber == '+918961043773')
+            if($mobileNumber == '+918961043773' || true)
             {
                 $response = $whatsAppUtility->sendWhatsApp($mobileNumber, $templateParams, '', 'Pending Order Report');
                 if (isset($response['error'])) {
