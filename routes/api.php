@@ -15,6 +15,8 @@ use App\Http\Controllers\CsvImportController;
 
 use App\Http\Controllers\InvoiceController;
 
+use App\Http\Controllers\ReportController;
+
 use App\Http\Middleware\GetUserRole;
 
 // Route::get('/user', function (Request $request) {
