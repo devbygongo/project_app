@@ -41,7 +41,37 @@ class ReportController extends Controller
         $mpdf->WriteHTML($headerHtml);
 
         // Table with orders
-        $tableHtml = "<table border='1' cellpadding='5' cellspacing='0' width='100%'>
+        $tableHtml = "<style>
+            table {
+                border-collapse: collapse;
+                width: 100%;
+                font-family: Arial, sans-serif;
+            }
+            th, td {
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: center;
+            }
+            th {
+                background-color: #f2f2f2;
+                color: #333;
+            }
+            tr:nth-child(even) {
+                background-color: #f9f9f9;
+            }
+            tr:nth-child(odd) {
+                background-color: #ffffff;
+            }
+            .type-gst {
+                background-color: #d4edda; /* Subtle green */
+                color: #155724;
+            }
+            .type-other {
+                background-color: #d1ecf1; /* Subtle blue */
+                color: #0c5460;
+            }
+        </style>
+        <table border='1' cellpadding='5' cellspacing='0' width='100%'>
                         <thead>
                             <tr>
                                 <th>SN</th>
