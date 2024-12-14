@@ -222,7 +222,7 @@ class InvoiceController extends Controller
                 ],
             ];
 
-            $response = $whatsAppUtility->sendWhatsApp($user->mobile, $templateParams, '', 'User Order Invoice');
+            //$response = $whatsAppUtility->sendWhatsApp($user->mobile, $templateParams, '', 'User Order Invoice');
         }else{
             $templateParams = [
                 'name' => 'ace_edit_order_admin', // Replace with your WhatsApp template name
