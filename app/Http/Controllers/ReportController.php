@@ -136,7 +136,7 @@ class ReportController extends Controller
                     'parameters' => [
                         [
                             'type' => 'text',
-                            'text' => "Super Steel - Ace Care",
+                            'text' => "Pending Orders",
                         ],
                         [
                             'type' => 'text',
