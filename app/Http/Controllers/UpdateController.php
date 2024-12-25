@@ -478,6 +478,7 @@ class UpdateController extends Controller
         $order->save();
 
         $user = User::find($order->user_id);
+        $mobileNumbers = User::where('role', 'admin')->pluck('mobile')->toArray();
 
         $whatsAppUtility = new sendWhatsAppUtility();
 
@@ -507,6 +508,15 @@ class UpdateController extends Controller
                 ]
             ],
         ];
+
+        foreach ($mobileNumbers as $mobileNumber) 
+        {
+            if($mobileNumber == '+918961043773' || true)
+            {
+                // Send message for each number
+                $response = $whatsAppUtility->sendWhatsApp($mobileNumber, $templateParams, '', 'Order Cancel Notification');
+            }
+        }
 
         $response = $whatsAppUtility->sendWhatsApp($user->mobile, $templateParams, '', 'Order Cancel Notification');
 
