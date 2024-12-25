@@ -16,6 +16,8 @@ use App\Http\Controllers\InvoiceController;
 
 use App\Utils\sendWhatsAppUtility;
 
+use Carbon\Carbon;
+
 use Illuminate\Support\Facades\Auth;
 
 class UpdateController extends Controller
@@ -474,6 +476,39 @@ class UpdateController extends Controller
         // Update the status of the order to 'completed'
         $order->status = 'cancelled';
         $order->save();
+
+        $user = User::find($id);
+
+        $whatsAppUtility = new sendWhatsAppUtility();
+
+        $templateParams = [
+            'name' => 'ace_order_cancelled', // Replace with your WhatsApp template name
+            'language' => ['code' => 'en'],
+            'components' => [[
+                    'type' => 'body',
+                    'parameters' => [
+                        [
+                            'type' => 'text',
+                            'text' => $user->name,
+                        ],
+                        [
+                            'type' => 'text',
+                            'text' => $order->order_id,
+                        ],
+                        [
+                            'type' => 'text',
+                            'text' => Carbon::parse($order->order_date)->format('d-m-Y'),
+                        ],
+                        [
+                            'type' => 'text',
+                            'text' => $order->amount,
+                        ],
+                    ],
+                ]
+            ],
+        ];
+
+        $response = $whatsAppUtility->sendWhatsApp($user->mobile, $templateParams, '', 'Order Cancel Notification');
 
         return response()->json([
             'message' => 'Order has been cancelled successfully!',
