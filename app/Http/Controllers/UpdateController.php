@@ -447,6 +447,38 @@ class UpdateController extends Controller
         ], 200);
     }
 
+    public function cancel_order(Request $request, $id)
+    {
+        // Validate incoming request data
+        $request->validate([
+            'order_id' => 'required|string',
+            'user_id' => 'required|integer'
+        ]);
 
+        // Find the order by its ID
+        $order = OrderModel::find($id);
+
+        if (!$order) {
+            return response()->json([
+                'message' => 'Order not found!'
+            ], 404);
+        }
+
+        // Check if the order belongs to the provided user_id
+        if ($order->user_id !== $request->input('user_id')) {
+            return response()->json([
+                'message' => 'Unauthorized action. This order does not belong to the specified user.'
+            ], 403);
+        }
+
+        // Update the status of the order to 'completed'
+        $order->status = 'cancelled';
+        $order->save();
+
+        return response()->json([
+            'message' => 'Order has been cancelled successfully!',
+            'order' => $order
+        ], 200);
+    }
 
 }
