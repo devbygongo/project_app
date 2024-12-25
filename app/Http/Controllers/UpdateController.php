@@ -477,7 +477,7 @@ class UpdateController extends Controller
         $order->status = 'cancelled';
         $order->save();
 
-        $user = User::find($id);
+        $user = User::find($order->user_id);
 
         $whatsAppUtility = new sendWhatsAppUtility();
 
