@@ -115,6 +115,7 @@ class ReportController extends Controller
 
         // Send WhatsApp message
         $whatsAppUtility = new sendWhatsAppUtility();
+        $fileUrlWithTimestamp = $fileUrl . '?t=' . time();
         $templateParams = [
             'name' => 'pending_order_report', // Replace with your WhatsApp template name
             'language' => ['code' => 'en'],
@@ -125,7 +126,7 @@ class ReportController extends Controller
                         [
                             'type' => 'document',
                             'document' => [
-                                'link' => $fileUrl,
+                                'link' => $fileUrlWithTimestamp,
                                 'filename' => $fileName,
                             ],
                         ],
