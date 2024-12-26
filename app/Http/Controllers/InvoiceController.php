@@ -129,6 +129,7 @@ class InvoiceController extends Controller
 
         if(!$is_edited)
         {
+            $fileUrlWithTimestamp = $fileUrl . '?t=' . time();
             $templateParams = [
                 'name' => 'ace_new_order_admin', // Replace with your WhatsApp template name
                 'language' => ['code' => 'en'],
@@ -139,7 +140,7 @@ class InvoiceController extends Controller
                             [
                                 'type' => 'document',
                                 'document' => [
-                                    'link' =>  $fileUrl, // Replace with the actual URL to the PDF document
+                                    'link' =>  $fileUrlWithTimestamp, // Replace with the actual URL to the PDF document
                                     'filename' => $sanitizedOrderId.'.pdf' // Optional: Set a custom file name for the PDF document
                                 ]
                             ]
@@ -197,7 +198,7 @@ class InvoiceController extends Controller
                             [
                                 'type' => 'document',
                                 'document' => [
-                                    'link' =>  $fileUrl, // Replace with the actual URL to the PDF document
+                                    'link' =>  $fileUrlWithTimestamp, // Replace with the actual URL to the PDF document
                                     'filename' => $sanitizedOrderId.'.pdf' // Optional: Set a custom file name for the PDF document
                                 ]
                             ]
@@ -226,7 +227,7 @@ class InvoiceController extends Controller
                 ],
             ];
 
-            //$response = $whatsAppUtility->sendWhatsApp($user->mobile, $templateParams, '', 'User Order Invoice');
+            $response = $whatsAppUtility->sendWhatsApp($user->mobile, $templateParams, '', 'User Order Invoice');
         }else{
             $fileUrlWithTimestamp = $fileUrl . '?t=' . time();
             $templateParams = [
@@ -274,7 +275,7 @@ class InvoiceController extends Controller
 
             foreach ($mobileNumbers as $mobileNumber) 
             {
-                if($mobileNumber == '+918961043773')
+                if($mobileNumber == '+918961043773' || true)
                 {
                     // Send message for each number
                     $response = $whatsAppUtility->sendWhatsApp($mobileNumber, $templateParams, '', 'Admin Order Invoice');
@@ -326,12 +327,12 @@ class InvoiceController extends Controller
                 ],
             ];
 
-            //$response = $whatsAppUtility->sendWhatsApp($user->mobile, $templateParams, '', 'User Order Invoice');
+            $response = $whatsAppUtility->sendWhatsApp($user->mobile, $templateParams, '', 'User Order Invoice');
         }
     
         // // Assuming additional functionality such as WhatsApp integration etc.
-        // return $mpdf->Output('invoice.pdf', 'I');
-        return $fileUrl;
+        return $mpdf->Output('invoice.pdf', 'I');
+        // return $fileUrl;
     }
 
     public function generateInvoice($invoiceId)
