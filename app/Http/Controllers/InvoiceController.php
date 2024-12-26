@@ -106,12 +106,16 @@ class InvoiceController extends Controller
 		$fileName = 'invoice_' . $sanitizedOrderId . '.pdf';
 		$filePath = storage_path('app/public/' . $publicPath . $fileName);
 
+        // Check if the file already exists and delete it
+        if (File::exists($filePath)) {
+            File::delete($filePath);
+        }
+
 		if (!File::isDirectory($storage_path = storage_path('app/public/' . $publicPath))) {
 			File::makeDirectory($storage_path, 0755, true);
 		}
 
 		$mpdf->Output($filePath, 'F');
-
 
         $fileUrl = asset('storage/' . $publicPath . $fileName);
 
