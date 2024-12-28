@@ -331,8 +331,8 @@ class InvoiceController extends Controller
         }
     
         // // Assuming additional functionality such as WhatsApp integration etc.
-        return $mpdf->Output('invoice.pdf', 'I');
-        // return $fileUrl;
+        // return $mpdf->Output('invoice.pdf', 'I');
+        return $fileUrl;
     }
 
     public function generateInvoice($invoiceId)
