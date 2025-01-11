@@ -30,6 +30,7 @@ class ProductModel extends Model
         'mark_up',
         'out_of_stock',
         'yet_to_launch',
+        'video_link'
     ];
 
     public function transactions()
