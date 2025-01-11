@@ -248,7 +248,8 @@ class ViewController extends Controller
 				DB::raw('special_basic as basic'), 
 				DB::raw('special_gst as gst'),
                 'out_of_stock',
-                'yet_to_launch'
+                'yet_to_launch',
+                'video_link'
 			);
 		} else if ($user_type && $user_type->type == 'outstation') {
                 // If user type is 'special', select special columns but alias them as 'basic' and 'gst'
@@ -261,7 +262,8 @@ class ViewController extends Controller
                     DB::raw('outstation_basic as basic'), 
                     DB::raw('outstation_gst as gst'),
                     'out_of_stock',
-                    'yet_to_launch'
+                    'yet_to_launch',
+                    'video_link'
                 );
         } else if ($user_type && $user_type->type == 'zeroprice') {
 
@@ -276,7 +278,8 @@ class ViewController extends Controller
                 DB::raw('0 as basic'), 
                 DB::raw('0 as gst'), 
                 'out_of_stock',
-                'yet_to_launch'
+                'yet_to_launch',
+                'video_link'
             );
 
         } else {
@@ -290,7 +293,8 @@ class ViewController extends Controller
 				'basic', 
 				'gst',
                 'out_of_stock',
-                'yet_to_launch'
+                'yet_to_launch',
+                'video_link'
 			);
 		}
 
@@ -318,6 +322,19 @@ class ViewController extends Controller
                 $product_name = $prd_rec->name_in_telugu;
             }
 
+            // Extract video ID from video_link
+            if (!empty($prd_rec->video_link)) {
+                // Parse the URL to get the query parameters
+                parse_str(parse_url($prd_rec->video_link, PHP_URL_QUERY), $query_params);
+                // Extract 'v' parameter (YouTube video ID) or other identifiers from shorts
+                if (isset($query_params['v'])) {
+                    $prd_rec->video_link = $query_params['v'];
+                } else {
+                    // For YouTube Shorts, get the last part of the URL
+                    $prd_rec->video_link = basename(parse_url($prd_rec->video_link, PHP_URL_PATH));
+                }
+            }
+
             // Check if the product is in the user's cart
             $cart_item = CartModel::where('user_id', $user_id)
                 ->where('product_code', $prd_rec->product_code)
@@ -335,6 +352,7 @@ class ViewController extends Controller
                 'gst' => $prd_rec->gst,
                 'out_of_stock' => $prd_rec->out_of_stock,
                 'yet_to_launch' => $prd_rec->yet_to_launch,
+                'video_link' => $prd_rec->video_link ?? null,
                 'in_cart' => $cart_item ? true : false,
                 'cart_quantity' => $cart_item->quantity ?? null,
                 'cart_type' => $cart_item->type ?? null,
@@ -514,7 +532,6 @@ class ViewController extends Controller
             : response()->json(['message' => 'Failed to get data'], 404);
     }
 
-
     public function categories()
     {
         // Fetch all categories with their product count
@@ -666,7 +683,6 @@ class ViewController extends Controller
 			], 200);
 	}
 
-
     public function user($lang = 'eng')
     {
         $get_user_details = User::select('id', 'name', 'name_in_hindi', 'name_in_telugu', 'email', 'mobile', 'role', 'address_line_1', 'address_line_2', 'city', 'pincode', 'gstin', 'state', 'country', 'is_verified', 'type', 'app_status')
@@ -729,8 +745,6 @@ class ViewController extends Controller
             ? response()->json(['Failed get data successfully!'], 404)
             : response()->json(['Fetch data successfully!', 'data' => $processed_rec_user, 'types' => $types], 200);
     }
-
-    
 
     public function find_user($search = null)
     {   
