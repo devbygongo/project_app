@@ -20,6 +20,8 @@ use App\Models\InvoiceModel;
 
 use App\Models\InvoiceItemsModel;
 
+use App\Models\StockCartModel;
+
 use Illuminate\Support\Facades\Auth;
 
 use Hash;
@@ -927,4 +929,34 @@ class CreateController extends Controller
         ? response()->json(['message' => 'New products file updated successfully!', 'data' => $update_file_name], 200)
         : response()->json(['message' => 'No changes detected.'], 304);
     }  
+
+    // Create operation
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'product_code' => 'required|string|exists:t_products,product_code',
+            'product_name' => 'required|string|exists:t_products,product_name',
+            'quantity' => 'required|integer|min:1',
+            'godown_key' => 'required|string|max:255',
+            'type' => 'required|in:IN,OUT',
+        ]);
+
+        $create_stock_cart = StockCartModel::create([
+            'user_id' => Auth::id(),
+            'product_code' => $validated['product_code'],
+            'product_name' => $validated['product_name'],
+            'quantity' => $validated['quantity'],
+            'godown_key' => $validated['godown_key'],
+            'type' => $validated['type'],
+        ]);
+
+        return $create_stock_cart
+        ? response()->json([
+            'message' => 'Stock cart item created successfully.',
+            'data' => $create_stock_cart,
+        ], 201)
+        : response()->json([
+            'message' => 'Failed to create stock cart item.',
+        ], 500);
+    }
 }
