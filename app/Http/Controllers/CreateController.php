@@ -931,7 +931,7 @@ class CreateController extends Controller
     }  
 
     // Create operation
-    public function store(Request $request)
+    public function stock_cart_store(Request $request)
     {
         $validated = $request->validate([
             'product_code' => 'required|string|exists:t_products,product_code',
@@ -959,4 +959,80 @@ class CreateController extends Controller
             'message' => 'Failed to create stock cart item.',
         ], 500);
     }
+
+    public function createStockOrder(Request $request)
+    {
+        try {
+            // Validate the request for remarks (optional)
+            $validated = $request->validate([
+                'remarks' => 'nullable|string|max:255',
+            ]);
+
+            // Fetch the current user's ID
+            $userId = Auth::id();
+
+            // Fetch the current date as the order date
+            $orderDate = now()->toDateString();
+
+            // Fetch cart items for the user
+            $cartItems = StockCartModel::where('user_id', $userId)->get();
+
+            if ($cartItems->isEmpty()) {
+                return response()->json([
+                    'message' => 'No items found in the stock cart for the user.',
+                    'status' => 'false',
+                ], 404);
+            }
+
+            // Determine the order type from the first cart item
+            $orderType = $cartItems->first()->type;
+
+            // Generate a unique order ID (you can customize this as needed)
+            $orderId = 'ORD-' . strtoupper(uniqid());
+
+            // Create the stock order
+            $stockOrder = StockOrderModel::create([
+                'order_id' => $orderId,
+                'user_id' => $userId,
+                'order_date' => $orderDate,
+                'type' => $orderType,
+                'pdf' => null, // Placeholder for PDF path (to be generated later)
+                'remarks' => $validated['remarks'] ?? null,
+            ]);
+
+            // Create stock order items from the cart
+            foreach ($cartItems as $item) {
+                StockOrderItemModel::create([
+                    'stock_order_id' => $stockOrder->id,
+                    'product_code' => $item->product_code,
+                    'product_name' => $item->product_name,
+                    'quantity' => $item->quantity,
+                    'type' => $item->type,
+                ]);
+            }
+
+            // Clear the stock cart after creating the order
+            StockCartModel::where('user_id', $userId)->delete();
+
+            return response()->json([
+                'message' => 'Stock order created successfully.',
+                'data' => [
+                    'order_id' => $stockOrder->order_id,
+                    'order_date' => $stockOrder->order_date,
+                    'type' => $stockOrder->type,
+                    'remarks' => $stockOrder->remarks,
+                    'items' => $cartItems->map(function ($item) {
+                        return $item->only(['product_code', 'product_name', 'quantity', 'type']);
+                    }),
+                ],
+                'status' => 'true',
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while creating the stock order.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
 }

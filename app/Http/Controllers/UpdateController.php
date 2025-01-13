@@ -12,6 +12,8 @@ use App\Models\OrderModel;
 
 use App\Models\OrderItemsModel;
 
+use App\Models\StockCartModel;
+
 use App\Http\Controllers\InvoiceController;
 
 use App\Utils\sendWhatsAppUtility;
@@ -525,5 +527,44 @@ class UpdateController extends Controller
             'order' => $order
         ], 200);
     }
+
+    public function stock_cart_update(Request $request, $id)
+    {
+        // Fetch the stock cart item for the authenticated user
+        $stockCartItem = StockCartModel::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->first();
+
+        // Return response using ternary operator if the item is not found
+        return !$stockCartItem
+            ? response()->json(['message' => 'Stock cart item not found.', 'count' => 0], 404)
+            : (function () use ($request, $stockCartItem) {
+                // Validate the request
+                $validated = $request->validate([
+                    'product_code' => 'required|string|exists:t_products,product_code',
+                    'product_name' => 'required|string|exists:t_products,product_name',
+                    'quantity' => 'required|integer|min:1',
+                    'godown_key' => 'required|string|max:255',
+                    'type' => 'required|in:IN,OUT',
+                ]);
+
+                // Update the stock cart item
+                $stockCartItem->update([
+                    'product_code' => $validated['product_code'],
+                    'product_name' => $validated['product_name'],
+                    'quantity' => $validated['quantity'],
+                    'godown_key' => $validated['godown_key'],
+                    'type' => $validated['type'],
+                ]);
+
+                // Return the success response
+                return response()->json([
+                    'message' => 'Stock cart item updated successfully.',
+                    'data' => $stockCartItem,
+                    'count' => 1,
+                ], 200);
+            })();
+    }
+
 
 }

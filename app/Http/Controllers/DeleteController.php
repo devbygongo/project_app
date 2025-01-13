@@ -10,6 +10,8 @@ use App\Models\CartModel;
 
 use App\Models\User;
 
+use App\Models\StockCartModel;
+
 class DeleteController extends Controller
 {
     //Delete Cart 
@@ -78,5 +80,23 @@ class DeleteController extends Controller
                 ], 200);
             }
         }
+    }
+
+    // Delete operation
+    public function stock_cart_destroy($id)
+    {
+        $stockCartItem = StockCartModel::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if (!$stockCartItem) {
+            return response()->json(['message' => 'Stock cart item not found.'], 404);
+        }
+
+        $stockCartItem->delete();
+
+        return response()->json([
+            'message' => 'Stock cart item deleted successfully.',
+        ], 200);
     }
 }

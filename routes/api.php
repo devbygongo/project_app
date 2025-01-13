@@ -107,6 +107,12 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
     Route::delete('/delete_user/{id}', [DeleteController::class, 'user']);
 
     Route::post('/upload_product', [CreateController::class, 'uploadProductsImage']);
+
+    Route::post('/make_stock_cart', [CreateController::class, 'stock_cart_store']);
+    Route::get('/view_stock_cart/{id?}', [ViewController::class, 'stock_cart_index']);
+    Route::post('/update_stock_cart/{id}', [UpdateController::class, 'stock_cart_update']);
+    Route::delete('/delete_stock_cart/{id}', [DeleteController::class, 'stock_cart_destroy']);
+
 });
 
 Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user'])->group(function () {

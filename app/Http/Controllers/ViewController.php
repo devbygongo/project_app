@@ -24,6 +24,8 @@ use App\Models\CategoryModel;
 
 use App\Models\SubCategoryModel;
 
+use App\Models\StockCartModel;
+
 class ViewController extends Controller
 {
     //
@@ -1134,6 +1136,45 @@ class ViewController extends Controller
             ], 200);
         }
     }
+
+    public function stock_cart_index($id = null)
+    {
+        // Fetch stock cart items for the authenticated user
+        $stockCartItems = StockCartModel::where('user_id', Auth::id());
+
+        // Check if a specific item is requested
+        if ($id) {
+            $item = $stockCartItems->find($id);
+
+            // Use a ternary operator to validate and return the response
+            return $item 
+                ? response()->json([
+                    'message' => 'Stock cart item fetched successfully.',
+                    'data' => $item,
+                    'count' => 1, // Only one item since we're fetching by ID
+                ], 200)
+                : response()->json([
+                    'message' => 'Stock cart item not found.',
+                    'count' => 0,
+                ], 404);
+        }
+
+        // Fetch all items for the user
+        $items = $stockCartItems->get();
+
+        // Use a ternary operator to validate and return the response
+        return $items->count() > 0
+            ? response()->json([
+                'message' => 'Stock cart items fetched successfully.',
+                'data' => $items->makeHidden(['id', '']),
+                'count' => $items->count(),
+            ], 200)
+            : response()->json([
+                'message' => 'No stock cart items found for this user.',
+                'count' => 0,
+            ], 404);
+    }
+
 
     // return blade file
     
