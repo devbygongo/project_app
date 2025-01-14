@@ -1175,6 +1175,66 @@ class ViewController extends Controller
             ], 404);
     }
 
+    public function fetchStockOrder($orderId = null)
+    {
+        try {
+            if ($orderId) {
+                // Fetch specific stock order with its items
+                $stockOrder = StockOrderModel::with('items')
+                    ->where('order_id', $orderId)
+                    ->first();
+
+                if (!$stockOrder) {
+                    return response()->json([
+                        'message' => 'Stock order not found.',
+                        'status' => 'false',
+                    ], 404);
+                }
+
+                return response()->json([
+                    'message' => 'Stock order fetched successfully.',
+                    'data' => [
+                        'order_id' => $stockOrder->order_id,
+                        'order_date' => $stockOrder->order_date,
+                        'type' => $stockOrder->type,
+                        'remarks' => $stockOrder->remarks,
+                        'items' => $stockOrder->items->map(function ($item) {
+                            return $item->only(['product_code', 'product_name', 'quantity', 'type']);
+                        }),
+                    ],
+                    'status' => 'true',
+                ], 200);
+            } else {
+                // Fetch all stock orders with pagination
+                $stockOrders = StockOrderModel::with('items')
+                    ->orderBy('order_date', 'desc')
+                    ->paginate(10);
+
+                return response()->json([
+                    'message' => 'Stock orders fetched successfully.',
+                    'data' => $stockOrders->map(function ($order) {
+                        return [
+                            'order_id' => $order->order_id,
+                            'order_date' => $order->order_date,
+                            'type' => $order->type,
+                            'remarks' => $order->remarks,
+                            'items' => $order->items->map(function ($item) {
+                                return $item->only(['product_code', 'product_name', 'quantity', 'type']);
+                            }),
+                        ];
+                    }),
+                    'status' => 'true',
+                    'count' => $stockOrders->total(),
+                ], 200);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while fetching stock orders.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
 
     // return blade file
     

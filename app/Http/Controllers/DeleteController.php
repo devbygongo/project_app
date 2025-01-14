@@ -12,6 +12,10 @@ use App\Models\User;
 
 use App\Models\StockCartModel;
 
+use App\Models\StockOrderModel;
+
+use App\Models\StockOrderItemModel;
+
 class DeleteController extends Controller
 {
     //Delete Cart 
@@ -99,4 +103,55 @@ class DeleteController extends Controller
             'message' => 'Stock cart item deleted successfully.',
         ], 200);
     }
+
+    public function deleteStockOrder($orderId)
+    {
+        try {
+            // Fetch the stock order by order_id
+            $stockOrder = StockOrderModel::where('order_id', $orderId)->first();
+
+            if (!$stockOrder) {
+                return response()->json([
+                    'message' => 'Stock order not found.',
+                    'status' => 'false',
+                ], 404);
+            }
+
+            // Check if the logged-in user is authorized to delete the stock order
+            $userId = Auth::id();
+            if ($stockOrder->user_id !== $userId) {
+                return response()->json([
+                    'message' => 'Unauthorized to delete this stock order.',
+                    'status' => 'false',
+                ], 403);
+            }
+
+            // Begin a database transaction
+            \DB::beginTransaction();
+
+            // Delete the associated stock order items
+            StockOrderItemModel::where('stock_order_id', $stockOrder->id)->delete();
+
+            // Delete the stock order
+            $stockOrder->delete();
+
+            // Commit the transaction
+            \DB::commit();
+
+            return response()->json([
+                'message' => 'Stock order and associated items deleted successfully.',
+                'order_id' => $orderId,
+                'status' => 'true',
+            ], 200);
+        } catch (\Exception $e) {
+            // Rollback the transaction in case of an error
+            \DB::rollBack();
+
+            return response()->json([
+                'message' => 'An error occurred while deleting the stock order.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
 }

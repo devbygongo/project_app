@@ -987,8 +987,14 @@ class CreateController extends Controller
             // Determine the order type from the first cart item
             $orderType = $cartItems->first()->type;
 
-            // Generate a unique order ID (you can customize this as needed)
-            $orderId = 'ORD-' . strtoupper(uniqid());
+            // Fetch counter details
+            $counter = CounterModel::where('name', 'stock_order')->firstOrFail();
+
+             // Generate the order_id
+            $orderId = $counter->prefix . str_pad($counter->counter, 5, '0', STR_PAD_LEFT) . $counter->postfix;
+
+            // Increment the counter
+            $counter->increment('counter');
 
             // Create the stock order
             $stockOrder = StockOrderModel::create([

@@ -18,4 +18,10 @@ class StockOrdersModel extends Model
         'pdf',
         'remarks',
     ];
+
+    public function items()
+    {
+        return $this->hasMany(StockOrderItemsModel::class, 'stock_order_id');
+    }
+
 }
