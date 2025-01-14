@@ -117,6 +117,8 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
     Route::get('/view_stock_order/{id?}', [ViewController::class, 'fetchStockOrder']);
     Route::post('/update_stock_order/{id}', [UpdateController::class, 'updateStockOrder']);
     Route::delete('/delete_stock_order/{id}', [DeleteController::class, 'deleteStockOrder']);
+
+    Route::post('/import_godown', [CsvImportController::class, 'importCsv_godown']);
 });
 
 Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user'])->group(function () {

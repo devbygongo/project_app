@@ -14,9 +14,9 @@ use App\Models\OrderItemsModel;
 
 use App\Models\StockCartModel;
 
-use App\Models\StockOrderModel;
+use App\Models\StockOrdersModel;
 
-use App\Models\StockOrderItemModel;
+use App\Models\StockOrderItemsModel;
 
 use App\Http\Controllers\InvoiceController;
 
@@ -564,12 +564,96 @@ class UpdateController extends Controller
                 // Return the success response
                 return response()->json([
                     'message' => 'Stock cart item updated successfully.',
-                    'data' => $stockCartItem,
-                    'count' => 1,
+                    'data' => $stockCartItem->makeHidden(['id', 'updated_at', 'created_at']),
                 ], 200);
             })();
     }
 
+
+    // public function updateStockOrder(Request $request, $orderId)
+    // {
+    //     try {
+    //         // Validate the request
+    //         $validated = $request->validate([
+    //             'remarks' => 'nullable|string|max:255',
+    //         ]);
+
+    //         // Fetch the stock order by order_id
+    //         $stockOrder = StockOrderModel::where('order_id', $orderId)->first();
+
+    //         if (!$stockOrder) {
+    //             return response()->json([
+    //                 'message' => 'Stock order not found.',
+    //                 'status' => 'false',
+    //             ], 404);
+    //         }
+
+    //         // Fetch the current user's ID
+    //         $userId = Auth::id();
+
+    //         if ($stockOrder->user_id !== $userId) {
+    //             return response()->json([
+    //                 'message' => 'Unauthorized to update this stock order.',
+    //                 'status' => 'false',
+    //             ], 403);
+    //         }
+
+    //         // Fetch cart items for the user
+    //         $cartItems = StockCartModel::where('user_id', $userId)->get();
+
+    //         if ($cartItems->isEmpty()) {
+    //             return response()->json([
+    //                 'message' => 'No items found in the stock cart for the user.',
+    //                 'status' => 'false',
+    //             ], 404);
+    //         }
+
+    //         // Determine the order type from the first cart item
+    //         $orderType = $cartItems->first()->type;
+
+    //         // Update the stock order
+    //         $stockOrder->update([
+    //             'type' => $orderType,
+    //             'remarks' => $validated['remarks'] ?? $stockOrder->remarks,
+    //         ]);
+
+    //         // Remove existing stock order items
+    //         StockOrderItemModel::where('stock_order_id', $stockOrder->id)->delete();
+
+    //         // Create new stock order items from the cart
+    //         foreach ($cartItems as $item) {
+    //             StockOrderItemModel::create([
+    //                 'stock_order_id' => $stockOrder->id,
+    //                 'product_code' => $item->product_code,
+    //                 'product_name' => $item->product_name,
+    //                 'quantity' => $item->quantity,
+    //                 'type' => $item->type,
+    //             ]);
+    //         }
+
+    //         // Clear the stock cart after updating the order
+    //         StockCartModel::where('user_id', $userId)->delete();
+
+    //         return response()->json([
+    //             'message' => 'Stock order updated successfully.',
+    //             'data' => [
+    //                 'order_id' => $stockOrder->order_id,
+    //                 'order_date' => $stockOrder->order_date,
+    //                 'type' => $stockOrder->type,
+    //                 'remarks' => $stockOrder->remarks,
+    //                 'items' => $cartItems->map(function ($item) {
+    //                     return $item->only(['product_code', 'product_name', 'quantity', 'type']);
+    //                 }),
+    //             ],
+    //             'status' => 'true',
+    //         ], 200);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'message' => 'An error occurred while updating the stock order.',
+    //             'error' => $e->getMessage(),
+    //         ], 500);
+    //     }
+    // }
 
     public function updateStockOrder(Request $request, $orderId)
     {
@@ -577,10 +661,15 @@ class UpdateController extends Controller
             // Validate the request
             $validated = $request->validate([
                 'remarks' => 'nullable|string|max:255',
+                'items' => 'required|array',
+                'items.*.product_code' => 'required|string|exists:t_products,product_code',
+                'items.*.product_name' => 'required|string|exists:t_products,product_name',
+                'items.*.quantity' => 'required|integer|min:1',
+                'items.*.type' => 'required|in:IN,OUT',
             ]);
 
             // Fetch the stock order by order_id
-            $stockOrder = StockOrderModel::where('order_id', $orderId)->first();
+            $stockOrder = StockOrdersModel::where('id', $orderId)->first();
 
             if (!$stockOrder) {
                 return response()->json([
@@ -592,6 +681,7 @@ class UpdateController extends Controller
             // Fetch the current user's ID
             $userId = Auth::id();
 
+            // Ensure the stock order belongs to the authenticated user
             if ($stockOrder->user_id !== $userId) {
                 return response()->json([
                     'message' => 'Unauthorized to update this stock order.',
@@ -599,41 +689,25 @@ class UpdateController extends Controller
                 ], 403);
             }
 
-            // Fetch cart items for the user
-            $cartItems = StockCartModel::where('user_id', $userId)->get();
-
-            if ($cartItems->isEmpty()) {
-                return response()->json([
-                    'message' => 'No items found in the stock cart for the user.',
-                    'status' => 'false',
-                ], 404);
-            }
-
-            // Determine the order type from the first cart item
-            $orderType = $cartItems->first()->type;
-
             // Update the stock order
             $stockOrder->update([
-                'type' => $orderType,
                 'remarks' => $validated['remarks'] ?? $stockOrder->remarks,
             ]);
 
             // Remove existing stock order items
-            StockOrderItemModel::where('stock_order_id', $stockOrder->id)->delete();
+            StockOrderItemsModel::where('stock_order_id', $stockOrder->id)->delete();
 
-            // Create new stock order items from the cart
-            foreach ($cartItems as $item) {
-                StockOrderItemModel::create([
+            // Add new items to the stock order
+            $items = $validated['items'];
+            foreach ($items as $item) {
+                StockOrderItemsModel::create([
                     'stock_order_id' => $stockOrder->id,
-                    'product_code' => $item->product_code,
-                    'product_name' => $item->product_name,
-                    'quantity' => $item->quantity,
-                    'type' => $item->type,
+                    'product_code' => $item['product_code'],
+                    'product_name' => $item['product_name'],
+                    'quantity' => $item['quantity'],
+                    'type' => $item['type'],
                 ]);
             }
-
-            // Clear the stock cart after updating the order
-            StockCartModel::where('user_id', $userId)->delete();
 
             return response()->json([
                 'message' => 'Stock order updated successfully.',
@@ -642,9 +716,7 @@ class UpdateController extends Controller
                     'order_date' => $stockOrder->order_date,
                     'type' => $stockOrder->type,
                     'remarks' => $stockOrder->remarks,
-                    'items' => $cartItems->map(function ($item) {
-                        return $item->only(['product_code', 'product_name', 'quantity', 'type']);
-                    }),
+                    'items' => $items,
                 ],
                 'status' => 'true',
             ], 200);
@@ -655,5 +727,6 @@ class UpdateController extends Controller
             ], 500);
         }
     }
+
 
 }

@@ -9,6 +9,8 @@ use League\Csv\Statement;
 use Hash;
 use App\Models\CategoryModel;
 use App\Models\SubCategoryModel;
+use Illuminate\Support\Facades\Validator;
+use App\Models\GodownModel;
 
 class CsvImportController extends Controller
 {
@@ -52,6 +54,7 @@ class CsvImportController extends Controller
             $gstPrice_prduct_special = $record_csv['Special GST Price'] !== '' ? $record_csv['Special GST Price'] : 0;
             $basicPrice_product_outstation = $record_csv['Outstation Basic Price'] !== '' ? $record_csv['Outstation Basic Price'] : 0;
             $gstPrice_prduct_outstation = $record_csv['Outstation GST Price'] !== '' ? $record_csv['Outstation GST Price'] : 0;
+            $guest_price = $record_csv['Guest Price'] !== '' ? $record_csv['Guest Price'] : 0;
             $filename = $record_csv['Product Code'];
 
             $category = $record_csv['Category'];
@@ -94,6 +97,7 @@ class CsvImportController extends Controller
                     'special_gst' => $gstPrice_prduct_special,     // Ensure this is a valid number
                     'outstation_basic' => $basicPrice_product_outstation,     // Ensure this is a valid number
                     'outstation_gst' => $gstPrice_prduct_outstation,     // Ensure this is a valid number
+                    'guest_price' => $guest_price,     // Ensure this is a valid number
                     'out_of_stock' => $record_csv['Out of Stock'] === 'TRUE' ? 1 : 0,
                     'yet_to_launch' => $record_csv['Yet to Launch'] === 'TRUE' ? 1 : 0,
                     // 'product_image' => null, // Set this if you have the image URL or path
@@ -120,6 +124,7 @@ class CsvImportController extends Controller
                     'special_gst' => $gstPrice_prduct_special,     // Ensure this is a valid number
                     'outstation_basic' => $basicPrice_product_outstation,     // Ensure this is a valid number
                     'outstation_gst' => $gstPrice_prduct_outstation,     // Ensure this is a valid number
+                    'guest_price' => $guest_price,     // Ensure this is a valid number
                     'out_of_stock' => $record_csv['Out of Stock'] === 'TRUE' ? 1 : 0,
                     'yet_to_launch' => $record_csv['Yet to Launch'] === 'TRUE' ? 1 : 0,
                     // 'product_image' => null, // Set this if you have the image URL or path
@@ -295,6 +300,71 @@ class CsvImportController extends Controller
         }
         else {
             return response()->json(['message' => 'Sorry, failed to import data'], 400);
+        }
+    }
+
+    public function importCsv_godown(Request $request)
+    {
+        try {
+            // Validate the uploaded file
+            $validator = Validator::make($request->all(), [
+                'file' => 'required|file|mimes:csv,txt|max:5120', // 5 MB max file size
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['message' => 'Invalid file format.', 'errors' => $validator->errors()], 422);
+            }
+
+            // Load the CSV file
+            $file = $request->file('file');
+            $filePath = $file->getRealPath();
+            $csvData = array_map('str_getcsv', file($filePath));
+
+            if (empty($csvData)) {
+                return response()->json(['message' => 'The CSV file is empty.'], 422);
+            }
+
+            // Extract the header and map it to DB columns
+            $header = array_map('trim', $csvData[0]);
+            $header = array_flip($header);
+
+            if (!isset($header['Name'], $header['Description'])) {
+                return response()->json(['message' => 'CSV file does not contain required columns: Name, Description.'], 422);
+            }
+
+            // Prepare data for bulk insert
+            $data = [];
+            foreach (array_slice($csvData, 1) as $row) {
+                if (isset($row[$header['Name']], $row[$header['Description']])) {
+                    $data[] = [
+                        'name' => $row[$header['Name']],
+                        'description' => $row[$header['Description']],
+                    ];
+                }
+            }
+
+            if (empty($data)) {
+                return response()->json(['message' => 'No valid data found in the CSV file.'], 422);
+            }
+
+            // Use chunking to insert data in batches using Eloquent
+            $chunkSize = 1000; // Number of records per batch
+            $chunks = array_chunk($data, $chunkSize);
+
+            foreach ($chunks as $chunk) {
+                GodownModel::insert($chunk);
+            }
+
+            return response()->json([
+                'message' => 'CSV data imported successfully.',
+                'total_records' => count($data),
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred during import.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
     }
 }

@@ -24,8 +24,16 @@ return new class extends Migration
             $table->string('type');
             $table->string('machine_part_no');
             $table->longText('product_image')->nullable();
+            $table->string('video_link', 100)->nullable();
             $table->float('basic')->nullable();
             $table->float('gst')->nullable();
+            $table->double('special_basic')->nullable();
+            $table->double('special_gst')->nullable();
+            $table->double('outstation_basic')->nullable();
+            $table->double('outstation_gst')->nullable();
+            $table->double('guest_price')->nullable();
+            $table->string('out_of_stock', 10)->default(0);
+            $table->string('yet_to_launch', 10)->nullable()->default(0);
             // $table->float('mark_up');
             $table->timestamps();
         });

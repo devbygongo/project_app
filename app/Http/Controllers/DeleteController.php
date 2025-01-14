@@ -12,9 +12,9 @@ use App\Models\User;
 
 use App\Models\StockCartModel;
 
-use App\Models\StockOrderModel;
+use App\Models\StockOrdersModel;
 
-use App\Models\StockOrderItemModel;
+use App\Models\StockOrderItemsModel;
 
 class DeleteController extends Controller
 {
@@ -108,7 +108,7 @@ class DeleteController extends Controller
     {
         try {
             // Fetch the stock order by order_id
-            $stockOrder = StockOrderModel::where('order_id', $orderId)->first();
+            $stockOrder = StockOrdersModel::where('id', $orderId)->first();
 
             if (!$stockOrder) {
                 return response()->json([
@@ -130,7 +130,7 @@ class DeleteController extends Controller
             \DB::beginTransaction();
 
             // Delete the associated stock order items
-            StockOrderItemModel::where('stock_order_id', $stockOrder->id)->delete();
+            StockOrderItemsModel::where('stock_order_id', $stockOrder->id)->delete();
 
             // Delete the stock order
             $stockOrder->delete();
@@ -140,7 +140,7 @@ class DeleteController extends Controller
 
             return response()->json([
                 'message' => 'Stock order and associated items deleted successfully.',
-                'order_id' => $orderId,
+                'order_id' => $stockOrder->order_id,
                 'status' => 'true',
             ], 200);
         } catch (\Exception $e) {

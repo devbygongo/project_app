@@ -26,6 +26,10 @@ use App\Models\SubCategoryModel;
 
 use App\Models\StockCartModel;
 
+use App\Models\StockOrdersModel;
+
+use App\Models\StockOrderItemsModel;
+
 class ViewController extends Controller
 {
     //
@@ -1150,7 +1154,7 @@ class ViewController extends Controller
             return $item 
                 ? response()->json([
                     'message' => 'Stock cart item fetched successfully.',
-                    'data' => $item,
+                    'data' => $item->makeHidden(['id', 'updated_at', 'created_at']),
                     'count' => 1, // Only one item since we're fetching by ID
                 ], 200)
                 : response()->json([
@@ -1166,7 +1170,7 @@ class ViewController extends Controller
         return $items->count() > 0
             ? response()->json([
                 'message' => 'Stock cart items fetched successfully.',
-                'data' => $items->makeHidden(['id', '']),
+                'data' => $items->makeHidden(['id', 'updated_at', 'created_at']),
                 'count' => $items->count(),
             ], 200)
             : response()->json([
@@ -1180,8 +1184,8 @@ class ViewController extends Controller
         try {
             if ($orderId) {
                 // Fetch specific stock order with its items
-                $stockOrder = StockOrderModel::with('items')
-                    ->where('order_id', $orderId)
+                $stockOrder = StockOrdersModel::with('items')
+                    ->where('id', $orderId)
                     ->first();
 
                 if (!$stockOrder) {
@@ -1206,7 +1210,7 @@ class ViewController extends Controller
                 ], 200);
             } else {
                 // Fetch all stock orders with pagination
-                $stockOrders = StockOrderModel::with('items')
+                $stockOrders = StockOrdersModel::with('items')
                     ->orderBy('order_date', 'desc')
                     ->paginate(10);
 

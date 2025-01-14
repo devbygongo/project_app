@@ -27,7 +27,8 @@ class ProductModel extends Model
         'special_gst',
         'outstation_basic',
         'outstation_gst',
-        'mark_up',
+        // 'mark_up',
+        'guest_price',
         'out_of_stock',
         'yet_to_launch',
         'video_link'

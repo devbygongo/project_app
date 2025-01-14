@@ -22,6 +22,10 @@ use App\Models\InvoiceItemsModel;
 
 use App\Models\StockCartModel;
 
+use App\Models\StockOrdersModel;
+
+use App\Models\StockOrderItemsModel;
+
 use Illuminate\Support\Facades\Auth;
 
 use Hash;
@@ -953,7 +957,7 @@ class CreateController extends Controller
         return $create_stock_cart
         ? response()->json([
             'message' => 'Stock cart item created successfully.',
-            'data' => $create_stock_cart,
+            'data' => $create_stock_cart->makeHidden(['id', 'updated_at', 'created_at']),
         ], 201)
         : response()->json([
             'message' => 'Failed to create stock cart item.',
@@ -997,7 +1001,7 @@ class CreateController extends Controller
             $counter->increment('counter');
 
             // Create the stock order
-            $stockOrder = StockOrderModel::create([
+            $stockOrder = StockOrdersModel::create([
                 'order_id' => $orderId,
                 'user_id' => $userId,
                 'order_date' => $orderDate,
@@ -1008,7 +1012,7 @@ class CreateController extends Controller
 
             // Create stock order items from the cart
             foreach ($cartItems as $item) {
-                StockOrderItemModel::create([
+                StockOrderItemsModel::create([
                     'stock_order_id' => $stockOrder->id,
                     'product_code' => $item->product_code,
                     'product_name' => $item->product_name,
