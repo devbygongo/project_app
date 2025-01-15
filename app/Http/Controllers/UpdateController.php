@@ -223,8 +223,6 @@ class UpdateController extends Controller
                     // Send message for each number
     
                     $response = $whatsAppUtility->sendWhatsApp($mobileNumber, $templateParams, '', 'User Register');
-
-                    print_r($response);
     
                     // Decode the response into an array
                     $responseArray = json_decode($response, true);
@@ -669,7 +667,7 @@ class UpdateController extends Controller
                     'product_code' => 'required|string|exists:t_products,product_code',
                     'product_name' => 'required|string|exists:t_products,product_name',
                     'quantity' => 'required|integer|min:1',
-                    'godown_key' => 'required|string|max:255',
+                    'godown_id' => 'required|integer|exists:t_godown,id',
                     'type' => 'required|in:IN,OUT',
                 ]);
 
@@ -678,7 +676,7 @@ class UpdateController extends Controller
                     'product_code' => $validated['product_code'],
                     'product_name' => $validated['product_name'],
                     'quantity' => $validated['quantity'],
-                    'godown_key' => $validated['godown_key'],
+                    'godown_id' => $validated['godown_id'],
                     'type' => $validated['type'],
                 ]);
 

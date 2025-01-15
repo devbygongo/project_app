@@ -17,4 +17,10 @@ class StockOrderItemsModel extends Model
         'quantity',
         'type',
     ];
+
+    // Define the relationship to the Product model
+    public function stock_product()
+    {
+        return $this->belongsTo(ProductModel::class, 'product_code', 'product_code');
+    }
 }

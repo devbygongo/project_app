@@ -17,6 +17,8 @@ use App\Http\Controllers\InvoiceController;
 
 use App\Http\Controllers\ReportController;
 
+use App\Http\Controllers\InvoiceControllerZP;
+
 use App\Http\Middleware\GetUserRole;
 
 // Route::get('/user', function (Request $request) {
@@ -119,6 +121,8 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
     Route::delete('/delete_stock_order/{id}', [DeleteController::class, 'deleteStockOrder']);
 
     Route::post('/import_godown', [CsvImportController::class, 'importCsv_godown']);
+
+    Route::get('/generate_stock_order_invoice/{orderId}', [InvoiceControllerZP::class, 'generatestockorderInvoice']);
 });
 
 Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user'])->group(function () {

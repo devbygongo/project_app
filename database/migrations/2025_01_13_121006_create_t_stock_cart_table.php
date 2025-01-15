@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('product_code', 255);
             $table->string('product_name', 255);
             $table->integer('quantity');
-            $table->string('godown_key', 255);
+            $table->string('godown_id', 255);
             $table->enum('type', ['IN', 'OUT']);
             $table->timestamps();
         });

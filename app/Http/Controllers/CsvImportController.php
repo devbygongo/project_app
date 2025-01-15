@@ -306,39 +306,38 @@ class CsvImportController extends Controller
     public function importCsv_godown(Request $request)
     {
         try {
-            // Validate the uploaded file
-            $validator = Validator::make($request->all(), [
-                'file' => 'required|file|mimes:csv,txt|max:5120', // 5 MB max file size
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json(['message' => 'Invalid file format.', 'errors' => $validator->errors()], 422);
-            }
 
             // Load the CSV file
-            $file = $request->file('file');
-            $filePath = $file->getRealPath();
-            $csvData = array_map('str_getcsv', file($filePath));
+            $get_product_category_url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQaU_DTPcjgHGqqE_THQNQuisDEsIXH2PJwGaNOGd5ND5F7mVXpgS5KJ7lv4pgRyb9vUtGk_GTPSTDo/pub?gid=799829324&single=true&output=csv';
 
-            if (empty($csvData)) {
-                return response()->json(['message' => 'The CSV file is empty.'], 422);
-            }
+            // Fetch the CSV content using file_get_contents
+            $csvContent_category = file_get_contents($get_product_category_url);
+
+            // Fetch and parse the CSV
+            $csv_category = Reader::createFromString($csvContent_category);
+
+            $csv_category->setHeaderOffset(0); // Set the header offset
+            
+
+            $records_csv = (new Statement())->process($csv_category);
 
             // Extract the header and map it to DB columns
-            $header = array_map('trim', $csvData[0]);
-            $header = array_flip($header);
+            // $header = array_map('trim', $csvData[0]);
+            // $header = array_flip($header);
 
-            if (!isset($header['Name'], $header['Description'])) {
-                return response()->json(['message' => 'CSV file does not contain required columns: Name, Description.'], 422);
-            }
+            // if (!isset($header['Name'], $header['Description'])) {
+            //     return response()->json(['message' => 'CSV file does not contain required columns: Name, Description.'], 422);
+            // }
 
             // Prepare data for bulk insert
             $data = [];
-            foreach (array_slice($csvData, 1) as $row) {
-                if (isset($row[$header['Name']], $row[$header['Description']])) {
+            foreach ($records_csv as $record) {
+                if (isset($record['Name'], $record['Description'])) {
                     $data[] = [
-                        'name' => $row[$header['Name']],
-                        'description' => $row[$header['Description']],
+                        'name' => trim($record['Name']),
+                        'description' => trim($record['Description']),
+                        'created_at' => now(),
+                        'updated_at' => now(),
                     ];
                 }
             }
@@ -350,6 +349,9 @@ class CsvImportController extends Controller
             // Use chunking to insert data in batches using Eloquent
             $chunkSize = 1000; // Number of records per batch
             $chunks = array_chunk($data, $chunkSize);
+
+            // Use the truncate method from the model's table
+            GodownModel::truncate();
 
             foreach ($chunks as $chunk) {
                 GodownModel::insert($chunk);

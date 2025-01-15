@@ -15,7 +15,7 @@ class StockCartModel extends Model
         'product_code',
         'product_name',
         'quantity',
-        'godown_key',
+        'godown_id',
         'type',
     ];
 }

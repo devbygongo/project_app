@@ -940,7 +940,7 @@ class CreateController extends Controller
             'product_code' => 'required|string|exists:t_products,product_code',
             'product_name' => 'required|string|exists:t_products,product_name',
             'quantity' => 'required|integer|min:1',
-            'godown_key' => 'required|string|max:255',
+            'godown_id' => 'required|integer|exists:t_godown,id',
             'type' => 'required|in:IN,OUT',
         ]);
 
@@ -949,18 +949,20 @@ class CreateController extends Controller
             'product_code' => $validated['product_code'],
             'product_name' => $validated['product_name'],
             'quantity' => $validated['quantity'],
-            'godown_key' => $validated['godown_key'],
+            'godown_id' => $validated['godown_id'],
             'type' => $validated['type'],
         ]);
 
         return $create_stock_cart
         ? response()->json([
+            'status' => true,
             'message' => 'Stock cart item created successfully.',
             'data' => $create_stock_cart->makeHidden(['id', 'updated_at', 'created_at']),
-        ], 201)
+        ], 200)
         : response()->json([
+            'status' => false,
             'message' => 'Failed to create stock cart item.',
-        ], 500);
+        ], 200);
     }
 
     public function createStockOrder(Request $request)
@@ -1022,6 +1024,9 @@ class CreateController extends Controller
 
             // Clear the stock cart after creating the order
             StockCartModel::where('user_id', $userId)->delete();
+
+            // $generate_stock_order_invoice = new InvoiceControllerZP();
+            // $stockOrder->pdf = $generate_stock_order_invoice->generatestockorderInvoice($stockOrder->id);
 
             return response()->json([
                 'message' => 'Stock order created successfully.',
