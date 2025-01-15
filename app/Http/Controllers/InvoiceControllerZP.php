@@ -339,15 +339,20 @@ class InvoiceControllerZP extends Controller
         //                                 ->first();
 
         $stock_order = StockOrdersModel::select('order_id', 'order_date')
-                                        ->with(['godown:name,id']) // Include the godown relationship and fetch 'name'
                                         ->where('id', $orderId)
                                         ->first();
 
-
-        $stock_order_items = StockOrderItemsModel::with('stock_product:product_code,product_image')
+                                        \DB::enableQueryLog(); // Enable query logging
+        $stock_order_items = StockOrderItemsModel::with(['stock_product:product_code,product_image', 'godown:name,id'])
                                                 ->select('product_code', 'product_name', 'quantity','type')
                                                 ->where('stock_order_id', $orderId)
                                                 ->get();
+
+                                                // Fetch and dump the logged queries
+$queries = \DB::getQueryLog();
+dd($queries);
+
+                                                dd($stock_order_items);
         $mobileNumbers = User::where('role', 'admin')->pluck('mobile')->toArray();
         
 
@@ -375,10 +380,10 @@ class InvoiceControllerZP extends Controller
 		foreach ($stock_orderItems as $stock_chunk) {
 			foreach ($stock_chunk as $stock_index => $stock_item) {
 
-                // Access individual item details
-                $product = $stock_item->stock_product; // Related product data
-                $productCode = $product->product_code ?? 'N/A'; // Handle null case
-                $productImage = $product->product_image ?? '/default_image_path.jpg'; // Default image if not found
+                // // Access individual item details
+                // $product = $stock_item->stock_product; // Related product data
+                // $productCode = $product->product_code ?? 'N/A'; // Handle null case
+                // $productImage = $product->product_image ?? '/default_image_path.jpg'; // Default image if not found
 				// Render each item row individually
 				// $stock_htmlChunk = view('stock_order_invoice_template_items', compact('stock_item', 'stock_index'))->render();
                 $stock_htmlChunk = view('stock_order_invoice_template_items', [
@@ -394,7 +399,7 @@ class InvoiceControllerZP extends Controller
 
 
 		// Render the footer
-		$stock_footerHtml = view('stock_order_invoice_template_footer', ['order' => $order])->render();
+		$stock_footerHtml = view('stock_order_invoice_template_footer', ['order' => $stock_order])->render();
 		$mpdf->WriteHTML($stock_footerHtml);
 
 		// Output the PDF
@@ -406,7 +411,7 @@ class InvoiceControllerZP extends Controller
 			File::makeDirectory($storage_path, 0755, true);
 		}
 
-		$mpdf->Output($filePath, 'F');
+		$mpdf->Output($stock_filePath, 'F');
 
 
         $stock_fileUrl = asset('storage/' . $stock_publicPath . $stock_fileName);

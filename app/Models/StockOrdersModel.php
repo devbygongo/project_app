@@ -24,9 +24,4 @@ class StockOrdersModel extends Model
         return $this->hasMany(StockOrderItemsModel::class, 'stock_order_id');
     }
 
-    public function godown()
-    {
-        return $this->belongsTo(GodownModel::class, 'godown_id', 'id'); // Assuming 'godown' is a foreign key in t_stock_orders referencing id in t_godown
-    }
-
 }
