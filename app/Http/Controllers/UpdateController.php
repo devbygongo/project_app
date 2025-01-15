@@ -176,9 +176,130 @@ class UpdateController extends Controller
         }
 
         else {
-            return response()->json([
-                'message' => 'User has not registered!',
-            ], 404);
+            // return response()->json([
+            //     'message' => 'User has not registered!',
+            // ], 404);
+            // no-register user will be registered as a guest user and otp will be send
+            $create_guest_user = User::create([
+                'name' => "guest",
+                'password' => bcrypt($request->input('mobile')),
+                'mobile' => $request->input('mobile'),
+                'type' => 'guest',
+                'is_verified' => '1',
+            ]);
+
+            if (isset($create_guest_user)) {
+
+                $mobileNumbers = User::where('role', 'admin')->pluck('mobile')->toArray();
+
+                $templateParams = [
+                    'name' => 'ace_new_user_registered', // Replace with your WhatsApp template name
+                    'language' => ['code' => 'en'],
+                    'components' => [
+                        [
+                            'type' => 'body',
+                            'parameters' => [
+                                [
+                                    'type' => 'text',
+                                    'text' => $create_guest_user->name,
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => $create_guest_user->mobile,
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => '-',
+                                ],
+                            ],
+                        ]
+                    ],
+                ];
+                
+                $whatsAppUtility = new sendWhatsAppUtility();
+                
+                foreach ($mobileNumbers as $mobileNumber)
+                {
+                    // Send message for each number
+    
+                    $response = $whatsAppUtility->sendWhatsApp($mobileNumber, $templateParams, '', 'User Register');
+
+                    print_r($response);
+    
+                    // Decode the response into an array
+                    $responseArray = json_decode($response, true);
+    
+                    // Check if the response has an error or was successful
+                    if (isset($responseArray['error'])) 
+                    {
+                        echo "Failed to send message to Whatsapp!";
+                    } 
+                }    
+
+                $six_digit_otp_number = random_int(100000, 999999);
+
+                $expiresAt = now()->addMinutes(10);
+
+                $store_otp = User::where('mobile', $mobile)
+                                    ->update([
+                                        'otp' => $six_digit_otp_number,
+                                        'expires_at' => $expiresAt,
+                                    ]);
+                if ($store_otp)     
+                {
+
+                    $templateParams = [
+                                    'name' => 'ace_otp', // Replace with your WhatsApp template name
+                                    'language' => ['code' => 'en'],
+                                    'components' => [
+                                        [
+                                            'type' => 'body',
+                                            'parameters' => [
+                                                [
+                                                    'type' => 'text',
+                                                    'text' => $six_digit_otp_number,
+                                                ],
+                                            ],
+                                        ],
+                                        [
+                                            'type' => 'button',
+                                            'sub_type' => 'url',
+                                            "index" => "0",
+                                            'parameters' => [
+                                                [
+                                                    'type' => 'text',
+                                                    'text' => $six_digit_otp_number,
+                                                ],
+                                            ],
+                                        ]
+                                    ],
+                                ];
+                                
+                                // Directly create an instance of SendWhatsAppUtility
+                                $whatsAppUtility = new sendWhatsAppUtility();
+                                
+                                // Send OTP via WhatsApp
+                                $response = $whatsAppUtility->sendWhatsApp($mobile, $templateParams, $mobile, 'OTP Campaign');
+                
+                                return response()->json([
+                                    'message' => 'Otp store successfully!',
+                                    'data' => $store_otp
+                                ], 200);
+                }
+
+                else {
+                    return response()->json([
+                    'message' => 'Fail to store otp successfully!',
+                    'data' => $store_otp
+                    ], 501);
+                }
+            }
+
+            else {
+                return response()->json([
+                    'message' => 'Sorry, please Try Again!',
+                ], 500);
+            }  
         }
     }
 

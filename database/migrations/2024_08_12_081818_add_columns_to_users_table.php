@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('name_in_telugu')->nullable()->after('name_in_hindi');
             $table->integer('otp')->after('name_in_telugu')->nullable();
             $table->timestamp('expires_at')->after('otp')->nullable();
-            $table->enum('role', ['admin', 'user'])->default('user')->after('expires_at');
+            $table->enum('role', ['admin', 'user', 'guest'])->default('user')->after('expires_at');
             $table->enum('is_verified', ['0', '1'])->default('0')->after('role');
             $table->string('address_line_1')->nullable()->after('is_verified')->nullable(); 
             $table->string('address_line_2')->nullable()->after('address_line_1')->nullable(); 

@@ -34,24 +34,67 @@ class ViewController extends Controller
 {
     //
 
-    public function product()
-    {
-        // $get_product_details = ProductModel::select('SKU','product_code','product_name','category','sub_category','product_image','basic','gst','mark_up')->get();
-        $get_product_details = ProductModel::select('product_code','product_name','category','sub_category','product_image','basic','gst')->get();
+    // public function product()
+    // {
+    //     // $get_product_details = ProductModel::select('SKU','product_code','product_name','category','sub_category','product_image','basic','gst','mark_up')->get();
+    //     $get_product_details = ProductModel::select('product_code','product_name','category','sub_category','product_image','basic','gst')->get();
         
 
-        if (isset($get_product_details)) {
+    //     if (isset($get_product_details)) {
+    //         return response()->json([
+    //             'message' => 'Fetch data successfully!',
+    //             'data' => $get_product_details
+    //         ], 200);
+    //     }
+
+    //     else {
+    //         return response()->json([
+    //             'message' => 'Failed get data successfully!',
+    //         ], 404);
+    //     }    
+    // }
+
+    public function product()
+    {
+        // Fetch authenticated user or check if the user is a guest
+        $user = Auth::user();
+
+        // Get the product details
+        $get_product_details = ProductModel::select(
+            'product_code',
+            'product_name',
+            'category',
+            'sub_category',
+            'product_image',
+            'basic',
+            'guest_price',
+            'gst'
+        )->get();
+
+        if ($get_product_details->isNotEmpty()) {
+            // Modify the response for guest users
+            $products = $get_product_details->map(function ($product) use ($user) {
+                return [
+                    'product_code' => $product->product_code,
+                    'product_name' => $product->product_name,
+                    'category' => $product->category,
+                    'sub_category' => $product->sub_category,
+                    'product_image' => $product->product_image,
+                    // For guest users, set basic = guest_price and gst = 0
+                    'basic' => $user && $user->role !== 'guest' ? $product->basic : $product->guest_price,
+                    'gst' => $user && $user->role !== 'guest' ? $product->gst : 0,
+                ];
+            });
+
             return response()->json([
                 'message' => 'Fetch data successfully!',
-                'data' => $get_product_details
+                'data' => $products,
             ], 200);
         }
 
-        else {
-            return response()->json([
-                'message' => 'Failed get data successfully!',
-            ], 404);
-        }    
+        return response()->json([
+            'message' => 'Failed to fetch data!',
+        ], 404);
     }
 
     public function lng_product($lang = 'eng')
@@ -282,6 +325,23 @@ class ViewController extends Controller
                 'sub_category', 
                 'product_image', 
                 DB::raw('0 as basic'), 
+                DB::raw('0 as gst'), 
+                'out_of_stock',
+                'yet_to_launch',
+                'video_link'
+            );
+
+        } else if ($user_type && $user_type->type == 'guest') {
+
+
+            // If user type is 'special', select special columns but alias them as 'basic' and 'gst'
+            $query = ProductModel::select(
+                'product_code', 
+                'product_name', 
+                'category', 
+                'sub_category', 
+                'product_image', 
+                DB::raw('guest_price as basic'), 
                 DB::raw('0 as gst'), 
                 'out_of_stock',
                 'yet_to_launch',
@@ -957,6 +1017,9 @@ class ViewController extends Controller
             } elseif ($user_type && $user_type->type == 'zeroprice') {
                 $basic_column = DB::raw('0 as basic');
                 $gst_column = DB::raw('0 as gst');
+            } elseif ($user_type && $user_type->type == 'guest') {
+                $basic_column = DB::raw('guest_price as basic');
+                $gst_column = DB::raw('0 as gst');
             }
             
             $get_items_for_user = CartModel::where('t_cart.user_id', $id)
@@ -994,6 +1057,9 @@ class ViewController extends Controller
                 $gst_column = DB::raw('outstation_gst as gst');
             } elseif ($user_type && $user_type->type == 'zeroprice') {
                 $basic_column = DB::raw('0 as basic');
+                $gst_column = DB::raw('0 as gst');
+            }elseif ($user_type && $user_type->type == 'guest') {
+                $basic_column = DB::raw('guest_price as basic');
                 $gst_column = DB::raw('0 as gst');
             }
             

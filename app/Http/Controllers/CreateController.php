@@ -116,7 +116,7 @@ class CreateController extends Controller
                 // Check if the response has an error or was successful
                 if (isset($responseArray['error'])) 
                 {
-                    echo "Failed to send order to Whatsapp!";
+                    echo "Failed to send message to Whatsapp!";
                 } 
                 
             }
@@ -165,8 +165,7 @@ class CreateController extends Controller
                     $user = User::where('mobile', $request->mobile)->first();
 
                     // Check if user is verified
-                    if ($user->is_verified == '0') {
-
+                    if ($user->is_verified == '0') {                        
                         $whatsAppUtility = new sendWhatsAppUtility();
 
                         $templateParams = [
