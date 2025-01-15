@@ -303,7 +303,7 @@ class CsvImportController extends Controller
         }
     }
 
-    public function importCsv_godown(Request $request)
+    public function importCsv_godown()
     {
         try {
 

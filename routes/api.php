@@ -120,7 +120,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
     Route::post('/update_stock_order/{id}', [UpdateController::class, 'updateStockOrder']);
     Route::delete('/delete_stock_order/{id}', [DeleteController::class, 'deleteStockOrder']);
 
-    Route::post('/import_godown', [CsvImportController::class, 'importCsv_godown']);
+    Route::get('/import_godown', [CsvImportController::class, 'importCsv_godown']);
 
     Route::get('/generate_stock_order_invoice/{orderId}', [InvoiceControllerZP::class, 'generatestockorderInvoice']);
 });
