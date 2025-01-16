@@ -28,4 +28,10 @@ class StockOrderItemsModel extends Model
     {
         return $this->belongsTo(GodownModel::class, 'godown_id', 'id'); // Assuming 'godown' is a foreign key in t_stock_orders referencing id in t_godown
     }
+
+    // Relationship with StockOrderModel
+    public function stockOrder()
+    {
+        return $this->belongsTo(StockOrdersModel::class, 'stock_order_id', 'id');
+    }
 }

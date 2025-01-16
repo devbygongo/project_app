@@ -30,6 +30,8 @@ use App\Models\StockOrdersModel;
 
 use App\Models\StockOrderItemsModel;
 
+use App\Models\GodownModel;
+
 class ViewController extends Controller
 {
     //
@@ -1303,6 +1305,140 @@ class ViewController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function get_godown($productCode = null)
+    {
+        if ($productCode == null) {
+            $get_godown_record = GodownModel::select('id', 'name', 'description')
+                                      ->get();
+
+                                
+            return response()->json([
+            'message' => 'Godown records fetched successfully!',
+            'data' => $get_godown_record,
+            'status' => 'true',
+        ], 200);
+        }else{
+            try {        
+                 // Fetch all godowns
+                $godowns = GodownModel::select('id', 'name', 'description')->get()->keyBy('id');
+
+                // Fetch stock order items for the product code
+                $stockOrderItems = StockOrderItemsModel::with('godown:name,id')
+                    ->select('godown_id', 'type', 'quantity')
+                    ->where('product_code', $productCode)
+                    ->get();
+
+                // Fetch stock cart items for the product code
+                $stockCartItems = StockCartModel::with('godown:name,id')
+                    ->select('godown_id', 'type', 'quantity')
+                    ->where('product_code', $productCode)
+                    ->get();
+
+                // Prepare the final output
+                $result = $godowns->map(function ($godown) use ($stockOrderItems, $stockCartItems) {
+                    $stockItems = $stockOrderItems->where('godown_id', $godown->id);
+                    $cartItems = $stockCartItems->where('godown_id', $godown->id);
+
+                    $totalInStock = $stockItems->where('type', 'IN')->sum('quantity');
+                    $totalOutStock = $stockItems->where('type', 'OUT')->sum('quantity');
+                    $totalInCart = $cartItems->where('type', 'IN')->sum('quantity');
+                    $totalOutCart = $cartItems->where('type', 'OUT')->sum('quantity');
+
+                return [
+                    'id' => $godown->id,
+                    'name' => $godown->name,
+                    'description' => $godown->description,
+                    'current_stock' => $totalInStock - $totalOutStock,
+                    'hold_in' => $totalInCart,
+                    'hold_out' => $totalOutCart,
+                ];
+            });
+
+                return response()->json([
+                    'message' => 'Stock details fetched successfully!',
+                    'data' => $result->values(),
+                    'status' => 'true',
+                ], 200);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'message' => 'An error occurred while fetching stock details.',
+                    'error' => $e->getMessage(),
+                ], 500);
+            }
+        
+        }
+    }
+
+    public function product_stock_details(Request $request)
+    {
+        $productCodes = $request->input('product_code') ? explode(',', $request->input('product_code')) : null;
+        $godownId = $request->input('godown_id');
+        $userId = $request->input('user_id');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        // Default date range: last 3 months
+        $startDate = $startDate ?? now()->subMonths(3)->startOfDay();
+        $endDate = $endDate ?? now()->endOfDay();
+
+        try {
+            // Fetch stock orders with optional filters
+            $stockOrders = StockOrdersModel::with(['user', 'items.godown', 'items.stock_product'])
+            ->when($userId, function ($query, $userId) {
+                $query->where('user_id', $userId);
+            })
+            ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('order_date', [$startDate, $endDate]);
+            })
+            ->when(!$startDate && !$endDate, function ($query) {
+                $query->whereBetween('order_date', [now()->subMonths(3)->startOfDay(), now()->endOfDay()]);
+            })
+            ->get();
+
+            // Check if any stock orders exist
+            if ($stockOrders->isEmpty()) {
+                return response()->json([
+                    'message' => 'No stock orders found for the given criteria.',
+                    'data' => [],
+                    'status' => 'false',
+                ], 404);
+            }
+
+            // Map results to the desired format
+            $result = $stockOrders->flatMap(function ($order) use ($productCodes, $godownId) {
+                return $order->items->filter(function ($item) use ($productCodes, $godownId) {
+                    return (!$productCodes || in_array($item->product_code, $productCodes)) &&
+                        (!$godownId || $item->godown_id == $godownId);
+                })->map(function ($item) use ($order) {
+                    return [
+                        'date' => $order->created_at->format('Y-m-d'),
+                        'product_code' => $item->product_code,
+                        'product_name' => $item->stock_product->name ?? 'Unknown',
+                        'godown_name' => $item->godown->name ?? 'Unknown',
+                        'quantity' => $item->quantity,
+                        'type' => $item->type,
+                        'user' => $order->user->name ?? 'Unknown',
+                    ];
+                });
+            });
+
+            // Group by date and sort in descending order
+            $groupedResult = $result->groupBy('date')->sortKeysDesc();
+        
+                return response()->json([
+                    'message' => 'Stock orders fetched successfully!',
+                    'data' => $groupedResult->values(),
+                    'status' => 'true',
+                ], 200);
+            }
+            catch (\Exception $e) {
+                return response()->json([
+                    'message' => 'An error occurred while fetching stock records.',
+                    'error' => $e->getMessage(),
+                ], 500);
+            }
     }
 
 

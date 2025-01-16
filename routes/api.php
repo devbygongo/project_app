@@ -122,6 +122,10 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
 
     Route::get('/import_godown', [CsvImportController::class, 'importCsv_godown']);
 
+    Route::get('/godown/{productCode?}', [ViewController::class, 'get_godown']);
+
+    Route::post('/stock_product', [ViewController::class, 'product_stock_details']);
+
     Route::get('/generate_stock_order_invoice/{orderId}', [InvoiceControllerZP::class, 'generatestockorderInvoice']);
 });
 

@@ -24,4 +24,10 @@ class StockOrdersModel extends Model
         return $this->hasMany(StockOrderItemsModel::class, 'stock_order_id');
     }
 
+    // Relationship with UserModel
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
 }

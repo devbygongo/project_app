@@ -14,4 +14,16 @@ class GodownModel extends Model
         'name',
         'description',
     ];
+
+    // Relationship with StockOrderItemsModel
+    public function stockOrderItems()
+    {
+        return $this->hasMany(StockOrderItemsModel::class, 'godown_id', 'id');
+    }
+
+    // Relationship with StockCartModel
+    public function stockCartItems()
+    {
+        return $this->hasMany(StockCartModel::class, 'godown_id', 'id');
+    }
 }

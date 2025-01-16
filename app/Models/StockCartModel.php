@@ -18,4 +18,10 @@ class StockCartModel extends Model
         'godown_id',
         'type',
     ];
+
+    // Relationship with GodownModel
+    public function godown()
+    {
+        return $this->belongsTo(GodownModel::class, 'godown_id', 'id');
+    }
 }
