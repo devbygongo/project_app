@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Order</title>
+    <title>Stock Report</title>
     <style>
         /* Include all relevant styling */
         body { font-family: 'Arial', sans-serif; margin: 0; padding: 0; }
@@ -25,7 +25,12 @@
 <table class="customer-info">
     <tr>
         <td>Order ID:</td><td>{{ $order->order_id }}</td>
-        <td>Order Date:</td><td>{{ $order->order_date }}</td>
+        <td>Order Date:</td><td>{{ \Carbon\Carbon::parse($order->order_date)->format('d/m/Y') }}
+        </td>
+    </tr>
+    <tr>
+        <td>User:</td><td>{{ $order->user->name }}</td>
+        <td>Remarks:</td><td>{{ $order->remarks }}</td>
     </tr>
 </table>
 
