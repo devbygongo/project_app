@@ -783,6 +783,7 @@ class UpdateController extends Controller
                 'items' => 'required|array',
                 'items.*.product_code' => 'required|string|exists:t_products,product_code',
                 'items.*.product_name' => 'required|string|exists:t_products,product_name',
+                'items.*.godown_id' => 'required|string|exists:t_godown,id',
                 'items.*.quantity' => 'required|integer|min:1',
                 'items.*.type' => 'required|in:IN,OUT',
             ]);
@@ -823,6 +824,7 @@ class UpdateController extends Controller
                     'stock_order_id' => $stockOrder->id,
                     'product_code' => $item['product_code'],
                     'product_name' => $item['product_name'],
+                    'godown_id' => $item['godown_id'],
                     'quantity' => $item['quantity'],
                     'type' => $item['type'],
                 ]);
@@ -830,13 +832,14 @@ class UpdateController extends Controller
 
             $generate_stock_order_invoice = new InvoiceControllerZP();
             $stockOrder->pdf = $generate_stock_order_invoice->generatestockorderInvoice($stockOrder->id, true);
-            
+
             return response()->json([
                 'message' => 'Stock order updated successfully.',
                 'data' => [
                     'order_id' => $stockOrder->order_id,
                     'order_date' => $stockOrder->order_date,
                     'type' => $stockOrder->type,
+                    'godown' => $stockOrder->godown_id,
                     'remarks' => $stockOrder->remarks,
                     'items' => $items,
                 ],
