@@ -1026,8 +1026,8 @@ class CreateController extends Controller
             // Clear the stock cart after creating the order
             StockCartModel::where('user_id', $userId)->delete();
 
-            // $generate_stock_order_invoice = new InvoiceControllerZP();
-            // $stockOrder->pdf = $generate_stock_order_invoice->generatestockorderInvoice($stockOrder->id);
+            $generate_stock_order_invoice = new InvoiceControllerZP();
+            $stockOrder->pdf = $generate_stock_order_invoice->generatestockorderInvoice($stockOrder->id);
 
             return response()->json([
                 'message' => 'Stock order created successfully.',

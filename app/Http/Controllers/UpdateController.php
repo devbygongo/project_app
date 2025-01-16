@@ -828,6 +828,9 @@ class UpdateController extends Controller
                 ]);
             }
 
+            $generate_stock_order_invoice = new InvoiceControllerZP();
+            $stockOrder->pdf = $generate_stock_order_invoice->generatestockorderInvoice($stockOrder->id, true);
+            
             return response()->json([
                 'message' => 'Stock order updated successfully.',
                 'data' => [
