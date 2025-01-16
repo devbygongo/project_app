@@ -1017,6 +1017,7 @@ class CreateController extends Controller
                     'stock_order_id' => $stockOrder->id,
                     'product_code' => $item->product_code,
                     'product_name' => $item->product_name,
+                    'godown_id' => $item->godown_id,
                     'quantity' => $item->quantity,
                     'type' => $item->type,
                 ]);
