@@ -1037,7 +1037,7 @@ class CreateController extends Controller
                     'type' => $stockOrder->type,
                     'remarks' => $stockOrder->remarks,
                     'items' => $cartItems->map(function ($item) {
-                        return $item->only(['product_code', 'product_name', 'quantity', 'type']);
+                        return $item->only(['product_code', 'product_name', 'godown_id', 'quantity', 'type']);
                     }),
                 ],
                 'status' => 'true',
