@@ -14,6 +14,7 @@ class StockOrderItemsModel extends Model
         'stock_order_id',
         'product_code',
         'product_name',
+        'godown_id',
         'quantity',
         'type',
     ];
