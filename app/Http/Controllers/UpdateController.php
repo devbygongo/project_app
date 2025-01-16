@@ -185,7 +185,7 @@ class UpdateController extends Controller
                 'password' => bcrypt($request->input('mobile')),
                 'mobile' => $request->input('mobile'),
                 'type' => 'guest',
-                'is_verified' => '1',
+                'is_verified' => '0',
             ]);
 
             if (isset($create_guest_user)) {
