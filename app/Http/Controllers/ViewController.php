@@ -1415,7 +1415,7 @@ class ViewController extends Controller
                     return [
                         'date' => $order->created_at->format('Y-m-d'),
                         'product_code' => $item->product_code,
-                        'product_name' => $item->stock_product_name ?? 'Unknown',
+                        'product_name' => $item->product_name ?? 'Unknown',
                         'godown_name' => $item->godown->name ?? 'Unknown',
                         'quantity' => $item->quantity,
                         'type' => $item->type,
