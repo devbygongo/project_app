@@ -783,7 +783,7 @@ class UpdateController extends Controller
                 'items' => 'required|array',
                 'items.*.product_code' => 'required|string|exists:t_products,product_code',
                 'items.*.product_name' => 'required|string|exists:t_products,product_name',
-                'items.*.godown_id' => 'required|string|exists:t_godown,id',
+                'items.*.godown_id' => 'required|integer|exists:t_godown,id',
                 'items.*.quantity' => 'required|integer|min:1',
                 'items.*.type' => 'required|in:IN,OUT',
             ]);
