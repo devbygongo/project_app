@@ -1222,7 +1222,7 @@ class ViewController extends Controller
             return $item 
                 ? response()->json([
                     'message' => 'Stock cart item fetched successfully.',
-                    'data' => $item->makeHidden(['id', 'updated_at', 'created_at']),
+                    'data' => $item->makeHidden(['updated_at', 'created_at']),
                     'count' => 1, // Only one item since we're fetching by ID
                 ], 200)
                 : response()->json([
