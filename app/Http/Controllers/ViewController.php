@@ -1238,7 +1238,7 @@ class ViewController extends Controller
         return $items->count() > 0
             ? response()->json([
                 'message' => 'Stock cart items fetched successfully.',
-                'data' => $items->makeHidden(['id', 'updated_at', 'created_at']),
+                'data' => $items->makeHidden(['updated_at', 'created_at']),
                 'count' => $items->count(),
             ], 200)
             : response()->json([
