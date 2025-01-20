@@ -934,36 +934,73 @@ class CreateController extends Controller
     }  
 
     // Create operation
+    // public function stock_cart_store(Request $request)
+    // {
+    //     $validated = $request->validate([
+    //         'product_code' => 'required|string|exists:t_products,product_code',
+    //         'product_name' => 'required|string|exists:t_products,product_name',
+    //         'quantity' => 'required|integer|min:1',
+    //         'godown_id' => 'required|integer|exists:t_godown,id',
+    //         'type' => 'required|in:IN,OUT',
+    //     ]);
+
+    //     $create_stock_cart = StockCartModel::create([
+    //         'user_id' => Auth::id(),
+    //         'product_code' => $validated['product_code'],
+    //         'product_name' => $validated['product_name'],
+    //         'quantity' => $validated['quantity'],
+    //         'godown_id' => $validated['godown_id'],
+    //         'type' => $validated['type'],
+    //     ]);
+
+    //     return $create_stock_cart
+    //     ? response()->json([
+    //         'status' => true,
+    //         'message' => 'Stock cart item created successfully.',
+    //         'data' => $create_stock_cart->makeHidden(['id', 'updated_at', 'created_at']),
+    //     ], 200)
+    //     : response()->json([
+    //         'status' => false,
+    //         'message' => 'Failed to create stock cart item.',
+    //     ], 200);
+    // }
+
     public function stock_cart_store(Request $request)
     {
         $validated = $request->validate([
-            'product_code' => 'required|string|exists:t_products,product_code',
-            'product_name' => 'required|string|exists:t_products,product_name',
-            'quantity' => 'required|integer|min:1',
-            'godown_id' => 'required|integer|exists:t_godown,id',
-            'type' => 'required|in:IN,OUT',
+            'items' => 'required|array|min:1',
+            'items.*.product_code' => 'required|integer|exists:t_products,product_code',
+            'items.*.product_name' => 'required|string|exists:t_products,product_name',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.godown_id' => 'required|integer|exists:t_godown,id',
+            'items.*.type' => 'required|in:IN,OUT',
         ]);
 
-        $create_stock_cart = StockCartModel::create([
-            'user_id' => Auth::id(),
-            'product_code' => $validated['product_code'],
-            'product_name' => $validated['product_name'],
-            'quantity' => $validated['quantity'],
-            'godown_id' => $validated['godown_id'],
-            'type' => $validated['type'],
-        ]);
+        $createdItems = [];
+        foreach ($validated['items'] as $item) {
+            $createdItem = StockCartModel::create([
+                'user_id' => Auth::id(),
+                'product_code' => $item['product_code'],
+                'product_name' => $item['product_name'],
+                'quantity' => $item['quantity'],
+                'godown_id' => $item['godown_id'],
+                'type' => $item['type'],
+            ]);
+            $createdItems[] = $createdItem->makeHidden(['id', 'created_at', 'updated_at']);
+        }
 
-        return $create_stock_cart
-        ? response()->json([
-            'status' => true,
-            'message' => 'Stock cart item created successfully.',
-            'data' => $create_stock_cart->makeHidden(['id', 'updated_at', 'created_at']),
-        ], 200)
-        : response()->json([
-            'status' => false,
-            'message' => 'Failed to create stock cart item.',
-        ], 200);
+        return !empty($createdItems)
+            ? response()->json([
+                'status' => true,
+                'message' => 'Stock cart items created successfully.',
+                'data' => $createdItems,
+            ], 200)
+            : response()->json([
+                'status' => false,
+                'message' => 'Failed to create stock cart items.',
+            ], 200);
     }
+
 
     public function createStockOrder(Request $request)
     {
