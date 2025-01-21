@@ -1209,21 +1209,67 @@ class ViewController extends Controller
         }
     }
 
+    // public function stock_cart_index($id = null)
+    // {
+    //     // Fetch stock cart items for the authenticated user
+    //     $stockCartItems = StockCartModel::where('user_id', Auth::id());
+
+    //     // Check if a specific item is requested
+    //     if ($id) {
+    //         $item = $stockCartItems->find($id);
+
+    //         // Use a ternary operator to validate and return the response
+    //         return $item 
+    //             ? response()->json([
+    //                 'message' => 'Stock cart item fetched successfully.',
+    //                 'data' => $item->makeHidden(['updated_at', 'created_at']),
+    //                 'count' => 1, // Only one item since we're fetching by ID
+    //             ], 200)
+    //             : response()->json([
+    //                 'message' => 'Stock cart item not found.',
+    //                 'count' => 0,
+    //             ], 404);
+    //     }
+
+    //     // Fetch all items for the user
+    //     $items = $stockCartItems->get();
+
+    //     // Use a ternary operator to validate and return the response
+    //     return $items->count() > 0
+    //         ? response()->json([
+    //             'message' => 'Stock cart items fetched successfully.',
+    //             'data' => $items->makeHidden(['updated_at', 'created_at']),
+    //             'count' => $items->count(),
+    //         ], 200)
+    //         : response()->json([
+    //             'message' => 'No stock cart items found for this user.',
+    //             'count' => 0,
+    //         ], 404);
+    // }
+
     public function stock_cart_index($id = null)
     {
         // Fetch stock cart items for the authenticated user
-        $stockCartItems = StockCartModel::where('user_id', Auth::id());
+        $stockCartItems = StockCartModel::with(['godown:id,name'])
+            ->where('user_id', Auth::id());
 
         // Check if a specific item is requested
         if ($id) {
             $item = $stockCartItems->find($id);
 
             // Use a ternary operator to validate and return the response
-            return $item 
+            return $item
                 ? response()->json([
                     'message' => 'Stock cart item fetched successfully.',
-                    'data' => $item->makeHidden(['updated_at', 'created_at']),
-                    'count' => 1, // Only one item since we're fetching by ID
+                    'data' => [
+                        'id' => $item->id,
+                        'product_code' => $item->product_code,
+                        'product_name' => $item->product_name,
+                        'quantity' => $item->quantity,
+                        'godown_name' => $item->godown->name ?? null,
+                        'product_image' => ProductModel::where('product_code', $item->product_code)->value('product_image'),
+                    ],
+                    'count' => 1,
                 ], 200)
                 : response()->json([
                     'message' => 'Stock cart item not found.',
@@ -1234,18 +1280,31 @@ class ViewController extends Controller
         // Fetch all items for the user
         $items = $stockCartItems->get();
 
+        // Process items to include additional details
+        $processedItems = $items->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'product_code' => $item->product_code,
+                'product_name' => $item->product_name,
+                'quantity' => $item->quantity,
+                'godown_name' => $item->godown->name ?? null,
+                'product_image' => ProductModel::where('product_code', $item->product_code)->value('product_image'),
+            ];
+        });
+
         // Use a ternary operator to validate and return the response
-        return $items->count() > 0
+        return $processedItems->isNotEmpty()
             ? response()->json([
                 'message' => 'Stock cart items fetched successfully.',
-                'data' => $items->makeHidden(['updated_at', 'created_at']),
-                'count' => $items->count(),
+                'data' => $processedItems,
+                'count' => $processedItems->count(),
             ], 200)
             : response()->json([
                 'message' => 'No stock cart items found for this user.',
                 'count' => 0,
             ], 404);
     }
+
 
     public function fetchStockOrder($orderId = null)
     {
