@@ -1334,6 +1334,7 @@ class ViewController extends Controller
                         'order_date' => $stockOrder->order_date,
                         'type' => $stockOrder->type,
                         'remarks' => $stockOrder->remarks,
+                        'attachment' => $stockOrder->pdf,
                         'items' => $stockOrder->items->map(function ($item) {
                             return $item->only(['product_code', 'product_name', 'quantity', 'type']);
                         }),
@@ -1354,6 +1355,7 @@ class ViewController extends Controller
                             'order_date' => $order->order_date,
                             'type' => $order->type,
                             'remarks' => $order->remarks,
+                            'attachment' => $order->pdf,
                             'items' => $order->items->map(function ($item) {
                                 return $item->only(['product_code', 'product_name', 'quantity', 'type']);
                             }),
