@@ -1266,6 +1266,7 @@ class ViewController extends Controller
                         'product_code' => $item->product_code,
                         'product_name' => $item->product_name,
                         'quantity' => $item->quantity,
+                        'godown_id' => $item->godown_id,
                         'godown_name' => $item->godown->name ?? null,
                         'product_image' => ProductModel::where('product_code', $item->product_code)->value('product_image'),
                     ],
@@ -1287,6 +1288,7 @@ class ViewController extends Controller
                 'product_code' => $item->product_code,
                 'product_name' => $item->product_name,
                 'quantity' => $item->quantity,
+                'godown_id' => $item->godown_id,
                 'godown_name' => $item->godown->name ?? null,
                 'product_image' => ProductModel::where('product_code', $item->product_code)->value('product_image'),
             ];
