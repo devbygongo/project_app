@@ -1305,6 +1305,7 @@ class ViewController extends Controller
             ], 200)
             : response()->json([
                 'message' => 'No stock cart items found for this user.',
+                'data' => [],
                 'count' => 0,
             ], 200);
     }
