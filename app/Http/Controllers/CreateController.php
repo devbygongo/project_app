@@ -223,6 +223,7 @@ class CreateController extends Controller
                             'token' => $token,
                             'name' => $user->name,
                             'role' => $user->role,
+                            'type' => $user->type,
                             'manager_mobile_number' => "+917506691380",
                         ],
                         'message' => 'User login successfully.',
