@@ -1316,7 +1316,7 @@ class ViewController extends Controller
         try {
             if ($orderId) {
                 // Fetch specific stock order with its items
-                $stockOrder = StockOrdersModel::with('items')
+                $stockOrder = StockOrdersModel::with(['items', 'user'])
                     ->where('id', $orderId)
                     ->first();
 
@@ -1324,7 +1324,7 @@ class ViewController extends Controller
                     return response()->json([
                         'message' => 'Stock order not found.',
                         'status' => 'false',
-                    ], 404);
+                    ], 200);
                 }
 
                 return response()->json([
@@ -1335,6 +1335,7 @@ class ViewController extends Controller
                         'type' => $stockOrder->type,
                         'remarks' => $stockOrder->remarks,
                         'attachment' => $stockOrder->pdf,
+                        'user' => $stockOrder->user ? $stockOrder->user->name : '-',
                         'items' => $stockOrder->items->map(function ($item) {
                             return $item->only(['product_code', 'product_name', 'quantity', 'type']);
                         }),
@@ -1343,7 +1344,7 @@ class ViewController extends Controller
                 ], 200);
             } else {
                 // Fetch all stock orders with pagination
-                $stockOrders = StockOrdersModel::with('items')
+                $stockOrders = StockOrdersModel::with(['items', 'user'])
                     ->orderBy('order_date', 'desc')
                     ->paginate(10);
 
@@ -1356,6 +1357,7 @@ class ViewController extends Controller
                             'type' => $order->type,
                             'remarks' => $order->remarks,
                             'attachment' => $order->pdf,
+                            'user' => $stockOrder->user ? $stockOrder->user->name : '-',
                             'items' => $order->items->map(function ($item) {
                                 return $item->only(['product_code', 'product_name', 'quantity', 'type']);
                             }),
