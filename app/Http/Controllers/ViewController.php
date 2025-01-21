@@ -474,6 +474,11 @@ class ViewController extends Controller
                 DB::raw('0 as basic'), 
                 DB::raw('0 as gst')
             );
+        } elseif ($user_type && $user_type->type == 'guest') {
+            $productQuery->addSelect(
+                DB::raw('guest_price as basic'), 
+                DB::raw('0 as gst')
+            );
         } else {
             $productQuery->addSelect('basic', 'gst');
         }
@@ -554,6 +559,11 @@ class ViewController extends Controller
         } elseif ($user_type && $user_type->type == 'zeroprice') {
             $productQuery->addSelect(
                 DB::raw('0 as basic'), 
+                DB::raw('0 as gst')
+            );
+        } elseif ($user_type && $user_type->type == 'guest') {
+            $productQuery->addSelect(
+                DB::raw('guest_price as basic'), 
                 DB::raw('0 as gst')
             );
         } else {
