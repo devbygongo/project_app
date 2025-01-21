@@ -1357,7 +1357,7 @@ class ViewController extends Controller
                             'type' => $order->type,
                             'remarks' => $order->remarks,
                             'attachment' => $order->pdf,
-                            'user' => $order->user ? $stockOrder->user->name : '-',
+                            'user' => $order->user ? $order->user->name : '-',
                             'items' => $order->items->map(function ($item) {
                                 return $item->only(['product_code', 'product_name', 'quantity', 'type']);
                             }),
