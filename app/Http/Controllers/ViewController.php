@@ -1219,44 +1219,6 @@ class ViewController extends Controller
         }
     }
 
-    // public function stock_cart_index($id = null)
-    // {
-    //     // Fetch stock cart items for the authenticated user
-    //     $stockCartItems = StockCartModel::where('user_id', Auth::id());
-
-    //     // Check if a specific item is requested
-    //     if ($id) {
-    //         $item = $stockCartItems->find($id);
-
-    //         // Use a ternary operator to validate and return the response
-    //         return $item 
-    //             ? response()->json([
-    //                 'message' => 'Stock cart item fetched successfully.',
-    //                 'data' => $item->makeHidden(['updated_at', 'created_at']),
-    //                 'count' => 1, // Only one item since we're fetching by ID
-    //             ], 200)
-    //             : response()->json([
-    //                 'message' => 'Stock cart item not found.',
-    //                 'count' => 0,
-    //             ], 404);
-    //     }
-
-    //     // Fetch all items for the user
-    //     $items = $stockCartItems->get();
-
-    //     // Use a ternary operator to validate and return the response
-    //     return $items->count() > 0
-    //         ? response()->json([
-    //             'message' => 'Stock cart items fetched successfully.',
-    //             'data' => $items->makeHidden(['updated_at', 'created_at']),
-    //             'count' => $items->count(),
-    //         ], 200)
-    //         : response()->json([
-    //             'message' => 'No stock cart items found for this user.',
-    //             'count' => 0,
-    //         ], 404);
-    // }
-
     public function stock_cart_index($id = null)
     {
         // Fetch stock cart items for the authenticated user
@@ -1320,7 +1282,6 @@ class ViewController extends Controller
             ], 200);
     }
 
-
     public function fetchStockOrder($orderId = null)
     {
         try {
@@ -1347,7 +1308,9 @@ class ViewController extends Controller
                         'attachment' => $stockOrder->pdf,
                         'user' => $stockOrder->user ? $stockOrder->user->name : '-',
                         'items' => $stockOrder->items->map(function ($item) {
-                            return $item->only(['product_code', 'product_name', 'quantity', 'type']);
+                            return array_merge($item->only(['product_code', 'product_name', 'quantity', 'type']), [
+                                'product_image' => ProductModel::where('product_code', $item->product_code)->value('product_image'),
+                            ]);
                         }),
                     ],
                     'status' => 'true',
@@ -1369,7 +1332,9 @@ class ViewController extends Controller
                             'attachment' => $order->pdf,
                             'user' => $order->user ? $order->user->name : '-',
                             'items' => $order->items->map(function ($item) {
-                                return $item->only(['product_code', 'product_name', 'quantity', 'type']);
+                                return array_merge($item->only(['product_code', 'product_name', 'quantity', 'type']), [
+                                    'product_image' => ProductModel::where('product_code', $item->product_code)->value('product_image'),
+                                ]);
                             }),
                         ];
                     }),
@@ -1384,6 +1349,7 @@ class ViewController extends Controller
             ], 500);
         }
     }
+
 
     public function get_godown($productCode = null)
     {
