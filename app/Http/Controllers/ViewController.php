@@ -1301,6 +1301,7 @@ class ViewController extends Controller
                 return response()->json([
                     'message' => 'Stock order fetched successfully.',
                     'data' => [
+                        'id' => $stockOrder->id,
                         'order_id' => $stockOrder->order_id,
                         'order_date' => $stockOrder->order_date,
                         'type' => $stockOrder->type,
@@ -1325,6 +1326,7 @@ class ViewController extends Controller
                     'message' => 'Stock orders fetched successfully.',
                     'data' => $stockOrders->map(function ($order) {
                         return [
+                            'id' => $order->id,
                             'order_id' => $order->order_id,
                             'order_date' => $order->order_date,
                             'type' => $order->type,
