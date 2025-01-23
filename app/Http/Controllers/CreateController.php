@@ -216,6 +216,7 @@ class CreateController extends Controller
 
                     // Generate a Sanctum token
                     $token = $user->createToken('API TOKEN')->plainTextToken;
+                    $stock = false;
 
                     if($user->type == 'admin'){
                         $stock = true;
@@ -259,6 +260,7 @@ class CreateController extends Controller
 
                 // Generate a Sanctum token
                 $token = $user->createToken('API TOKEN')->plainTextToken;
+                $stock = false;
 
                 if($user->type == 'admin'){
                     $stock = true;
