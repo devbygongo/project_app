@@ -217,6 +217,10 @@ class CreateController extends Controller
                     // Generate a Sanctum token
                     $token = $user->createToken('API TOKEN')->plainTextToken;
 
+                    if($user->type == 'admin'){
+                        $stock = true;
+                    }
+
                     return response()->json([
                         'success' => true,
                         'data' => [
@@ -224,6 +228,7 @@ class CreateController extends Controller
                             'name' => $user->name,
                             'role' => $user->role,
                             'type' => $user->type,
+                            'stock' => $stock,
                             'manager_mobile_number' => "+917506691380",
                         ],
                         'message' => 'User login successfully.',
@@ -255,6 +260,10 @@ class CreateController extends Controller
                 // Generate a Sanctum token
                 $token = $user->createToken('API TOKEN')->plainTextToken;
 
+                if($user->type == 'admin'){
+                    $stock = true;
+                }
+
                 return response()->json([
                     'success' => true,
                     'data' => [
@@ -262,6 +271,7 @@ class CreateController extends Controller
                         'name' => $user->name,
                         'role' => $user->role,
                         'type' => $user->type,
+                        'stock' => $stock,
                         'manager_mobile_number' => "+917506691380",
                     ],
                     'message' => 'User login successfully.',
@@ -1025,7 +1035,7 @@ class CreateController extends Controller
                 return response()->json([
                     'message' => 'No items found in the stock cart for the user.',
                     'status' => 'false',
-                ], 404);
+                ], 200);
             }
 
             // Determine the order type from the first cart item
