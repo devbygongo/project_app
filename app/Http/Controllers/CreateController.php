@@ -218,7 +218,7 @@ class CreateController extends Controller
                     $token = $user->createToken('API TOKEN')->plainTextToken;
                     $stock = false;
 
-                    if($user->type == 'admin'){
+                    if($user->role == 'admin'){
                         $stock = true;
                     }
 
@@ -262,7 +262,7 @@ class CreateController extends Controller
                 $token = $user->createToken('API TOKEN')->plainTextToken;
                 $stock = false;
 
-                if($user->type == 'admin'){
+                if($user->role == 'admin'){
                     $stock = true;
                 }
 
