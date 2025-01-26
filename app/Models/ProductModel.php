@@ -14,6 +14,7 @@ class ProductModel extends Model
         'product_code',
         'product_name',
         'product_image',
+        'extra_images',
         'name_in_hindi',
         'name_in_telugu',
         'brand',

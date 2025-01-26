@@ -78,6 +78,20 @@ class CsvImportController extends Controller
                 $productImagePath = $product_imagePath_for_not_available;
             }
 
+            // Handle extra images
+            $extraImages = [];
+            $extraImagePath = public_path("/storage/uploads/extra");
+            $i = 1;
+
+            // Check for extra images in the format PRODUCT_CODE-1, PRODUCT_CODE-2, etc.
+            while (file_exists("{$extraImagePath}/{$filename}-{$i}.jpg")) {
+                $extraImages[] = "/storage/uploads/extra/{$filename}-{$i}.jpg";
+                $i++;
+            }
+
+            // Convert extra images array to a comma-separated string
+            $extraImagesCsv = implode(',', $extraImages);
+
             if ($product_csv) 
             {
                 // If product exists, update it
@@ -102,6 +116,7 @@ class CsvImportController extends Controller
                     'yet_to_launch' => $record_csv['Yet to Launch'] === 'TRUE' ? 1 : 0,
                     // 'product_image' => null, // Set this if you have the image URL or path
                     'product_image' => $productImagePath,
+                    'extra_images' => $extraImagesCsv, // Set the extra images
                     'video_link' => $record_csv['YouTube Link'],
                 ]);
             } 

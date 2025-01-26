@@ -296,6 +296,7 @@ class ViewController extends Controller
 				'category', 
 				'sub_category', 
 				'product_image', 
+                'extra_images',
 				DB::raw('special_basic as basic'), 
 				DB::raw('special_gst as gst'),
                 'out_of_stock',
@@ -310,6 +311,7 @@ class ViewController extends Controller
                     'category', 
                     'sub_category', 
                     'product_image', 
+                    'extra_images',
                     DB::raw('outstation_basic as basic'), 
                     DB::raw('outstation_gst as gst'),
                     'out_of_stock',
@@ -326,6 +328,7 @@ class ViewController extends Controller
                 'category', 
                 'sub_category', 
                 'product_image', 
+                'extra_images',
                 DB::raw('0 as basic'), 
                 DB::raw('0 as gst'), 
                 'out_of_stock',
@@ -343,6 +346,7 @@ class ViewController extends Controller
                 'category', 
                 'sub_category', 
                 'product_image', 
+                'extra_images',
                 DB::raw('guest_price as basic'), 
                 DB::raw('0 as gst'), 
                 'out_of_stock',
@@ -358,6 +362,7 @@ class ViewController extends Controller
 				'category', 
 				'sub_category', 
 				'product_image', 
+                'extra_images',
 				'basic', 
 				'gst',
                 'out_of_stock',
@@ -402,6 +407,11 @@ class ViewController extends Controller
                     $prd_rec->video_link = basename(parse_url($prd_rec->video_link, PHP_URL_PATH));
                 }
             }
+
+            // Parse extra_images from the database column
+            $prd_rec->extra_images = !empty($prd_rec->extra_images)
+            ? explode(',', $prd_rec->extra_images)
+            : [];
 
             // Check if the product is in the user's cart
             $cart_item = CartModel::where('user_id', $user_id)
