@@ -1443,16 +1443,16 @@ class ViewController extends Controller
         try {
             // Fetch stock orders with optional filters
             $stockOrders = StockOrdersModel::with(['user', 'items.godown', 'items.stock_product'])
-            ->when($userId, function ($query, $userId) {
-                $query->where('user_id', $userId);
-            })
-            ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
-                $query->whereBetween('order_date', [$startDate, $endDate]);
-            })
-            ->when(!$startDate && !$endDate, function ($query) {
-                $query->whereBetween('order_date', [now()->subMonths(3)->startOfDay(), now()->endOfDay()]);
-            })
-            ->get();
+                ->when($userId, function ($query, $userId) {
+                    $query->where('user_id', $userId);
+                })
+                ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
+                    $query->whereBetween('order_date', [$startDate, $endDate]);
+                })
+                ->when(!$startDate && !$endDate, function ($query) {
+                    $query->whereBetween('order_date', [now()->subMonths(3)->startOfDay(), now()->endOfDay()]);
+                })
+                ->get();
 
             // Check if any stock orders exist
             if ($stockOrders->isEmpty()) {
@@ -1463,7 +1463,7 @@ class ViewController extends Controller
                 ], 404);
             }
 
-            // Map results to the desired format
+            // Map results to the desired format and flatten them
             $result = $stockOrders->flatMap(function ($order) use ($productCodes, $godownId) {
                 return $order->items->filter(function ($item) use ($productCodes, $godownId) {
                     return (!$productCodes || in_array($item->product_code, $productCodes)) &&
@@ -1481,22 +1481,22 @@ class ViewController extends Controller
                 });
             });
 
-            // Group by date and sort in descending order
-            $groupedResult = $result->groupBy('date')->sortKeysDesc();
-        
-                return response()->json([
-                    'message' => 'Stock orders fetched successfully!',
-                    'data' => $groupedResult->values(),
-                    'status' => 'true',
-                ], 200);
-            }
-            catch (\Exception $e) {
-                return response()->json([
-                    'message' => 'An error occurred while fetching stock records.',
-                    'error' => $e->getMessage(),
-                ], 500);
-            }
+            // Sort by date in descending order and convert to array
+            $sortedResult = $result->sortByDesc('date')->values();
+
+            return response()->json([
+                'message' => 'Stock orders fetched successfully!',
+                'data' => $sortedResult,
+                'status' => 'true',
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while fetching stock records.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
+
 
 
     // return blade file
