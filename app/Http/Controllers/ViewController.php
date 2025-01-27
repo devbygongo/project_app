@@ -383,8 +383,8 @@ class ViewController extends Controller
         }
 
         // Apply pagination and get products
-        $get_products = $query->skip($offset)->take($limit)->get();
         $total_products_count = $query->count();
+        $get_products = $query->skip($offset)->take($limit)->get();
 
         // Process products for language and cart details
         $processed_prd_lang_rec = $get_products->map(function ($prd_rec) use ($lang, $user_id) {
