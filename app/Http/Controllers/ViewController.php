@@ -384,6 +384,7 @@ class ViewController extends Controller
 
         // Apply pagination and get products
         $get_products = $query->skip($offset)->take($limit)->get();
+        $total_products_count = $query->count();
 
         // Process products for language and cart details
         $processed_prd_lang_rec = $get_products->map(function ($prd_rec) use ($lang, $user_id) {
@@ -444,7 +445,7 @@ class ViewController extends Controller
         ? response()->json(['Failed to fetch data!'], 404)
         : response()->json(['message' => 'Fetch data successfully!',
                 'data' => $processed_prd_lang_rec,
-                'count' => count($processed_prd_lang_rec)], 200);
+                'count' => $total_products_count], 200);
     }
 
     public function get_spares(Request $request, $lang = 'eng', $code = null)
