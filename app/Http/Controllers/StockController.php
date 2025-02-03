@@ -93,7 +93,7 @@ class StockController extends Controller
         //     asset('storage/reports/' . $fileName),
         // ]);
 
-        return response()->file(storage_path('app/reports/' . $fileName));
+        return response()->file(storage_path('storage/reports/' . $fileName));
 
     }
 }
