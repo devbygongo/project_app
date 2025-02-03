@@ -1,7 +1,10 @@
 <?php
 
-use Mpdf\Mpdf;
+namespace App\Http\Controllers;
+
 use Illuminate\Http\Request;
+
+use Mpdf\Mpdf;
 use App\Models\StockOrderItemsModel;
 use App\Models\ProductModel;
 use App\Models\GodownModel;
