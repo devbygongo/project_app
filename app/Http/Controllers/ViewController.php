@@ -384,9 +384,7 @@ class ViewController extends Controller
 
         // Apply pagination and get products
         $total_products_count = $query->count();
-        $get_products = $query->orderBy('category') // First, order by category
-                                ->orderBy('brand') // Then, order by brand
-                                ->orderBy('price', 'asc') // Finally, order by price (ascending)
+        $get_products = $query->orderByRaw("FIELD(type, 'MACHINE', 'ACCESSORIES', 'SPARES') ASC")
                                 ->skip($offset)
                                 ->take($limit)
                                 ->get();
