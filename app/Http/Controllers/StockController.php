@@ -90,8 +90,7 @@ class StockController extends Controller
 
         // Return download link
         return response()->json([
-            'message' => 'Stock Report Generated Successfully!',
-            'file_url' => asset('storage/reports/' . $fileName),
+            asset('storage/reports/' . $fileName),
         ]);
     }
 }
