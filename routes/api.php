@@ -23,6 +23,8 @@ use App\Http\Controllers\InvoiceControllerZP;
 
 use App\Http\Middleware\GetUserRole;
 
+Route::get('/generate-stock-report', [StockController::class, 'generateStockReport']);
+
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
 // })->middleware('auth:sanctum');
