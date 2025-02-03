@@ -89,11 +89,11 @@ class StockController extends Controller
         $mpdf->Output($filePath . $fileName, 'F');
 
         // Return download link
-        // return response()->json([
-        //     asset('storage/reports/' . $fileName),
-        // ]);
+        return response()->json([
+            asset('storage/reports/' . $fileName),
+        ]);
 
-        return response()->download(asset('storage/reports/' . $fileName));
+        // return response()->download(asset('storage/reports/' . $fileName));
 
     }
 }
