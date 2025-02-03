@@ -384,7 +384,12 @@ class ViewController extends Controller
 
         // Apply pagination and get products
         $total_products_count = $query->count();
-        $get_products = $query->skip($offset)->take($limit)->get();
+        $get_products = $query->orderBy('category_id') // First, order by category
+                                ->orderBy('brand_id') // Then, order by brand
+                                ->orderBy('price', 'asc') // Finally, order by price (ascending)
+                                ->skip($offset)
+                                ->take($limit)
+                                ->get();
 
         // Process products for language and cart details
         $processed_prd_lang_rec = $get_products->map(function ($prd_rec) use ($lang, $user_id) {
