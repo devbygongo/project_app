@@ -16,7 +16,7 @@ class StockController extends Controller
     public function generateStockReport()
     {
         // Fetch stock data from the `t_stock_order_items` table
-        $stockData = StockOrderItemsModel::with('product', 'godown')->get();
+        $stockData = StockOrderItemsModel::with('stock_product', 'godown')->get();
 
         // Calculate current stock for each product
         $stockSummary = [];
