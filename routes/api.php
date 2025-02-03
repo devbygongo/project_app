@@ -17,6 +17,8 @@ use App\Http\Controllers\InvoiceController;
 
 use App\Http\Controllers\ReportController;
 
+use App\Http\Controllers\StockController;
+
 use App\Http\Controllers\InvoiceControllerZP;
 
 use App\Http\Middleware\GetUserRole;
