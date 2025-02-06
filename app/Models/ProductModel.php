@@ -22,6 +22,7 @@ class ProductModel extends Model
         'sub_category',
         'type',
         'machine_part_no',
+        'purchase',
         'basic',
         'gst',
         'special_basic',
@@ -30,6 +31,7 @@ class ProductModel extends Model
         'outstation_gst',
         // 'mark_up',
         'guest_price',
+        're_order_level',
         'out_of_stock',
         'yet_to_launch',
         'video_link'

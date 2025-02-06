@@ -48,6 +48,7 @@ class CsvImportController extends Controller
             
             $product_csv = ProductModel::where('product_code', $record_csv['Product Code'])->first();
 
+            $purchasePrice_product = $record_csv['GST Base Price - temp'] !== '' ? $record_csv['GST Base Price - temp'] : 0;
             $basicPrice_product = $record_csv['Basic Price'] !== '' ? $record_csv['Basic Price'] : 0;
             $gstPrice_prduct = $record_csv['GST Price'] !== '' ? $record_csv['GST Price'] : 0;
 			$basicPrice_product_special = $record_csv['Special Basic Price'] !== '' ? $record_csv['Special Basic Price'] : 0;
@@ -55,6 +56,7 @@ class CsvImportController extends Controller
             $basicPrice_product_outstation = $record_csv['Outstation Basic Price'] !== '' ? $record_csv['Outstation Basic Price'] : 0;
             $gstPrice_prduct_outstation = $record_csv['Outstation GST Price'] !== '' ? $record_csv['Outstation GST Price'] : 0;
             $guest_price = $record_csv['Guest Price'] !== '' ? $record_csv['Guest Price'] : 0;
+            $re_order_level = $record_csv['RE ORDER LEVEL'] !== '' ? $record_csv['RE ORDER LEVEL'] : 0;
             $filename = $record_csv['Product Code'];
 
             $category = $record_csv['Category'];
@@ -105,6 +107,7 @@ class CsvImportController extends Controller
                     'sub_category' => $record_csv['Sub Category'],
                     'type' => $record_csv['Type'],
                     'machine_part_no' => $record_csv['Machine Part No'],
+                    'purchase' => $purchasePrice_product, // Ensure this is a valid number
                     'basic' => $basicPrice_product, // Ensure this is a valid number
                     'gst' => $gstPrice_prduct,     // Ensure this is a valid number
                     'special_basic' => $basicPrice_product_special,     // Ensure this is a valid number
@@ -112,6 +115,7 @@ class CsvImportController extends Controller
                     'outstation_basic' => $basicPrice_product_outstation,     // Ensure this is a valid number
                     'outstation_gst' => $gstPrice_prduct_outstation,     // Ensure this is a valid number
                     'guest_price' => $guest_price,     // Ensure this is a valid number
+                    're_order_level' => $re_order_level,     // Ensure this is a valid number
                     'out_of_stock' => $record_csv['Out of Stock'] === 'TRUE' ? 1 : 0,
                     'yet_to_launch' => $record_csv['Yet to Launch'] === 'TRUE' ? 1 : 0,
                     // 'product_image' => null, // Set this if you have the image URL or path
@@ -133,6 +137,7 @@ class CsvImportController extends Controller
                     'sub_category' => $record_csv['Sub Category'],
                     'type' => $record_csv['Type'],
                     'machine_part_no' => $record_csv['Machine Part No'],
+                    'purchase' => $purchasePrice_product, // Ensure this is a valid number
                     'basic' => $basicPrice_product, // Ensure this is a valid number
                     'gst' => $gstPrice_prduct,     // Ensure this is a valid number
 					'special_basic' => $basicPrice_product_special,     // Ensure this is a valid number
@@ -140,6 +145,7 @@ class CsvImportController extends Controller
                     'outstation_basic' => $basicPrice_product_outstation,     // Ensure this is a valid number
                     'outstation_gst' => $gstPrice_prduct_outstation,     // Ensure this is a valid number
                     'guest_price' => $guest_price,     // Ensure this is a valid number
+                    're_order_level' => $re_order_level,     // Ensure this is a valid number
                     'out_of_stock' => $record_csv['Out of Stock'] === 'TRUE' ? 1 : 0,
                     'yet_to_launch' => $record_csv['Yet to Launch'] === 'TRUE' ? 1 : 0,
                     // 'product_image' => null, // Set this if you have the image URL or path
