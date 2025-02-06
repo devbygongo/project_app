@@ -123,7 +123,7 @@ class StockController extends Controller
             }
 
             $html .= "<td style='width: {$columnWidth}%; font-weight: bold;'>{$product['total_stock']}</td>
-                      <td style='width: {$columnWidth}%; font-weight: bold; text-align: right;'>₹ " . number_format($stockValue, 2) . "</td>
+                    <td style='width: {$columnWidth}%; font-weight: bold; text-align: right;'>₹ " . $this->formatInINR($stockValue) . "</td>
 
                     </tr>";
             $index++;
@@ -133,7 +133,7 @@ class StockController extends Controller
 		// Add Total Row at the End
 		$html .= "<tr style='font-weight: bold; background-color: #f2f2f2;'>
             <td colspan='" . (count($allGodowns) + 4) . "' style='text-align: right; font-weight: bold;'>Total Stock Value:</td>
-            <td style='width: {$columnWidth}%; text-align: right;'>₹ " . number_format($totalStockValue, 2) . "</td>
+            <td style='width: {$columnWidth}%; text-align: right;'>₹ " . $this->formatInINR($totalStockValue) . "</td>
           </tr>";
 
         $html .= '</tbody></table>';
@@ -158,5 +158,24 @@ class StockController extends Controller
             'download_url' => asset('storage/reports/' . $fileName),
         ]);
     }
+
+    private function formatInINR($number)
+    {
+        $explodedNumber = explode('.', $number);
+        $integerPart = $explodedNumber[0];
+        $decimalPart = isset($explodedNumber[1]) ? '.' . $explodedNumber[1] : '';
+
+        $lastThreeDigits = substr($integerPart, -3);
+        $remainingDigits = substr($integerPart, 0, -3);
+        
+        if ($remainingDigits != '') {
+            $remainingDigits = preg_replace("/\B(?=(\d{2})+(?!\d))/", ",", $remainingDigits);
+        }
+        
+        return $remainingDigits . ',' . $lastThreeDigits . $decimalPart;
+    }
+
 }
+
+
 ?>
