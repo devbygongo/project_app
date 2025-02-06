@@ -17,8 +17,8 @@ class StockController extends Controller
         $stockData = StockOrderItemsModel::with(['stock_product:id,product_code,product_name,category,type,purchase', 'godown:id,name'])
             ->get()
             ->sortBy([
-                ['stock_product.category', 'asc'], // Sort by category
-                ['stock_product.type', fn($a, $b) => array_search($a, ['MACHINE', 'ACCESSORIES', 'SPARES']) - array_search($b, ['MACHINE', 'ACCESSORIES', 'SPARES'])] // Custom type sorting
+                ['stock_product.type', fn($a, $b) => array_search($a, ['MACHINE', 'ACCESSORIES', 'SPARES']) - array_search($b, ['MACHINE', 'ACCESSORIES', 'SPARES'])], // Custom type sorting
+                ['stock_product.category', 'asc'] // Sort by category
             ]);
 
         // Organize stock by product and godown
