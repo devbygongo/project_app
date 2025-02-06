@@ -19,23 +19,24 @@ class StockController extends Controller
         // Organize stock by product and godown
         $stockSummary = [];
         foreach ($stockData as $item) {
-            $productCode = $item->product_code;
+            $productCode = $item->product_code ?? 'Unknown'; // Prevent null issues
+            $productName = $item->product_name ?? 'Unknown Product';
             $godown = $item->godown->name ?? 'N/A';
-
+        
             if (!isset($stockSummary[$productCode])) {
                 $stockSummary[$productCode] = [
-                    'product_code' => $item->product_code,
-                    'product_name' => $item->product_name,
+                    'product_code' => $productCode,
+                    'product_name' => $productName,
                     'godowns' => [],
                     'total_stock' => 0
                 ];
             }
-
-            // Initialize godown stock if not set
+        
+            // Ensure valid array key
             if (!isset($stockSummary[$productCode]['godowns'][$godown])) {
                 $stockSummary[$productCode]['godowns'][$godown] = 0;
             }
-
+        
             // Update stock based on type (IN or OUT)
             if ($item->type === 'IN') {
                 $stockSummary[$productCode]['godowns'][$godown] += $item->quantity;
@@ -45,6 +46,7 @@ class StockController extends Controller
                 $stockSummary[$productCode]['total_stock'] -= $item->quantity;
             }
         }
+        
 
         // Fetch all Godown Names dynamically
         $allGodowns = GodownModel::pluck('name')->toArray();
@@ -89,21 +91,26 @@ class StockController extends Controller
         // Populate table rows
         $index = 1;
         foreach ($stockSummary as $product) {
+            if (!isset($product['product_code']) || !isset($product['product_name'])) {
+                continue; // Skip invalid entries
+            }
+        
             $html .= "<tr>
                         <td>{$index}</td>
                         <td>{$product['product_code']}</td>
                         <td>{$product['product_name']}</td>";
-
+        
             // Fill stock for each godown
             foreach ($allGodowns as $godown) {
-                $stockInGodown = $product['godowns'][$godown] ?? 0;
+                $stockInGodown = $product['godowns'][$godown] ?? 0; // Avoid undefined index
                 $html .= "<td>{$stockInGodown}</td>";
             }
-
+        
             $html .= "<td>{$product['total_stock']}</td>
                     </tr>";
             $index++;
         }
+        
 
         $html .= '</tbody></table>';
 
