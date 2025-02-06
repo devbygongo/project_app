@@ -114,6 +114,8 @@ class StockController extends Controller
 
         $html .= '</tbody></table>';
 
+        die($html);
+
         // Write HTML to PDF
         $mpdf->WriteHTML($html);
 
