@@ -23,14 +23,15 @@ use App\Http\Controllers\InvoiceControllerZP;
 
 use App\Http\Middleware\GetUserRole;
 
-Route::get('/generate-stock-report', [StockController::class, 'generateStockReport']);
 
 // Route::get('/user', function (Request $request) {
-//     return $request->user();
-// })->middleware('auth:sanctum');
-
+    //     return $request->user();
+    // })->middleware('auth:sanctum');
+    
 Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin'])->group(function () {
-
+    
+    Route::post('/generate-stock-report', [StockController::class, 'generateStockReport']);
+    
     Route::post('/add_user', [CreateController::class, 'user']);
 
     Route::get('/view_user/{lang?}', [ViewController::class, 'user']);

@@ -11,8 +11,11 @@ use Carbon\Carbon;
 
 class StockController extends Controller
 {
-    public function generateStockReport()
+    public function generateStockReport(Request $request)
     {
+
+        $type = $request->mobile;
+
         // Fetch stock data with category, type, and purchase price using relationships
         $stockData = StockOrderItemsModel::with(['stock_product:id,product_code,product_name,category,type,purchase', 'godown:id,name'])
         ->get()
@@ -92,11 +95,20 @@ class StockController extends Controller
             $html .= "<th style='width: {$columnWidth}%;'>{$godown}</th>";
         }
 
-        $html .= '<th style="width: ' . $columnWidth . '%; font-weight: bold;">Total Stock</th>
+        if($type == 'with_value')
+        {
+            $html .= '<th style="width: ' . $columnWidth . '%; font-weight: bold;">Total Stock</th>
                   <th style="width: ' . $columnWidth . '%; font-weight: bold;">Stock Value</th>
                         </tr>
                     </thead>
                     <tbody>';
+        }else{
+            $html .= '
+                  </tr>
+              </thead>
+              <tbody>';
+
+        }
 		
 		$totalStockValue = 0; // Initialize total stock value
 
@@ -122,19 +134,27 @@ class StockController extends Controller
                 $html .= "<td style='width: {$columnWidth}%;'>{$stockInGodown}</td>";
             }
 
-            $html .= "<td style='width: {$columnWidth}%; font-weight: bold;'>{$product['total_stock']}</td>
-                    <td style='width: {$columnWidth}%; font-weight: bold; text-align: right;'>₹ " . $this->formatInINR($stockValue) . "</td>
+            if($type == 'with_value')
+            {
+                $html .= "<td style='width: {$columnWidth}%; font-weight: bold;'>{$product['total_stock']}</td>
+                        <td style='width: {$columnWidth}%; font-weight: bold; text-align: right;'>₹ " . $this->formatInINR($stockValue) . "</td>
 
-                    </tr>";
+                        </tr>";
+            }else{
+                $html .= "
+                        </tr>";
+            }
             $index++;
         }
 		
-		
-		// Add Total Row at the End
-		$html .= "<tr style='font-weight: bold; background-color: #f2f2f2;'>
-            <td colspan='" . (count($allGodowns) + 4) . "' style='text-align: right; font-weight: bold;'>Total Stock Value:</td>
-            <td style='width: {$columnWidth}%; text-align: right;'>₹ " . $this->formatInINR($totalStockValue) . "</td>
-          </tr>";
+		if($type == 'with_value')
+        {
+            // Add Total Row at the End
+            $html .= "<tr style='font-weight: bold; background-color: #f2f2f2;'>
+                <td colspan='" . (count($allGodowns) + 4) . "' style='text-align: right; font-weight: bold;'>Total Stock Value:</td>
+                <td style='width: {$columnWidth}%; text-align: right;'>₹ " . $this->formatInINR($totalStockValue) . "</td>
+            </tr>";
+        }
 
         $html .= '</tbody></table>';
 
