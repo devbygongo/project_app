@@ -103,7 +103,7 @@ class StockController extends Controller
                     </thead>
                     <tbody>';
         }else{
-            $html .= '
+            $html .= '<th style="width: ' . $columnWidth . '%; font-weight: bold;">Total Stock</th>
                   </tr>
               </thead>
               <tbody>';
@@ -141,7 +141,7 @@ class StockController extends Controller
 
                         </tr>";
             }else{
-                $html .= "
+                $html .= "<td style='width: {$columnWidth}%; font-weight: bold;'>{$product['total_stock']}</td>
                         </tr>";
             }
             $index++;
