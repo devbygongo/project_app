@@ -14,7 +14,7 @@ class StockController extends Controller
     public function generateStockReport(Request $request)
     {
 
-        $type = $request->mobile;
+        $type = $request->type;
 
         // Fetch stock data with category, type, and purchase price using relationships
         $stockData = StockOrderItemsModel::with(['stock_product:id,product_code,product_name,category,type,purchase', 'godown:id,name'])
