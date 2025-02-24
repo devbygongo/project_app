@@ -983,7 +983,7 @@ class CreateController extends Controller
     {
         $validated = $request->validate([
             'items' => 'required|array|min:1',
-            'items.*.product_code' => 'required|integer|exists:t_products,product_code',
+            'items.*.product_code' => 'required|string|exists:t_products,product_code',
             'items.*.product_name' => 'required|string|exists:t_products,product_name',
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.godown_id' => 'required|integer|exists:t_godown,id',
