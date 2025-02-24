@@ -292,7 +292,7 @@ class ViewController extends Controller
 			// If user type is 'special', select special columns but alias them as 'basic' and 'gst'
 			$query = ProductModel::select(
 				'product_code', 
-				'product_name', 
+				DB::raw('addslashes(product_name) as product_name'),
 				'category', 
 				'sub_category', 
 				'product_image', 
@@ -307,7 +307,7 @@ class ViewController extends Controller
                 // If user type is 'special', select special columns but alias them as 'basic' and 'gst'
                 $query = ProductModel::select(
                     'product_code', 
-                    'product_name', 
+                    DB::raw('addslashes(product_name) as product_name'),
                     'category', 
                     'sub_category', 
                     'product_image', 
@@ -324,7 +324,7 @@ class ViewController extends Controller
             // If user type is 'special', select special columns but alias them as 'basic' and 'gst'
             $query = ProductModel::select(
                 'product_code', 
-                'product_name', 
+                DB::raw('addslashes(product_name) as product_name'),
                 'category', 
                 'sub_category', 
                 'product_image', 
@@ -342,7 +342,7 @@ class ViewController extends Controller
             // If user type is 'special', select special columns but alias them as 'basic' and 'gst'
             $query = ProductModel::select(
                 'product_code', 
-                'product_name', 
+                DB::raw('addslashes(product_name) as product_name'),
                 'category', 
                 'sub_category', 
                 'product_image', 
@@ -358,7 +358,7 @@ class ViewController extends Controller
 			// Default columns for non-special users
 			$query = ProductModel::select(
 				'product_code', 
-				'product_name', 
+				DB::raw('addslashes(product_name) as product_name'),
 				'category', 
 				'sub_category', 
 				'product_image', 
