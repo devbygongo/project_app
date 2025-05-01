@@ -423,6 +423,7 @@ class InvoiceController extends Controller
     {
         // Fetch orders with 'pending' or 'completed' status
         $orders = OrderModel::whereIn('status', ['pending', 'completed'])  // Adjust the status values as needed
+                            ->whereNull('packing_slip')
                             ->get();
 
         // Loop through each order and generate the packing slip
