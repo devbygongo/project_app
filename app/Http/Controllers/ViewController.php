@@ -964,6 +964,7 @@ class ViewController extends Controller
             $get_user = Auth::User();
             if ($get_user->mobile == "+919951263651") {
                 $order->amount = 0;
+                $order->order_invoice = $order->packing_slip;
             }
             $order->order_items->each(function($orderItem) {
                 $orderItem->product_image = $orderItem->product->product_image ?? null;
