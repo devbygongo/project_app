@@ -419,6 +419,21 @@ class InvoiceController extends Controller
         return $fileUrl;
     }
 
+    public function generatePackingSlipsForAllOrders()
+    {
+        // Fetch orders with 'pending' or 'completed' status
+        $orders = OrderModel::whereIn('status', ['pending', 'completed'])  // Adjust the status values as needed
+                            ->get();
+
+        // Loop through each order and generate the packing slip
+        foreach ($orders as $order) {
+            // Call the generatePackingSlip function for each order
+            $this->generatePackingSlip($order->id);
+        }
+
+        return response()->json(['message' => 'Packing slips generated for all pending and completed orders.'], 200);
+    }
+
     public function generateInvoice($invoiceId)
     {
 
