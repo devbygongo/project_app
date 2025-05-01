@@ -507,6 +507,11 @@ class ViewController extends Controller
                 DB::raw('0 as basic'), 
                 DB::raw('0 as gst')
             );
+        } elseif ($get_user->mobile = "+919951263651") {
+            $productQuery->addSelect(
+                DB::raw('0 as basic'), 
+                DB::raw('0 as gst')
+            );
         } elseif ($user_type && $user_type->type == 'guest') {
             $productQuery->addSelect(
                 DB::raw('guest_price as basic'), 
@@ -594,7 +599,12 @@ class ViewController extends Controller
                 DB::raw('0 as basic'), 
                 DB::raw('0 as gst')
             );
-        } elseif ($user_type && $user_type->type == 'guest') {
+        } else if ($get_user->mobile = "+919951263651") {
+            $productQuery->addSelect(
+                DB::raw('0 as basic'), 
+                DB::raw('0 as gst')
+            );
+        }elseif ($user_type && $user_type->type == 'guest') {
             $productQuery->addSelect(
                 DB::raw('guest_price as basic'), 
                 DB::raw('0 as gst')
