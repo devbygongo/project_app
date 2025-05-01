@@ -336,7 +336,7 @@ class ViewController extends Controller
                 'video_link'
             );
 
-        } else if ($get_user->mobile = "+919951263651") {
+        } else if ($get_user->mobile = "+919951263652") {
 
 
             // If user type is 'special', select special columns but alias them as 'basic' and 'gst'
@@ -507,7 +507,7 @@ class ViewController extends Controller
                 DB::raw('0 as basic'), 
                 DB::raw('0 as gst')
             );
-        } elseif ($get_user->mobile = "+919951263651") {
+        } elseif ($get_user->mobile = "+919951263652") {
             $productQuery->addSelect(
                 DB::raw('0 as basic'), 
                 DB::raw('0 as gst')
@@ -599,7 +599,7 @@ class ViewController extends Controller
                 DB::raw('0 as basic'), 
                 DB::raw('0 as gst')
             );
-        } else if ($get_user->mobile = "+919951263651") {
+        } else if ($get_user->mobile = "+919951263652") {
             $productQuery->addSelect(
                 DB::raw('0 as basic'), 
                 DB::raw('0 as gst')
@@ -962,7 +962,7 @@ class ViewController extends Controller
         // Modify the order items to append the product image directly
         $get_user_orders->each(function($order) {
             $get_user = Auth::User();
-            if ($get_user->mobile == "+919951263651") {
+            if ($get_user->mobile == "+919951263652") {
                 $order->amount = 0;
                 $order->order_invoice = $order->packing_slip;
             }
