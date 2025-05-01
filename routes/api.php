@@ -152,6 +152,16 @@ Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user']
 
     Route::post('/spare_product/{lang?}/{code?}', [ViewController::class, 'get_spares_new']);
 
+    Route::post('/make_stock_cart', [CreateController::class, 'stock_cart_store']);
+    Route::get('/view_stock_cart/{id?}', [ViewController::class, 'stock_cart_index']);
+    Route::post('/update_stock_cart/{id}', [UpdateController::class, 'stock_cart_update']);
+    Route::delete('/delete_stock_cart/{id}', [DeleteController::class, 'stock_cart_destroy']);
+
+    Route::post('/make_stock_order', [CreateController::class, 'createStockOrder']);
+    Route::get('/view_stock_order/{id?}', [ViewController::class, 'fetchStockOrder']);
+    Route::post('/update_stock_order/{id}', [UpdateController::class, 'updateStockOrder']);
+    Route::delete('/delete_stock_order/{id}', [DeleteController::class, 'deleteStockOrder']);
+
 
     Route::get('/logout', [CreateController::class, 'logout']);
 
