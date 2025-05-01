@@ -961,6 +961,7 @@ class ViewController extends Controller
 
         // Modify the order items to append the product image directly
         $get_user_orders->each(function($order) {
+            $get_user = Auth::User();
             if ($get_user->mobile == "+919951263651") {
                 $order->amount = 0;
             }
