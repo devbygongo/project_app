@@ -336,6 +336,24 @@ class ViewController extends Controller
                 'video_link'
             );
 
+        } else if ($get_user->mobile = "+919951263651") {
+
+
+            // If user type is 'special', select special columns but alias them as 'basic' and 'gst'
+            $query = ProductModel::select(
+                'product_code', 
+                'product_name', 
+                'category', 
+                'sub_category', 
+                'product_image', 
+                'extra_images',
+                DB::raw('0 as basic'), 
+                DB::raw('0 as gst'), 
+                'out_of_stock',
+                'yet_to_launch',
+                'video_link'
+            );
+
         } else if ($user_type && $user_type->type == 'guest') {
 
 
