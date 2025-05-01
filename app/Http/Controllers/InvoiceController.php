@@ -335,6 +335,90 @@ class InvoiceController extends Controller
         return $fileUrl;
     }
 
+    public function generatePackingSlip($orderId, $is_edited = false)
+    {
+        $order = OrderModel::select('user_id','order_id', 'amount', 'order_date','type')
+                            ->where('id', $orderId)
+                            ->first();
+
+        $get_user = $order->user_id;
+        
+        $user = User::select('name', 'mobile', 'email', 'address_line_1', 'address_line_2', 'gstin')
+                    ->where('id', $get_user)
+                    ->first();
+		
+
+        $order_items = OrderItemsModel::with('product:product_code')
+                                    ->select('product_code', 'product_name', 'rate', 'quantity', 'total', 'remarks')
+                                    ->where('order_id', $orderId)
+                                    ->get();
+        $mobileNumbers = User::where('role', 'admin')->pluck('mobile')->toArray();
+        
+
+        if (!$user || !$order || $order_items->isEmpty()) {
+            return response()->json(['error' => 'Sorry, required data are not available!'], 500);
+        }
+
+        $sanitizedOrderId = preg_replace('/[^A-Za-z0-9]+/', '-', trim($order->order_id));
+        $sanitizedOrderId = trim($sanitizedOrderId, '-');
+
+		//die($sanitizedOrderId);
+		
+        $data = [
+            'user' => $user,
+            'order' => $order,
+            'order_items' => $order_items,
+        ];
+		$mpdf = new Mpdf();
+
+		// Render the header
+		$headerHtml = view('packing_slip_template_header', ['user' => $user, 'order' => $order])->render();
+		$mpdf->WriteHTML($headerHtml);
+
+		$chunkSize = 10;
+		$orderItems = collect($order_items)->chunk($chunkSize);
+
+		foreach ($orderItems as $chunk) {
+			foreach ($chunk as $index => $item) {
+				// Render each item row individually
+				$htmlChunk = view('packing_slip_template_items', compact('item', 'index'))->render();
+				$mpdf->WriteHTML($htmlChunk);
+			}
+			ob_flush();
+			flush();
+		}
+
+		// Render the footer
+		$footerHtml = view('packing_slip_template_footer', ['order' => $order])->render();
+		$mpdf->WriteHTML($footerHtml);
+
+		// Output the PDF
+		$publicPath = 'uploads/packing_slip/';
+		$fileName = 'packing_slip_' . $sanitizedOrderId . '.pdf';
+		$filePath = storage_path('app/public/' . $publicPath . $fileName);
+
+        // Check if the file already exists and delete it
+        if (File::exists($filePath)) {
+            File::delete($filePath);
+        }
+
+		if (!File::isDirectory($storage_path = storage_path('app/public/' . $publicPath))) {
+			File::makeDirectory($storage_path, 0755, true);
+		}
+
+		$mpdf->Output($filePath, 'F');
+
+        $fileUrl = asset('storage/' . $publicPath . $fileName);
+
+        $update_order = OrderModel::where('id', $orderId)
+        ->update([
+            'packing_slip' => $fileUrl,
+        ]);
+    
+        // return $mpdf->Output('invoice.pdf', 'I');
+        return $fileUrl;
+    }
+
     public function generateInvoice($invoiceId)
     {
 

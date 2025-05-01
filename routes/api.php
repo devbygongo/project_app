@@ -186,6 +186,7 @@ Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user']
 });
 
 Route::get('/generate_order_invoice/{orderId}', [InvoiceController::class, 'generateorderInvoice']);
+Route::get('/generate_packing_slip/{orderId}', [InvoiceController::class, 'generatePackingSlip']);
 Route::get('/pending_order', [ReportController::class, 'pendingOrderReport']);
 
 
