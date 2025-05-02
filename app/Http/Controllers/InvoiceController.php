@@ -457,7 +457,7 @@ class InvoiceController extends Controller
                             ],
                             [
                                 'type' => 'text',
-                                'text' => $order->amount,
+                                'text' => '0',
                             ],
                         ],
                     ]
@@ -516,7 +516,7 @@ class InvoiceController extends Controller
                             ],
                             [
                                 'type' => 'text',
-                                'text' => $order->amount,
+                                'text' => '0',
                             ],
                         ],
                     ]
