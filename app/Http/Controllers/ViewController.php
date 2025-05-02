@@ -336,7 +336,8 @@ class ViewController extends Controller
                 'video_link'
             );
 
-        } else if ($get_user->mobile = "+919951263652") {
+        } 
+        else if ($get_user->mobile == "+919951263652") {
 
 
             // If user type is 'special', select special columns but alias them as 'basic' and 'gst'
@@ -354,7 +355,8 @@ class ViewController extends Controller
                 'video_link'
             );
 
-        } else if ($user_type && $user_type->type == 'guest') {
+        } 
+        else if ($user_type && $user_type->type == 'guest') {
 
 
             // If user type is 'special', select special columns but alias them as 'basic' and 'gst'
@@ -507,7 +509,7 @@ class ViewController extends Controller
                 DB::raw('0 as basic'), 
                 DB::raw('0 as gst')
             );
-        } elseif ($get_user->mobile = "+919951263652") {
+        } elseif ($get_user->mobile == "+919951263652") {
             $productQuery->addSelect(
                 DB::raw('0 as basic'), 
                 DB::raw('0 as gst')
@@ -599,7 +601,7 @@ class ViewController extends Controller
                 DB::raw('0 as basic'), 
                 DB::raw('0 as gst')
             );
-        } else if ($get_user->mobile = "+919951263652") {
+        } else if ($get_user->mobile == "+919951263652") {
             $productQuery->addSelect(
                 DB::raw('0 as basic'), 
                 DB::raw('0 as gst')
