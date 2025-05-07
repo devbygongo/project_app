@@ -10,6 +10,8 @@ use App\Models\CartModel;
 
 use App\Models\OrderModel;
 
+use App\Models\ProductModel;
+
 use App\Models\OrderItemsModel;
 
 use App\Models\StockCartModel;
