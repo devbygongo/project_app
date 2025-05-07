@@ -542,34 +542,34 @@ class UpdateController extends Controller
             $rate = $item['rate'];
             $total = $item['total'];
 
-            if ($get_user->mobile === "+918961043773") {
-                // 🔵 Check if this product already existed in the order
-                if ($existingItems->has($item['product_code'])) {
-                    // Use previously stored rate
-                    $rate = $existingItems[$item['product_code']]->rate;
-                } else {
-                    // Get rate based on type and order pricing type (basic/gst)
-                    if ($order->type == 'basic') {
-                        $rate = match ($user_type->type ?? null) {
-                            'special' => $product->special_basic ?? 0,
-                            'outstation' => $product->outstation_basic ?? 0,
-                            'zeroprice' => 0,
-                            'guest' => $product->guest_price ?? 0,
-                            default => $product->basic ?? 0,
-                        };
-                    } else {
-                        $rate = match ($user_type->type ?? null) {
-                            'special' => $product->special_gst ?? 0,
-                            'outstation' => $product->outstation_gst ?? 0,
-                            'zeroprice', 'guest' => 0,
-                            default => $product->gst ?? 0,
-                        };
-                    }
-                }
+            // if ($get_user->mobile === "+918961043773") {
+            //     // 🔵 Check if this product already existed in the order
+            //     if ($existingItems->has($item['product_code'])) {
+            //         // Use previously stored rate
+            //         $rate = $existingItems[$item['product_code']]->rate;
+            //     } else {
+            //         // Get rate based on type and order pricing type (basic/gst)
+            //         if ($order->type == 'basic') {
+            //             $rate = match ($user_type->type ?? null) {
+            //                 'special' => $product->special_basic ?? 0,
+            //                 'outstation' => $product->outstation_basic ?? 0,
+            //                 'zeroprice' => 0,
+            //                 'guest' => $product->guest_price ?? 0,
+            //                 default => $product->basic ?? 0,
+            //             };
+            //         } else {
+            //             $rate = match ($user_type->type ?? null) {
+            //                 'special' => $product->special_gst ?? 0,
+            //                 'outstation' => $product->outstation_gst ?? 0,
+            //                 'zeroprice', 'guest' => 0,
+            //                 default => $product->gst ?? 0,
+            //             };
+            //         }
+            //     }
 
-                // Update total based on resolved rate
-                $total = $rate * $item['quantity'];
-            }
+            //     // Update total based on resolved rate
+            //     $total = $rate * $item['quantity'];
+            // }
             
             OrderItemsModel::create([
                 'order_id' => $id,
