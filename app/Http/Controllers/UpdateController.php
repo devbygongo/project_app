@@ -516,7 +516,12 @@ class UpdateController extends Controller
         $order->amount = $request->input('amount');
         $order->save();
 
-        // Remove existing order items for the given order ID
+        // 🟡 Save current order items in associative array by product_code
+        $existingItems = OrderItemsModel::where('order_id', $id)
+        ->get()
+        ->keyBy('product_code');
+
+        // 🔴 Delete all old items
         OrderItemsModel::where('order_id', $id)->delete();
 
         $user_id = $order->user_id;
@@ -533,41 +538,37 @@ class UpdateController extends Controller
                 return response()->json(['message' => "Product {$item['product_code']} not found."], 404);
             }
 
-            // Determine rate based on user type or mobile
-            // if ($get_user->mobile === "+919951263652") {
+            // Default values
+            $rate = $item['rate'];
+            $total = $item['total'];
+
             if ($get_user->mobile === "+919951263652") {
-                if($order->type == 'basic')
-                {                
-                    if ($user_type === 'special') {
-                        $rate = $product->special_basic ?? 0;
-                    } elseif ($user_type === 'outstation') {
-                        $rate = $product->outstation_basic ?? 0;
-                    } elseif ($user_type === 'zeroprice') {
-                        $rate = 0;
-                    } elseif ($user_type === 'guest') {
-                        $rate = $product->guest_price ?? 0;
-                    } else {
-                        $rate = $product->basic ?? 0;
-                    }
+                // 🔵 Check if this product already existed in the order
+                if ($existingItems->has($item['product_code'])) {
+                    // Use previously stored rate
+                    $rate = $existingItems[$item['product_code']]->rate;
                 } else {
-                    if ($user_type === 'special') {
-                        $rate = $product->special_gst ?? 0;
-                    } elseif ($user_type === 'outstation') {
-                        $rate = $product->outstation_gst ?? 0;
-                    } elseif ($user_type === 'zeroprice') {
-                        $rate = 0;
-                    } elseif ($user_type === 'guest') {
-                        $rate = 0;
+                    // Get rate based on type and order pricing type (basic/gst)
+                    if ($order->type == 'basic') {
+                        $rate = match ($user_type->type ?? null) {
+                            'special' => $product->special_basic ?? 0,
+                            'outstation' => $product->outstation_basic ?? 0,
+                            'zeroprice' => 0,
+                            'guest' => $product->guest_price ?? 0,
+                            default => $product->basic ?? 0,
+                        };
                     } else {
-                        $rate = $product->gst ?? 0;
+                        $rate = match ($user_type->type ?? null) {
+                            'special' => $product->special_gst ?? 0,
+                            'outstation' => $product->outstation_gst ?? 0,
+                            'zeroprice', 'guest' => 0,
+                            default => $product->gst ?? 0,
+                        };
                     }
                 }
 
+                // Update total based on resolved rate
                 $total = $rate * $item['quantity'];
-
-            } else {
-                $rate = $item['rate'];
-                $total = $item['total'];
             }
             
             OrderItemsModel::create([
