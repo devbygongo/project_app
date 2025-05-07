@@ -477,6 +477,8 @@ class UpdateController extends Controller
 
     public function edit_order(Request $request, $id)
     {
+        $get_user = Auth::User();
+
         // Validate incoming request data
         $request->validate([
             'order_id' => 'required|string',
@@ -515,9 +517,57 @@ class UpdateController extends Controller
         // Remove existing order items for the given order ID
         OrderItemsModel::where('order_id', $id)->delete();
 
+        $user_id = $order->user_id;
+
+        // Fetch user type
+        $user_type = User::select('type')->where('id', $user_id)->first();
+
         // Add the updated items to the order
         $items = $request->input('items');
         foreach ($items as $item) {
+
+            $product = ProductModel::where('product_code', $item['product_code'])->first();
+            if (!$product) {
+                return response()->json(['message' => "Product {$item['product_code']} not found."], 404);
+            }
+
+            // Determine rate based on user type or mobile
+            // if ($get_user->mobile === "+919951263652") {
+            if ($get_user->mobile === "+919951263652") {
+                if($order->type == 'basic')
+                {                
+                    if ($user_type === 'special') {
+                        $rate = $product->special_basic ?? 0;
+                    } elseif ($user_type === 'outstation') {
+                        $rate = $product->outstation_basic ?? 0;
+                    } elseif ($user_type === 'zeroprice') {
+                        $rate = 0;
+                    } elseif ($user_type === 'guest') {
+                        $rate = $product->guest_price ?? 0;
+                    } else {
+                        $rate = $product->basic ?? 0;
+                    }
+                } else {
+                    if ($user_type === 'special') {
+                        $rate = $product->special_gst ?? 0;
+                    } elseif ($user_type === 'outstation') {
+                        $rate = $product->outstation_gst ?? 0;
+                    } elseif ($user_type === 'zeroprice') {
+                        $rate = 0;
+                    } elseif ($user_type === 'guest') {
+                        $rate = 0;
+                    } else {
+                        $rate = $product->gst ?? 0;
+                    }
+                }
+
+                $total = $rate * $item['quantity'];
+
+            } else {
+                $rate = $item['rate'];
+                $total = $item['total'];
+            }
+            
             OrderItemsModel::create([
                 'order_id' => $id,
                 'product_code' => $item['product_code'],
@@ -530,9 +580,11 @@ class UpdateController extends Controller
             ]);
         }
 
-        $generate_order_invoice = new InvoiceController();
-        $generate_order_invoice->generateorderInvoice($id, true);
-        $generate_order_invoice->generatePackingSlip($id, true);
+        if ($get_user->mobile != "+918961043773") {
+            $generate_order_invoice = new InvoiceController();
+            $generate_order_invoice->generateorderInvoice($id, true);
+            $generate_order_invoice->generatePackingSlip($id, true);
+        }
 
         return response()->json([
             'message' => 'Order updated successfully!',
