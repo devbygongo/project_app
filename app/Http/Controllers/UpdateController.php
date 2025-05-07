@@ -542,7 +542,7 @@ class UpdateController extends Controller
             $rate = $item['rate'];
             $total = $item['total'];
 
-            if ($get_user->mobile === "+919951263652") {
+            if ($get_user->mobile === "+918961043773") {
                 // 🔵 Check if this product already existed in the order
                 if ($existingItems->has($item['product_code'])) {
                     // Use previously stored rate
