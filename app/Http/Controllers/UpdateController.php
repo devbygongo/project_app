@@ -30,6 +30,9 @@ use Illuminate\Support\Facades\Auth;
 
 use Laravel\Sanctum\PersonalAccessToken;
 
+use Illuminate\Support\Facades\DB;
+
+
 
 class UpdateController extends Controller
 {
