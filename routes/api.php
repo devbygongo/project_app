@@ -141,6 +141,7 @@ Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user']
     Route::get('/get_details', [ViewController::class, 'user_details']);
 
     Route::post('/update_user', [UpdateController::class, 'user']);
+    Route::post('/update_user_role', [UpdateController::class, 'updateUserRole']);
 
     Route::get('/category/{lang?}', [ViewController::class, 'lng_categories']);
 

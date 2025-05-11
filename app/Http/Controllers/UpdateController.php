@@ -71,6 +71,37 @@ class UpdateController extends Controller
         }
     }
 
+    public function updateUserRole(Request $request)
+    {
+        // Validate the incoming request data
+        $request->validate([
+            'user_id' => 'required|exists:users,id', // Ensure that the user_id exists in the users table
+            'role' => 'required|string', // Add validation for type (e.g., role, address, etc.)
+        ]);
+
+        // Get the user_id and type from the request
+        $user_id = $request->input('user_id');
+        $role = $request->input('role');
+
+        // Based on the type, you can update specific fields of the user
+        $updateData = [];
+        $updateData['role'] = $request->input('role');
+        
+        // Update the user record with the given data
+        $update_user_record = User::where('id', $user_id)->update($updateData);
+
+        // Check if the update was successful
+        if ($update_user_record) {
+            return response()->json([
+                'message' => 'User record updated successfully!',
+            ], 200);
+        } else {
+            return response()->json([
+                'message' => 'Failed to update user record.',
+            ], 400);
+        }
+    }
+
     // public function __construct(sendWhatsAppUtility $whatsapputility)
     // {
     //     $this->whatsapputility = $whatsapputility;
