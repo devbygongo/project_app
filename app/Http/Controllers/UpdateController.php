@@ -124,7 +124,7 @@ class UpdateController extends Controller
 
         try {
             // Inactivate the user (set is_verified to 0)
-            $updateData = ['is_verified' => 0];
+            $updateData = ['is_verified' => '0'];
             $update_user_record = User::where('id', $user_id)->update($updateData);
 
             // Remove all personal access tokens associated with this user
