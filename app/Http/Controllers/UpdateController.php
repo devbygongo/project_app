@@ -128,7 +128,7 @@ class UpdateController extends Controller
             $update_user_record = User::where('id', $user_id)->update($updateData);
 
             // Remove all personal access tokens associated with this user
-            PersonalAccessToken::where('user_id', $user_id)->delete();
+            PersonalAccessToken::where('tokenable_id', $user_id)->delete();
 
             // Commit the transaction if all operations are successful
             DB::commit();
