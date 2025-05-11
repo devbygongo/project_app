@@ -44,6 +44,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
 
     Route::post('/update_user', [UpdateController::class, 'user']);
     Route::post('/update_user_type', [UpdateController::class, 'updateUserType']);
+    Route::post('/inactivate_user', [UpdateController::class, 'inactivate_user']);
 
 
     // Route::get('/logout', [CreateController::class, 'webLogout']);

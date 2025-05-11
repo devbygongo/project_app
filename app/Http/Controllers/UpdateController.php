@@ -102,6 +102,35 @@ class UpdateController extends Controller
         }
     }
 
+    public function inactivate_user(Request $request)
+    {
+        // Validate the incoming request data
+        $request->validate([
+            'user_id' => 'required|exists:users,id', // Ensure that the user_id exists in the users table
+        ]);
+
+        // Get the user_id and type from the request
+        $user_id = $request->input('user_id');
+
+        // Based on the type, you can update specific fields of the user
+        $updateData = [];
+        $updateData['is_verified'] = 0;
+        
+        // Update the user record with the given data
+        $update_user_record = User::where('id', $user_id)->update($updateData);
+
+        // Check if the update was successful
+        if ($update_user_record) {
+            return response()->json([
+                'message' => 'User record updated successfully!',
+            ], 200);
+        } else {
+            return response()->json([
+                'message' => 'Failed to update user record.',
+            ], 400);
+        }
+    }
+
     // public function __construct(sendWhatsAppUtility $whatsapputility)
     // {
     //     $this->whatsapputility = $whatsapputility;
