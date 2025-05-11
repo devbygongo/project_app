@@ -43,6 +43,8 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
     Route::post('/make_unverify/{id}', [UpdateController::class, 'unverify_user']);
 
     Route::post('/update_user', [UpdateController::class, 'user']);
+    Route::post('/update_user_role', [UpdateController::class, 'updateUserRole']);
+
 
     // Route::get('/logout', [CreateController::class, 'webLogout']);
     Route::post('/logout', [CreateController::class, 'logout']);
@@ -141,7 +143,6 @@ Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user']
     Route::get('/get_details', [ViewController::class, 'user_details']);
 
     Route::post('/update_user', [UpdateController::class, 'user']);
-    Route::post('/update_user_role', [UpdateController::class, 'updateUserRole']);
 
     Route::get('/category/{lang?}', [ViewController::class, 'lng_categories']);
 
