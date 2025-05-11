@@ -114,7 +114,7 @@ class UpdateController extends Controller
 
         // Based on the type, you can update specific fields of the user
         $updateData = [];
-        $updateData['is_verified'] = 0;
+        $updateData['is_verified'] = '0';
         
         // Update the user record with the given data
         $update_user_record = User::where('id', $user_id)->update($updateData);
