@@ -43,7 +43,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
     Route::post('/make_unverify/{id}', [UpdateController::class, 'unverify_user']);
 
     Route::post('/update_user', [UpdateController::class, 'user']);
-    Route::post('/update_user_role', [UpdateController::class, 'updateUserRole']);
+    Route::post('/update_user_type', [UpdateController::class, 'updateUserType']);
 
 
     // Route::get('/logout', [CreateController::class, 'webLogout']);

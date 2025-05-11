@@ -71,7 +71,7 @@ class UpdateController extends Controller
         }
     }
 
-    public function updateUserRole(Request $request)
+    public function updateUserType(Request $request)
     {
         // Validate the incoming request data
         $request->validate([
