@@ -28,6 +28,9 @@ use Carbon\Carbon;
 
 use Illuminate\Support\Facades\Auth;
 
+use Laravel\Sanctum\PersonalAccessToken;
+
+
 class UpdateController extends Controller
 {
     //
@@ -102,6 +105,7 @@ class UpdateController extends Controller
         }
     }
 
+
     public function inactivate_user(Request $request)
     {
         // Validate the incoming request data
@@ -109,27 +113,38 @@ class UpdateController extends Controller
             'user_id' => 'required|exists:users,id', // Ensure that the user_id exists in the users table
         ]);
 
-        // Get the user_id and type from the request
+        // Get the user_id from the request
         $user_id = $request->input('user_id');
 
-        // Based on the type, you can update specific fields of the user
-        $updateData = [];
-        $updateData['is_verified'] = '0';
-        
-        // Update the user record with the given data
-        $update_user_record = User::where('id', $user_id)->update($updateData);
+        // Start a database transaction to ensure atomic updates
+        DB::beginTransaction();
 
-        // Check if the update was successful
-        if ($update_user_record) {
+        try {
+            // Inactivate the user (set is_verified to 0)
+            $updateData = ['is_verified' => 0];
+            $update_user_record = User::where('id', $user_id)->update($updateData);
+
+            // Remove all personal access tokens associated with this user
+            PersonalAccessToken::where('user_id', $user_id)->delete();
+
+            // Commit the transaction if all operations are successful
+            DB::commit();
+
             return response()->json([
-                'message' => 'User record updated successfully!',
+                'message' => 'User inactivated and tokens removed successfully!',
             ], 200);
-        } else {
+
+        } catch (\Exception $e) {
+            // Rollback in case of any error
+            DB::rollBack();
+
             return response()->json([
-                'message' => 'Failed to update user record.',
+                'message' => 'Failed to inactivate user and remove tokens.',
+                'error' => $e->getMessage(),
             ], 400);
         }
     }
+
 
     // public function __construct(sendWhatsAppUtility $whatsapputility)
     // {
