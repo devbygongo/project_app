@@ -76,16 +76,16 @@ class UpdateController extends Controller
         // Validate the incoming request data
         $request->validate([
             'user_id' => 'required|exists:users,id', // Ensure that the user_id exists in the users table
-            'role' => 'required|string', // Add validation for type (e.g., role, address, etc.)
+            'type' => 'required|string', // Add validation for type (e.g., role, address, etc.)
         ]);
 
         // Get the user_id and type from the request
         $user_id = $request->input('user_id');
-        $role = $request->input('role');
+        $type = $request->input('type');
 
         // Based on the type, you can update specific fields of the user
         $updateData = [];
-        $updateData['role'] = $request->input('role');
+        $updateData['type'] = $request->input('type');
         
         // Update the user record with the given data
         $update_user_record = User::where('id', $user_id)->update($updateData);
