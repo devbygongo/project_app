@@ -397,15 +397,18 @@ class UpdateController extends Controller
                 'type' => 'required',
             ]);
     
-                $update_cart = CartModel::where('id', $id)
-                ->update([
-                    // 'products_id' => $request->input('products_id'),
-                    'product_code' => $request->input('product_code'),
-                    'quantity' => $request->input('quantity'),
-                    'rate' => $request->input('rate'),
-                    'type' => $request->input('type'),
-                    'remarks' => $request->input('remarks'),
-                ]);
+            $update_cart = CartModel::where('id', $id)
+            ->update([
+                // 'products_id' => $request->input('products_id'),
+                'product_code' => $request->input('product_code'),
+                'quantity' => $request->input('quantity'),
+                'rate' => $request->input('rate'),
+                'amount' => ($request->input('rate')) * ($request->input('quantity')),
+                'type' => $request->input('type'),
+                'remarks' => $request->input('remarks'),
+            ]);
+
+
         }
         else {
             $request->validate([
