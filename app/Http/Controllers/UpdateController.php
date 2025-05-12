@@ -677,11 +677,11 @@ class UpdateController extends Controller
             ]);
         }
 
-        if ($get_user->mobile != "+918961043773") {
+        // if ($get_user->mobile != "+918961043773") {
             $generate_order_invoice = new InvoiceController();
             $generate_order_invoice->generateorderInvoice($id, true);
             $generate_order_invoice->generatePackingSlip($id, true);
-        }
+        // }
 
         return response()->json([
             'message' => 'Order updated successfully!',
