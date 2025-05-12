@@ -22,6 +22,8 @@ use App\Models\StockOrderItemsModel;
 
 use App\Http\Controllers\InvoiceController;
 
+use App\Http\Controllers\WishlistController;
+
 use App\Utils\sendWhatsAppUtility;
 
 use Carbon\Carbon;
@@ -620,7 +622,7 @@ class UpdateController extends Controller
             if ($item['markedForDeletion']) {
                 if ($item['removalReason'] === 'Not in Stock') {
                     // Save to wishlist table if removalReason is "Not in Stock"
-                    $this->saveToWishlist($user_id, $item);
+                    WishlistController::saveToWishlist($user_id, $item);
                 }
                 continue; // Skip further processing for this item
             }
