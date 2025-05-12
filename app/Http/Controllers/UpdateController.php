@@ -620,7 +620,7 @@ class UpdateController extends Controller
         foreach ($items as $item) {
             // Skip the items marked for deletion
             if ($item['markedForDeletion']) {
-                if ($item['removalReason'] === 'Not in Stock') {
+                if ($item['removalReason'] === 'Not in stock') {
                     // Save to wishlist table if removalReason is "Not in Stock"
                     WishlistController::saveToWishlist($user_id, $item);
                 }
