@@ -16,7 +16,7 @@ class WishlistController extends Controller
         
         WishlistModel::create([
             'user_id' => $user_id,
-            'product_id' => $item['product_code'], // Assuming the product ID is passed in the item
+            'product_code' => $item['product_code'], // Assuming the product ID is passed in the item
             'qty' => $item['quantity'],
             'type' => $item['type'],
             'order_id' => $item['order_id'],
