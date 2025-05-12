@@ -622,7 +622,8 @@ class UpdateController extends Controller
             if ($item['markedForDeletion']) {
                 if ($item['removalReason'] === 'Not in stock') {
                     // Save to wishlist table if removalReason is "Not in Stock"
-                    WishlistController::saveToWishlist($user_id, $item);
+                    $wishlistController = new WishlistController();
+                    $wishlistController->saveToWishlist($user_id, $item);  // Instance call
                 }
                 continue; // Skip further processing for this item
             }
@@ -677,11 +678,11 @@ class UpdateController extends Controller
             ]);
         }
 
-        // if ($get_user->mobile != "+918961043773") {
+        if ($get_user->mobile != "+918961043773") {
             $generate_order_invoice = new InvoiceController();
             $generate_order_invoice->generateorderInvoice($id, true);
             $generate_order_invoice->generatePackingSlip($id, true);
-        // }
+        }
 
         return response()->json([
             'message' => 'Order updated successfully!',
