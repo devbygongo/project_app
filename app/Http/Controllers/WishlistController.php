@@ -14,7 +14,7 @@ class WishlistController extends Controller
         $order = OrderModel::find($item['order_id']);
         $order_date = $order ? $order->order_date : now(); // Default to current date if
         
-        WishlistController::create([
+        WishlistModel::create([
             'user_id' => $user_id,
             'product_id' => $item['id'], // Assuming the product ID is passed in the item
             'qty' => $item['quantity'],
