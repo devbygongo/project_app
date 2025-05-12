@@ -576,6 +576,8 @@ class UpdateController extends Controller
             'items.*.rate' => 'required|numeric',
             'items.*.total' => 'required|numeric',
             'items.*.remarks' => 'nullable|string',
+            'items.*.markedForDeletion' => 'nullable|boolean',
+            'items.*.removalReason' => 'nullable|string',
         ]);
 
         // Find the order by its ID
@@ -614,6 +616,14 @@ class UpdateController extends Controller
         // Add the updated items to the order
         $items = $request->input('items');
         foreach ($items as $item) {
+            // Skip the items marked for deletion
+            if ($item['markedForDeletion']) {
+                if ($item['removalReason'] === 'Not in Stock') {
+                    // Save to wishlist table if removalReason is "Not in Stock"
+                    $this->saveToWishlist($user_id, $item);
+                }
+                continue; // Skip further processing for this item
+            }
 
             $product = ProductModel::where('product_code', $item['product_code'])->first();
             if (!$product) {
