@@ -34,6 +34,7 @@ use Laravel\Sanctum\PersonalAccessToken;
 
 use Illuminate\Support\Facades\DB;
 
+use Illuminate\Support\Facades\Log;
 
 
 class UpdateController extends Controller
@@ -561,11 +562,140 @@ class UpdateController extends Controller
             }    
     }
 
+    // public function edit_order(Request $request, $id)
+    // {
+    //     $get_user = Auth::User();
+
+    //     // Validate incoming request data
+    //     $request->validate([
+    //         'order_id' => 'required|string',
+    //         'order_type' => 'required|string',
+    //         'user_id' => 'required|integer',
+    //         'amount' => 'required|numeric',
+    //         'items' => 'required|array',
+    //         'items.*.product_code' => 'required|string',
+    //         'items.*.product_name' => 'required|string',
+    //         'items.*.quantity' => 'required|integer',
+    //         'items.*.rate' => 'required|numeric',
+    //         'items.*.total' => 'required|numeric',
+    //         'items.*.remarks' => 'nullable|string',
+    //         'items.*.markedForDeletion' => 'nullable|boolean',
+    //         'items.*.removalReason' => 'nullable|string',
+    //     ]);
+
+    //     // Find the order by its ID
+    //     $order = OrderModel::find($id);
+
+    //     if (!$order) {
+    //         return response()->json([
+    //             'message' => 'Order not found!'
+    //         ], 404);
+    //     }
+
+    //     // Check if the order belongs to the provided user_id
+    //     if ($order->user_id !== $request->input('user_id')) {
+    //         return response()->json([
+    //             'message' => 'Unauthorized action. This order does not belong to the specified user.'
+    //         ], 403);
+    //     }
+
+    //     // Update the order details
+    //     $order->amount = $request->input('amount');
+    //     $order->save();
+
+    //     // 🟡 Save current order items in associative array by product_code
+    //     $existingItems = OrderItemsModel::where('order_id', $id)
+    //     ->get()
+    //     ->keyBy('product_code');
+
+    //     // 🔴 Delete all old items
+    //     OrderItemsModel::where('order_id', $id)->delete();
+
+    //     $user_id = $order->user_id;
+
+    //     // Fetch user type
+    //     $user_type = User::select('type')->where('id', $user_id)->first();
+
+    //     // Add the updated items to the order
+    //     $items = $request->input('items');
+    //     foreach ($items as $item) {
+    //         // Skip the items marked for deletion
+    //         if ($item['markedForDeletion']) {
+    //             if ($item['removalReason'] === 'Not in stock') {
+    //                 // Save to wishlist table if removalReason is "Not in Stock"
+    //                 $wishlistController = new WishlistController();
+    //                 $wishlistController->saveToWishlist($user_id, $item);  // Instance call
+    //             }
+    //             continue; // Skip further processing for this item
+    //         }
+
+    //         $product = ProductModel::where('product_code', $item['product_code'])->first();
+    //         if (!$product) {
+    //             return response()->json(['message' => "Product {$item['product_code']} not found."], 404);
+    //         }
+
+    //         // Default values
+    //         $rate = $item['rate'];
+    //         $total = $item['total'];
+
+    //         // if ($get_user->mobile === "+918961043773") {
+    //         //     // 🔵 Check if this product already existed in the order
+    //         //     if ($existingItems->has($item['product_code'])) {
+    //         //         // Use previously stored rate
+    //         //         $rate = $existingItems[$item['product_code']]->rate;
+    //         //     } else {
+    //         //         // Get rate based on type and order pricing type (basic/gst)
+    //         //         if ($order->type == 'basic') {
+    //         //             $rate = match ($user_type->type ?? null) {
+    //         //                 'special' => $product->special_basic ?? 0,
+    //         //                 'outstation' => $product->outstation_basic ?? 0,
+    //         //                 'zeroprice' => 0,
+    //         //                 'guest' => $product->guest_price ?? 0,
+    //         //                 default => $product->basic ?? 0,
+    //         //             };
+    //         //         } else {
+    //         //             $rate = match ($user_type->type ?? null) {
+    //         //                 'special' => $product->special_gst ?? 0,
+    //         //                 'outstation' => $product->outstation_gst ?? 0,
+    //         //                 'zeroprice', 'guest' => 0,
+    //         //                 default => $product->gst ?? 0,
+    //         //             };
+    //         //         }
+    //         //     }
+
+    //         //     // Update total based on resolved rate
+    //         //     $total = $rate * $item['quantity'];
+    //         // }
+            
+    //         OrderItemsModel::create([
+    //             'order_id' => $id,
+    //             'product_code' => $item['product_code'],
+    //             'product_name' => $item['product_name'],
+    //             'quantity' => $item['quantity'],
+    //             'rate' => $item['rate'],
+    //             'total' => $item['total'],
+    //             'type' => strtolower($request->input('order_type')),
+    //             'remarks' => $item['remarks'] ?? '',
+    //         ]);
+    //     }
+
+    //     if ($get_user->mobile != "+918961043773") {
+    //         $generate_order_invoice = new InvoiceController();
+    //         $generate_order_invoice->generateorderInvoice($id, true);
+    //         $generate_order_invoice->generatePackingSlip($id, true);
+    //     }
+
+    //     return response()->json([
+    //         'message' => 'Order updated successfully!',
+    //         'order' => $order,
+    //         'items' => $items
+    //     ], 200);
+    // }
+
     public function edit_order(Request $request, $id)
     {
         $get_user = Auth::User();
 
-        // Validate incoming request data
         $request->validate([
             'order_id' => 'required|string',
             'order_type' => 'required|string',
@@ -582,114 +712,88 @@ class UpdateController extends Controller
             'items.*.removalReason' => 'nullable|string',
         ]);
 
-        // Find the order by its ID
         $order = OrderModel::find($id);
 
         if (!$order) {
-            return response()->json([
-                'message' => 'Order not found!'
-            ], 404);
+            return response()->json(['message' => 'Order not found!'], 404);
         }
 
-        // Check if the order belongs to the provided user_id
         if ($order->user_id !== $request->input('user_id')) {
             return response()->json([
                 'message' => 'Unauthorized action. This order does not belong to the specified user.'
             ], 403);
         }
 
-        // Update the order details
-        $order->amount = $request->input('amount');
-        $order->save();
+        DB::beginTransaction();
 
-        // 🟡 Save current order items in associative array by product_code
-        $existingItems = OrderItemsModel::where('order_id', $id)
-        ->get()
-        ->keyBy('product_code');
+        try {
+            $order->amount = $request->input('amount');
+            $order->save();
 
-        // 🔴 Delete all old items
-        OrderItemsModel::where('order_id', $id)->delete();
+            $existingItems = OrderItemsModel::where('order_id', $id)->get()->keyBy('product_code');
+            OrderItemsModel::where('order_id', $id)->delete();
 
-        $user_id = $order->user_id;
+            $user_id = $order->user_id;
+            $user_type = User::select('type')->where('id', $user_id)->first();
+            $items = $request->input('items');
 
-        // Fetch user type
-        $user_type = User::select('type')->where('id', $user_id)->first();
-
-        // Add the updated items to the order
-        $items = $request->input('items');
-        foreach ($items as $item) {
-            // Skip the items marked for deletion
-            if ($item['markedForDeletion']) {
-                if ($item['removalReason'] === 'Not in stock') {
-                    // Save to wishlist table if removalReason is "Not in Stock"
-                    $wishlistController = new WishlistController();
-                    $wishlistController->saveToWishlist($user_id, $item);  // Instance call
+            foreach ($items as $item) {
+                if ($item['markedForDeletion'] ?? false) {
+                    if (($item['removalReason'] ?? '') === 'Not in stock') {
+                        $wishlistController = new WishlistController();
+                        $wishlistController->saveToWishlist($user_id, $item);
+                    }
+                    continue;
                 }
-                continue; // Skip further processing for this item
+
+                $product = ProductModel::where('product_code', $item['product_code'])->first();
+                if (!$product) {
+                    throw new \Exception("Product {$item['product_code']} not found.");
+                }
+
+                OrderItemsModel::create([
+                    'order_id' => $id,
+                    'product_code' => $item['product_code'],
+                    'product_name' => $item['product_name'],
+                    'quantity' => $item['quantity'],
+                    'rate' => $item['rate'],
+                    'total' => $item['total'],
+                    'type' => strtolower($request->input('order_type')),
+                    'remarks' => $item['remarks'] ?? '',
+                ]);
             }
 
-            $product = ProductModel::where('product_code', $item['product_code'])->first();
-            if (!$product) {
-                return response()->json(['message' => "Product {$item['product_code']} not found."], 404);
+            if ($get_user->mobile != "+918961043773") {
+                $generate_order_invoice = new InvoiceController();
+                $generate_order_invoice->generateorderInvoice($id, true);
+                $generate_order_invoice->generatePackingSlip($id, true);
             }
 
-            // Default values
-            $rate = $item['rate'];
-            $total = $item['total'];
+            DB::commit();
 
-            // if ($get_user->mobile === "+918961043773") {
-            //     // 🔵 Check if this product already existed in the order
-            //     if ($existingItems->has($item['product_code'])) {
-            //         // Use previously stored rate
-            //         $rate = $existingItems[$item['product_code']]->rate;
-            //     } else {
-            //         // Get rate based on type and order pricing type (basic/gst)
-            //         if ($order->type == 'basic') {
-            //             $rate = match ($user_type->type ?? null) {
-            //                 'special' => $product->special_basic ?? 0,
-            //                 'outstation' => $product->outstation_basic ?? 0,
-            //                 'zeroprice' => 0,
-            //                 'guest' => $product->guest_price ?? 0,
-            //                 default => $product->basic ?? 0,
-            //             };
-            //         } else {
-            //             $rate = match ($user_type->type ?? null) {
-            //                 'special' => $product->special_gst ?? 0,
-            //                 'outstation' => $product->outstation_gst ?? 0,
-            //                 'zeroprice', 'guest' => 0,
-            //                 default => $product->gst ?? 0,
-            //             };
-            //         }
-            //     }
+            return response()->json([
+                'message' => 'Order updated successfully!',
+                'order' => $order,
+                'items' => $items
+            ], 200);
 
-            //     // Update total based on resolved rate
-            //     $total = $rate * $item['quantity'];
-            // }
-            
-            OrderItemsModel::create([
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Failed to edit order', [
                 'order_id' => $id,
-                'product_code' => $item['product_code'],
-                'product_name' => $item['product_name'],
-                'quantity' => $item['quantity'],
-                'rate' => $item['rate'],
-                'total' => $item['total'],
-                'type' => strtolower($request->input('order_type')),
-                'remarks' => $item['remarks'] ?? '',
+                'user_id' => $get_user->id ?? null,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
-        }
 
-        if ($get_user->mobile != "+918961043773") {
-            $generate_order_invoice = new InvoiceController();
-            $generate_order_invoice->generateorderInvoice($id, true);
-            $generate_order_invoice->generatePackingSlip($id, true);
+            return response()->json([
+                'message' => 'Failed to update order.',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        return response()->json([
-            'message' => 'Order updated successfully!',
-            'order' => $order,
-            'items' => $items
-        ], 200);
     }
+
 
     public function complete_order(Request $request, $id)
     {
