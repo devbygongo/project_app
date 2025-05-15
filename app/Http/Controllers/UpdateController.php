@@ -737,6 +737,12 @@ class UpdateController extends Controller
             $user_type = User::select('type')->where('id', $user_id)->first();
             $items = $request->input('items');
 
+            Log::error('Edit Order Data', [
+                'order_id' => $id,
+                'user_id' => $get_user->id ?? null,
+                'items' => $items
+            ]);
+
             foreach ($items as $item) {
                 if ($item['markedForDeletion'] ?? false) {
                     if (($item['removalReason'] ?? '') === 'Not in stock') {
@@ -763,11 +769,11 @@ class UpdateController extends Controller
                 ]);
             }
 
-            // if ($get_user->mobile != "+918961043773") {
+            if ($get_user->mobile != "+918961043773") {
                 $generate_order_invoice = new InvoiceController();
                 $generate_order_invoice->generateorderInvoice($id, true);
                 $generate_order_invoice->generatePackingSlip($id, true);
-            // }
+            }
 
             DB::commit();
 
