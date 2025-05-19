@@ -727,8 +727,8 @@ class UpdateController extends Controller
         DB::beginTransaction();
 
         try {
-            $order->amount = $request->input('amount');
-            $order->save();
+            // $order->amount = $request->input('amount');
+            // $order->save();
 
             $existingItems = OrderItemsModel::where('order_id', $id)->get()->keyBy('product_code');
             OrderItemsModel::where('order_id', $id)->delete();
@@ -736,6 +736,7 @@ class UpdateController extends Controller
             $user_id = $order->user_id;
             $user_type = User::select('type')->where('id', $user_id)->first();
             $items = $request->input('items');
+            $calculatedAmount = 0;
 
             Log::error('Edit Order Data', [
                 'order_id' => $id,
@@ -767,7 +768,13 @@ class UpdateController extends Controller
                     'type' => strtolower($request->input('order_type')),
                     'remarks' => $item['remarks'] ?? '',
                 ]);
+
+                $calculatedAmount += $item['total'];
             }
+
+            // Set order amount based on sum of item totals, not input
+            $order->amount = $calculatedAmount;
+            $order->save();
 
             // if ($get_user->mobile != "+918961043773") {
                 $generate_order_invoice = new InvoiceController();
