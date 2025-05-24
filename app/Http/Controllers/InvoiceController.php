@@ -432,7 +432,7 @@ class InvoiceController extends Controller
                                 'type' => 'document',
                                 'document' => [
                                     'link' =>  $fileUrlWithTimestamp, // Replace with the actual URL to the PDF document
-                                    'filename' => $sanitizedOrderId.'.pdf' // Optional: Set a custom file name for the PDF document
+                                    'filename' => $sanitizedUserId.'.pdf' // Optional: Set a custom file name for the PDF document
                                 ]
                             ]
                         ]
@@ -491,7 +491,7 @@ class InvoiceController extends Controller
                                 'type' => 'document',
                                 'document' => [
                                     'link' =>  $fileUrlWithTimestamp, // Replace with the actual URL to the PDF document
-                                    'filename' => $sanitizedOrderId.'.pdf' // Optional: Set a custom file name for the PDF document
+                                    'filename' => $sanitizedUserId.'.pdf' // Optional: Set a custom file name for the PDF document
                                 ]
                             ]
                         ]
