@@ -873,7 +873,8 @@ class ViewController extends Controller
             return $category->get_products_count > 0 ? [
                 'category_id' => $category->id,
                 'category_name' => $category_name,
-                'category_image' => $category->image,
+                // Wrap image path with url() helper
+                'category_image' => $category->image ? url($category->image) : null,
                 'products_count' => $category->get_products_count,
             ] : null;
         })->filter(); // Filter out null values
