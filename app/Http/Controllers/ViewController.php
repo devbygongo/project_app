@@ -146,6 +146,46 @@ class ViewController extends Controller
         }    
     }
 
+    public function lng_product_public($lang = 'eng')
+    {
+        $get_product_details = ProductModel::select('product_code', 'product_name', 'name_in_hindi', 'name_in_telugu', 'category', 'sub_category', 'product_image')
+            ->whereIn('type', ['MACHINE', 'ACCESSORIES'])
+            ->get();
+
+        $processed_prd_rec = $get_product_details->map(function ($prd_rec) use ($lang) {
+            $product_name = $prd_rec->product_name;
+
+            if ($lang === 'hin' && !empty($prd_rec->name_in_hindi)) {
+                $product_name = $prd_rec->name_in_hindi;
+            } elseif ($lang === 'tlg' && !empty($prd_rec->name_in_telugu)) {
+                $product_name = $prd_rec->name_in_telugu;
+            }
+
+            return [
+                'product_code' => $prd_rec->product_code,
+                'product_name' => $product_name,
+                'category' => $prd_rec->category,
+                'sub_category' => $prd_rec->sub_category,
+                'product_image' => $prd_rec->product_image,
+                // 'basic' => null,   // No pricing info for public API
+                // 'gst' => null,
+            ];
+        });
+
+        if ($get_product_details->isNotEmpty()) {
+            return response()->json([
+                'message' => 'Fetch data successfully!',
+                'data' => $processed_prd_rec,
+                'fetch_records' => count($processed_prd_rec)
+            ], 200);
+        } else {
+            return response()->json([
+                'message' => 'Failed to get data successfully!',
+            ], 404);
+        }
+    }
+
+
     public function get_product(Request $request)
     {
         // Retrieve offset and limit from the request with default values
@@ -805,6 +845,41 @@ class ViewController extends Controller
 				'count' => $formattedCategories->count(),
 			], 200);
 	}
+
+    public function lng_categories_public($lang = 'eng')
+    {
+        // Fetch all categories with their product count
+        $categories = CategoryModel::withCount('get_products')->get();
+
+        // Format and filter the categories data for a JSON response
+        $formattedCategories = $categories->map(function ($category) use ($lang) {
+            $category_name = $category->name;
+
+            // Set category name based on language
+            if ($lang === 'hin' && !empty($category->name_in_hindi)) {
+                $category_name = $category->name_in_hindi;
+            } elseif ($lang === 'tlg' && !empty($category->name_in_telugu)) {
+                $category_name = $category->name_in_telugu;
+            }
+
+            // Return category details if products count > 0, otherwise return null
+            return $category->get_products_count > 0 ? [
+                'category_id' => $category->id,
+                'category_name' => $category_name,
+                'category_image' => $category->image,
+                'products_count' => $category->get_products_count,
+            ] : null;
+        })->filter(); // Filter out null values
+
+        // Check if the filtered categories are empty and return response
+        return $formattedCategories->isEmpty()
+            ? response()->json(['message' => 'No categories with products found!'], 404)
+            : response()->json([
+                'message' => 'Fetch data successfully!',
+                'data' => $formattedCategories->values(), // Re-index filtered array
+                'count' => $formattedCategories->count(),
+            ], 200);
+    }
 
     public function user($lang = 'eng')
     {

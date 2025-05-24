@@ -27,6 +27,9 @@ use App\Http\Middleware\GetUserRole;
 // Route::get('/user', function (Request $request) {
     //     return $request->user();
     // })->middleware('auth:sanctum');
+
+ Route::get('/public_view_product/{lang?}', [ViewController::class, 'lng_product_public']);
+ Route::get('/public_view_category/{lang?}', [ViewController::class, 'lng_categories_public']);
     
 Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin'])->group(function () {
     
