@@ -360,7 +360,7 @@ class InvoiceController extends Controller
         }
 
         $sanitizedUserName = preg_replace('/[^A-Za-z0-9]+/', '-', trim($user->name));
-        $sanitizedOrderId = trim($sanitizedUserName, '-');
+        $sanitizedUserId = trim($sanitizedUserName, '-');
 
 		//die($sanitizedOrderId);
 		
@@ -394,7 +394,7 @@ class InvoiceController extends Controller
 
 		// Output the PDF
 		$publicPath = 'uploads/packing_slip/';
-		$fileName = 'ps_' . $sanitizedOrderId . '.pdf';
+		$fileName = 'ps_' . $sanitizedUserId . '.pdf';
 		$filePath = storage_path('app/public/' . $publicPath . $fileName);
 
         // Check if the file already exists and delete it
