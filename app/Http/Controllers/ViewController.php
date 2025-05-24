@@ -148,9 +148,17 @@ class ViewController extends Controller
 
     public function lng_product_public($lang = 'eng')
     {
-        $get_product_details = ProductModel::select('product_code', 'product_name', 'name_in_hindi', 'name_in_telugu', 'category', 'sub_category', 'product_image')
-            ->whereIn('type', ['MACHINE', 'ACCESSORIES'])
-            ->get();
+        $get_product_details = ProductModel::select(
+            'product_code',
+            'product_name',
+            'name_in_hindi',
+            'name_in_telugu',
+            'category',
+            'sub_category',
+            'product_image'
+        )
+        ->whereIn('type', ['MACHINE', 'ACCESSORIES'])
+        ->get();
 
         $processed_prd_rec = $get_product_details->map(function ($prd_rec) use ($lang) {
             $product_name = $prd_rec->product_name;
@@ -166,9 +174,8 @@ class ViewController extends Controller
                 'product_name' => $product_name,
                 'category' => $prd_rec->category,
                 'sub_category' => $prd_rec->sub_category,
-                'product_image' => $prd_rec->product_image,
-                // 'basic' => null,   // No pricing info for public API
-                // 'gst' => null,
+                // Wrap image path with url() to get full URL
+                'product_image' => $prd_rec->product_image ? url($prd_rec->product_image) : null,
             ];
         });
 
