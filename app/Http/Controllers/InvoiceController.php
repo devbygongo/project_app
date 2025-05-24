@@ -359,8 +359,8 @@ class InvoiceController extends Controller
             return response()->json(['error' => 'Sorry, required data are not available!'], 500);
         }
 
-        $sanitizedOrderId = preg_replace('/[^A-Za-z0-9]+/', '-', trim($order->order_id));
-        $sanitizedOrderId = trim($sanitizedOrderId, '-');
+        $sanitizedUserName = preg_replace('/[^A-Za-z0-9]+/', '-', trim($user->name));
+        $sanitizedOrderId = trim($sanitizedUserName, '-');
 
 		//die($sanitizedOrderId);
 		
@@ -394,7 +394,7 @@ class InvoiceController extends Controller
 
 		// Output the PDF
 		$publicPath = 'uploads/packing_slip/';
-		$fileName = 'packing_slip_' . $sanitizedOrderId . '.pdf';
+		$fileName = 'ps_' . $sanitizedOrderId . '.pdf';
 		$filePath = storage_path('app/public/' . $publicPath . $fileName);
 
         // Check if the file already exists and delete it
