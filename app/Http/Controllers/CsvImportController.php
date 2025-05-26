@@ -18,7 +18,7 @@ class CsvImportController extends Controller
     public function importProduct()
     {
         // URL of the CSV file from Google Sheets
-        $get_product_csv_url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQaU_DTPcjgHGqqE_THQNQuisDEsIXH2PJwGaNOGd5ND5F7mVXpgS5KJ7lv4pgRyb9vUtGk_GTPSTDo/pub?gid=559891556&single=true&output=csv';
+        $get_product_csv_url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQaU_DTPcjgHGqqE_THQNQuisDEsIXH2PJwGaNOGd5ND5F7mVXpgS5KJ7lv4pgRyb9vUtGk_GTPSTDo/pub?gid=1797389278&single=true&output=csv';
 
         // Fetch the CSV content using file_get_contents
         $csvContent_product = file_get_contents($get_product_csv_url);
@@ -164,7 +164,7 @@ class CsvImportController extends Controller
     public function importUser()
     {
         // URL of the CSV file from Google Sheets
-        $get_product_user_url = 'https://docs.google.com/spreadsheets/d/1oF0yBLb2GjMhBep8ZpmmTYjJoW8d6AcajGDATEvqZaU/pub?gid=1797389278&single=true&output=csv';
+        $get_product_user_url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQaU_DTPcjgHGqqE_THQNQuisDEsIXH2PJwGaNOGd5ND5F7mVXpgS5KJ7lv4pgRyb9vUtGk_GTPSTDo/pub?gid=1797389278&single=true&output=csv';
 
         // Fetch the CSV content using file_get_contents
         $csvContent_user = file_get_contents($get_product_user_url);
@@ -220,25 +220,26 @@ class CsvImportController extends Controller
             else 
             {
                 // If user does not exist, create a new one
-                $get_insert_response = User::create([
-                    'mobile' => $mobile,
-                    'name' => $record_user['Name'],
-                    'email' => $email_user,
-                    'password' => bcrypt($mobile),
-                    'name_in_hindi' => $record_user['Hindi'],
-                    'name_in_telugu' => $record_user['Telegu'],
-                    'address_line_1' => $record_user['Address Line 1'],
-                    'address_line_2' => $record_user['Address Line 2'],
-                    'is_verified' => '1',
-                    'address_line_1' => $record_user['Address Line 1'],
-                    'address_line_2' => $record_user['Address Line 2'],
-                    'city' => $record_user['City'],
-                    'pincode' => $pincode_user,// Ensure this is a valid number
-                    'gstin' => $record_user['GSTIN'],
-                    'state' => $record_user['State'],
-                    'country' => $record_user['Country'],
-                    'type' => $markup_user, // Ensure this is a valid number
-                ]);
+                if (!empty($record_user['Name'])) {
+                    $get_insert_response = User::create([
+                        'mobile' => $mobile,
+                        'name' => $record_user['Name'],
+                        'email' => $email_user,
+                        'password' => bcrypt($mobile),
+                        'name_in_hindi' => $record_user['Hindi'],
+                        'name_in_telugu' => $record_user['Telegu'],
+                        'address_line_1' => $record_user['Address Line 1'],
+                        'address_line_2' => $record_user['Address Line 2'],
+                        'is_verified' => '1',
+                        'city' => $record_user['City'],
+                        'pincode' => $pincode_user, // Ensure this is a valid number
+                        'gstin' => $record_user['GSTIN'],
+                        'state' => $record_user['State'],
+                        'country' => $record_user['Country'],
+                        'type' => $markup_user, // Ensure this is a valid number
+                    ]);
+                }
+                
             }
         }   
 
