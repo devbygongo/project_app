@@ -18,7 +18,7 @@ class CsvImportController extends Controller
     public function importProduct()
     {
         // URL of the CSV file from Google Sheets
-        $get_product_csv_url = 'https://docs.google.com/spreadsheets/d/1oF0yBLb2GjMhBep8ZpmmTYjJoW8d6AcajGDATEvqZaU/pub?gid=0&single=true&output=csv';
+        $get_product_csv_url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQaU_DTPcjgHGqqE_THQNQuisDEsIXH2PJwGaNOGd5ND5F7mVXpgS5KJ7lv4pgRyb9vUtGk_GTPSTDo/pub?gid=559891556&single=true&output=csv';
 
         // Fetch the CSV content using file_get_contents
         $csvContent_product = file_get_contents($get_product_csv_url);
