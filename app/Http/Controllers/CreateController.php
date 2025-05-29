@@ -462,7 +462,7 @@ class CreateController extends Controller
                     foreach ($data as &$order) {
                         // Unset unwanted fields
     
-                        $order->pdf = $generate_order_zp->generateorderInvoiceZP($create_order->id);
+                        $order->pdf = $generate_order_zp->new_generateorderInvoiceZP($create_order->id);
                         unset($order->updated_at, $order->created_at, $order->id);
     
                     }
@@ -845,10 +845,10 @@ class CreateController extends Controller
         dispatch(function () use ($invoice_queue, $hardcodedMobile) {
             foreach ($invoice_queue as $item) {
                 if ($item['type'] === 'zeroprice') {
-                    $pdf = (new InvoiceControllerZP())->generateorderInvoiceZP($item['order_table_id']);
+                    $pdf = (new InvoiceControllerZP())->new_generateorderInvoice($item['order_table_id']);
                     sendInvoiceToWhatsApp($hardcodedMobile, $pdf, $item['order_table_id']);
                 } else {
-                    $pdf = (new InvoiceController())->generateorderInvoice($item['order_table_id']);
+                    $pdf = (new InvoiceController())->new_generateorderInvoice($item['order_table_id']);
                     // Optionally also generate packing slip:
                     $packing_slip = (new InvoiceController())->generatePackingSlip($item['order_table_id']);
                     sendInvoiceToWhatsApp($hardcodedMobile, $pdf, $item['order_table_id']);
