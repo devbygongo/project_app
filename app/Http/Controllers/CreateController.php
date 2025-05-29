@@ -842,17 +842,37 @@ class CreateController extends Controller
         $hardcodedMobile = '+918777623806'; // <-- update this number
 
         // Generate invoice and send to WhatsApp in background
+        // dispatch(function () use ($invoice_queue, $hardcodedMobile) {
+        //     foreach ($invoice_queue as $item) {
+        //         if ($item['type'] === 'zeroprice') {
+        //             $pdf = (new InvoiceControllerZP())->new_generateorderInvoice($item['order_table_id']);
+        //             // sendInvoiceToWhatsApp($hardcodedMobile, $pdf, $item['order_table_id']);
+        //             $whatsAppUtility = new \App\Utilities\sendWhatsAppUtility();
+        //             $whatsAppUtility->sendWhatsApp($hardcodedMobile, $pdf, $item['order_table_id']);
+        //         } else {
+        //             $pdf = (new InvoiceController())->new_generateorderInvoice($item['order_table_id']);
+        //             // Optionally also generate packing slip:
+        //             $packing_slip = (new InvoiceController())->new_generatePackingSlip($item['order_table_id']);
+        //             // sendInvoiceToWhatsApp($hardcodedMobile, $pdf, $item['order_table_id']);
+        //             $whatsAppUtility = new \App\Utilities\sendWhatsAppUtility();
+        //             $whatsAppUtility->sendWhatsApp($hardcodedMobile, $pdf, $item['order_table_id']);
+        //             // Optionally send packing slip too
+        //         }
+        //     }
+        // })->afterResponse();
+
         dispatch(function () use ($invoice_queue, $hardcodedMobile) {
             foreach ($invoice_queue as $item) {
                 if ($item['type'] === 'zeroprice') {
-                    $pdf = (new InvoiceControllerZP())->new_generateorderInvoice($item['order_table_id']);
-                    sendInvoiceToWhatsApp($hardcodedMobile, $pdf, $item['order_table_id']);
+                    $pdf = (new \App\Http\Controllers\InvoiceControllerZP())->new_generateorderInvoice($item['order_table_id']);
+                    // Call WhatsApp Utility here with your parameters
+                    \App\Utils\sendWhatsAppUtility::sendWhatsApp($hardcodedMobile, $pdf, $item['order_table_id'], 'zeroprice_order'); // <-- update $pdf/$params as needed
                 } else {
-                    $pdf = (new InvoiceController())->new_generateorderInvoice($item['order_table_id']);
-                    // Optionally also generate packing slip:
-                    $packing_slip = (new InvoiceController())->new_generatePackingSlip($item['order_table_id']);
-                    sendInvoiceToWhatsApp($hardcodedMobile, $pdf, $item['order_table_id']);
-                    // Optionally send packing slip too
+                    $pdf = (new \App\Http\Controllers\InvoiceController())->new_generateorderInvoice($item['order_table_id']);
+                    // Optionally generate packing slip (as you do)
+                    $packing_slip = (new \App\Http\Controllers\InvoiceController())->new_generatePackingSlip($item['order_table_id']);
+                    // Call WhatsApp Utility
+                    \App\Utils\sendWhatsAppUtility::sendWhatsApp($hardcodedMobile, $pdf, $item['order_table_id'], 'normal_order');
                 }
             }
         })->afterResponse();
@@ -871,10 +891,10 @@ class CreateController extends Controller
     }
 
     // Helper function (update this with your WhatsApp logic)
-    function sendInvoiceToWhatsApp($mobile, $pdf, $orderId) {
-        // Implement your actual WhatsApp sending logic here
-        \Log::info("Invoice for order {$orderId} sent to WhatsApp: {$mobile} (PDF: {$pdf})");
-    }
+    // function sendInvoiceToWhatsApp($mobile, $pdf, $orderId) {
+    //     // Implement your actual WhatsApp sending logic here
+    //     \Log::info("Invoice for order {$orderId} sent to WhatsApp: {$mobile} (PDF: {$pdf})");
+    // }
     //
 
     public function orders_items(Request $request)
