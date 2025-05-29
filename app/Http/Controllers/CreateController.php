@@ -44,30 +44,30 @@ class CreateController extends Controller
     public function user(Request $request)
     {
         $request->validate([
-            'email' => 'required|unique:users,email',
+            // 'email' => 'required|unique:users,email',
             'mobile' => ['required', 'string', 'size:13', 'unique:users'],
             'name' => 'required',
             'password' => 'required',
-            'role' => 'required',
+            // 'role' => 'required',
             // 'category_discount' => 'required',
-            'address_line_1' => 'required',
-            'city' => 'required',
-            'pincode' => 'required',
+            // 'address_line_1' => 'required',
+            // 'city' => 'required',
+            // 'pincode' => 'required',
         ]);
         
         $create_user = User::create([
             'name' => $request->input('name'),
             'password' => bcrypt($request->input('password')),
-            'email' => strtolower($request->input('email')),
+            'email' => strtolower($request->input('email')) ?? null,
             'mobile' => $request->input('mobile'),
             'role' => 'user',
-            'address_line_1' => $request->input('address_line_1'),
-            'address_line_2' => $request->input('address_line_2'),
-            'city' => $request->input('city'),
-            'pincode' => $request->input('pincode'),
-            'gstin' => $request->input('gstin'),
-            'state' => $request->input('state'),
-            'country' => $request->input('country'),
+            'address_line_1' => $request->input('address_line_1') ?? null,
+            'address_line_2' => $request->input('address_line_2') ?? null,
+            'city' => $request->input('city') ?? null,
+            'pincode' => $request->input('pincode') ?? null,
+            'gstin' => $request->input('gstin') ?? null,
+            'state' => $request->input('state') ?? null,
+            'country' => $request->input('country') ?? null,
             // 'category_discount' => $request->input('category_discount'),
         ]);
 
