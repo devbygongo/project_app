@@ -413,10 +413,10 @@ class InvoiceController extends Controller
                 $htmlChunk = view('order_invoice_template_items', compact('item', 'index'))->render();
                 $mpdf->WriteHTML($htmlChunk);
             }
-            if (ob_get_level() > 0) {
-                ob_flush();
-                flush();
-            }
+            // if (ob_get_level() > 0) {
+            //     ob_flush();
+            //     flush();
+            // }
         }
 
 		// Render the footer
