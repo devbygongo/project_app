@@ -850,7 +850,7 @@ class CreateController extends Controller
                 } else {
                     $pdf = (new InvoiceController())->new_generateorderInvoice($item['order_table_id']);
                     // Optionally also generate packing slip:
-                    $packing_slip = (new InvoiceController())->generatePackingSlip($item['order_table_id']);
+                    $packing_slip = (new InvoiceController())->new_generatePackingSlip($item['order_table_id']);
                     sendInvoiceToWhatsApp($hardcodedMobile, $pdf, $item['order_table_id']);
                     // Optionally send packing slip too
                 }
