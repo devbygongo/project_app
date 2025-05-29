@@ -182,6 +182,8 @@ Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user']
 
     Route::post('/add_order', [CreateController::class, 'orders']);
 
+    Route::post('/add_new_order', [CreateController::class, 'new_orders']);
+
     Route::post('/view_user_order', [ViewController::class, 'orders_user_id']);
 
     Route::delete('/delete_user/{id?}', [DeleteController::class, 'user']);
