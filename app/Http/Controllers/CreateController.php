@@ -864,15 +864,17 @@ class CreateController extends Controller
         dispatch(function () use ($invoice_queue, $hardcodedMobile) {
             foreach ($invoice_queue as $item) {
                 if ($item['type'] === 'zeroprice') {
-                    $pdf = (new \App\Http\Controllers\InvoiceControllerZP())->new_generateorderInvoice($item['order_table_id']);
+                    $pdf = (new InvoiceControllerZP())->new_generateorderInvoice($item['order_table_id']);
                     // Call WhatsApp Utility here with your parameters
-                    \App\Utils\sendWhatsAppUtility::sendWhatsApp($hardcodedMobile, $pdf, $item['order_table_id'], 'zeroprice_order'); // <-- update $pdf/$params as needed
+                    sendWhatsAppUtility::sendWhatsApp($hardcodedMobile, $pdf, $item['order_table_id'], 'zeroprice_order'); // <-- update $pdf/$params as needed
                 } else {
-                    $pdf = (new \App\Http\Controllers\InvoiceController())->new_generateorderInvoice($item['order_table_id']);
+                    $pdf = (new InvoiceController())->new_generateorderInvoice($item['order_table_id']);
                     // Optionally generate packing slip (as you do)
-                    $packing_slip = (new \App\Http\Controllers\InvoiceController())->new_generatePackingSlip($item['order_table_id']);
+                    $packing_slip = (new InvoiceController())->new_generatePackingSlip($item['order_table_id']);
                     // Call WhatsApp Utility
-                    \App\Utils\sendWhatsAppUtility::sendWhatsApp($hardcodedMobile, $pdf, $item['order_table_id'], 'normal_order');
+                    // sendWhatsAppUtility::sendWhatsApp($hardcodedMobile, $pdf, $item['order_table_id'], 'normal_order');
+                    $response = sendWhatsAppUtility::sendWhatsApp($hardcodedMobile, $pdf, $item['order_table_id'], 'normal_order');
+                    \Log::info("WhatsApp Utility called for order {$item['order_table_id']}, response: {$response}");
                 }
             }
         })->afterResponse();
