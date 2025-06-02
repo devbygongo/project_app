@@ -178,7 +178,7 @@ class InvoiceController extends Controller
                 if($mobileNumber != '+919951263652')
                 {
                     // Send message for each number
-                    //$response = $whatsAppUtility->sendWhatsApp($mobileNumber, $templateParams, '', 'Admin Order Invoice');
+                    $response = $whatsAppUtility->sendWhatsApp($mobileNumber, $templateParams, '', 'Admin Order Invoice');
 
                     // Check if the response has an error or was successful
                     if (isset($responseArray['error'])) 
@@ -227,7 +227,7 @@ class InvoiceController extends Controller
                 ],
             ];
 
-            //$response = $whatsAppUtility->sendWhatsApp($user->mobile, $templateParams, '', 'User Order Invoice');
+            $response = $whatsAppUtility->sendWhatsApp($user->mobile, $templateParams, '', 'User Order Invoice');
         }else{
             $fileUrlWithTimestamp = $fileUrl . '?t=' . time();
             $templateParams = [
