@@ -122,6 +122,7 @@ class CsvImportController extends Controller
                     'product_image' => $productImagePath,
                     'extra_images' => $extraImagesCsv, // Set the extra images
                     'video_link' => $record_csv['YouTube Link'],
+                    'size' => $record_csv['Sizes'],
                 ]);
             } 
             else 
@@ -150,6 +151,7 @@ class CsvImportController extends Controller
                     'yet_to_launch' => $record_csv['Yet to Launch'] === 'TRUE' ? 1 : 0,
                     // 'product_image' => null, // Set this if you have the image URL or path
                     'product_image' => $productImagePath,
+                    'size' => $record_csv['Sizes'],
                 ]);
             }
         }   
