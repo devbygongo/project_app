@@ -19,6 +19,7 @@ class CartModel extends Model
         'rate',
         'quantity',
         'amount',
+        'size',
         'type',
         'remarks',
     ];
