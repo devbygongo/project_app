@@ -398,6 +398,7 @@ class UpdateController extends Controller
                 'quantity' => 'required',
                 // 'amount' => 'required',
                 'type' => 'required',
+                'size'=>'required',
             ]);
     
             $update_cart = CartModel::where('id', $id)
@@ -409,9 +410,8 @@ class UpdateController extends Controller
                 'amount' => ($request->input('rate')) * ($request->input('quantity')),
                 'type' => $request->input('type'),
                 'remarks' => $request->input('remarks'),
+                'size' => $request->input('size'),
             ]);
-
-
         }
         else {
             $request->validate([
@@ -421,6 +421,7 @@ class UpdateController extends Controller
                 'quantity' => 'required',
                 // 'amount' => 'required',
                 'type' => 'required',
+                'size'=>'required',
             ]);
     
                 $update_cart = CartModel::where('id', $id)
@@ -430,6 +431,7 @@ class UpdateController extends Controller
                     'quantity' => $request->input('quantity'),
                     'type' => $request->input('type'),
                     'remarks' => $request->input('remarks'),
+                    'size' => $request->input('size'),
                 ]);
         }
 

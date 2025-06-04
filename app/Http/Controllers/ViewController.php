@@ -1205,8 +1205,7 @@ class ViewController extends Controller
                     't_cart.amount',
                     't_cart.type',
                     't_cart.remarks',
-                    't_cart.created_at',
-                    't_cart.updated_at',
+                    't_cart.size',
                     't_products.product_image',
                     $basic_column,
                     $gst_column
@@ -1246,8 +1245,7 @@ class ViewController extends Controller
                     't_cart.amount',
                     't_cart.type',
                     't_cart.remarks',
-                    't_cart.created_at',
-                    't_cart.updated_at',
+                    't_cart.size',
                     't_products.product_image',
                     $basic_column,
                     $gst_column

@@ -329,6 +329,7 @@ class CreateController extends Controller
             'product_image'=> 'required',
             'basic'=>'required',
             'gst'=>'required',
+            'size'=>'required',
             // 'mark_up'=>'required',
         ]);
 
@@ -342,7 +343,7 @@ class CreateController extends Controller
             $get_file_name = $filename;
 
 
-            $create_order = ProductModel::create([
+            $create_product = ProductModel::create([
                 // 'sku' => $request->input('sku'),
                 'product_code' => $request->input('product_code'),
                 'product_name' => $request->input('product_name'),
@@ -351,15 +352,16 @@ class CreateController extends Controller
                 'product_image' => $fileUrl,
                 'basic' => $request->input('basic'),
                 'gst' => $request->input('gst'),
+                'size' => $request->input('size'),
                 // 'mark_up' => $request->input('mark_up'),
             ]);
         }
 
 
-        if (isset($create_order)) {
+        if (isset($create_product)) {
             return response()->json([
-                'message' => 'Customer created successfully!',
-                'data' => $create_order
+                'message' => 'Product created successfully!',
+                'data' => $create_product
             ], 201);
         }
 
@@ -394,7 +396,7 @@ class CreateController extends Controller
         if($user_type == 'zeroprice')
         {
 
-            $get_product = CartModel::select('amount', 'quantity', 'product_code', 'product_name', 'rate', 'type', 'remarks')
+            $get_product = CartModel::select('amount', 'quantity', 'product_code', 'product_name', 'rate', 'type', 'remarks', 'size')
                                         ->where('user_id', $userId)
                                         ->get();
 
@@ -434,6 +436,7 @@ class CreateController extends Controller
                             'total' => $product->rate * $product->quantity,
                             'type' => $product->type,
                             'remarks' => $product->remarks,
+                            'size' => $product->size,
                         ]);
                     }
                 }
@@ -956,6 +959,7 @@ class CreateController extends Controller
                 'rate' => 'required',
                 'quantity' => 'required',
                 'type' => 'required',
+                'size'=>'required',
             ]);
         }
 
@@ -976,6 +980,7 @@ class CreateController extends Controller
 					'amount' => ($request->input('rate')) * ($request->input('quantity')),
 					'type' => $request->input('type'),
 					'remarks' => $request->input('remarks'),
+                    'size' => $request->input('size'),
 				]
 			);
 
