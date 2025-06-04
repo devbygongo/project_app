@@ -937,6 +937,7 @@ class ViewController extends Controller
                 'app_status' => $record->app_status,
                 'verified' => $record->is_verified,
                 'last_viewed' => $record->app_status == 1 ? $last_viewed : '',
+                'purchase_lock' => $record->purchase_lock,
             ];
         });
     
