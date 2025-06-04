@@ -1110,6 +1110,29 @@ class ViewController extends Controller
         }    
     }
 
+    public function getPendingOrders()
+    {
+        try {
+            // Attempt to fetch orders where the status is 'pending' and load the related user information
+            $pendingOrders = OrderModel::where('status', 'pending')
+                ->with('user:id,name', 'order_items') // Eager load the 'user' and 'order_items' relationships
+                ->get();
+
+            // Return the response with the orders and their respective user names
+            return response()->json([
+                'success' => true,
+                'data' => $pendingOrders
+            ]);
+        } catch (Exception $e) {
+            // If an error occurs, catch the exception and return an error response
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while fetching pending orders.',
+                'error' => $e->getMessage()
+            ], 500); // HTTP 500 for internal server error
+        }
+    }
+
     public function cart()
     {
         // Retrieve all records with their associated user and product data
