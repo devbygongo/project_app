@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('category')->nullable();
             $table->string('sub_category')->nullable();
             $table->string('type');
+            $table->string('size')->nullable();
             $table->string('machine_part_no');
             $table->longText('product_image')->nullable();
             $table->string('video_link', 100)->nullable();

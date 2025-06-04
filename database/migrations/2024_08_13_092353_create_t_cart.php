@@ -20,6 +20,8 @@ return new class extends Migration
             $table->float('rate');
             $table->integer('quantity');
             $table->float('amount');
+            $table->string('size')->nullable();
+            $table->longText('remarks');
             $table->enum('type', ['basic', 'gst']);
             $table->timestamps();
         });

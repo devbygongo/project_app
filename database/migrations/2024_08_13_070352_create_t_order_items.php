@@ -23,6 +23,7 @@ return new class extends Migration
             $table->float('quantity');
             // $table->float('line_total');
             $table->float('total');
+            $table->string('size')->nullable();
             $table->enum('type', ['basic', 'gst']);
             $table->timestamps();
         });
