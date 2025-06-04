@@ -215,7 +215,7 @@ class CsvImportController extends Controller
                     'state' => $record_user['State'],
                     'country' => $record_user['Country'],
                     'type' => $markup_user, // Ensure this is a valid number
-                    'purchase_lock' => isset($record_user['Purchase Limit']) ? $record_user['Purchase Limit'] : '0',  // Default to '0' if blank,
+                    'purchase_lock' => $record_user['Purchase Limit'],  // Default to '0' if blank,
                 ]);
             } 
             else 
