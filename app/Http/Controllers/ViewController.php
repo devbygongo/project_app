@@ -891,7 +891,7 @@ class ViewController extends Controller
 
     public function user($lang = 'eng')
     {
-        $get_user_details = User::select('id', 'name', 'name_in_hindi', 'name_in_telugu', 'email', 'mobile', 'role', 'address_line_1', 'address_line_2', 'city', 'pincode', 'gstin', 'state', 'country', 'is_verified', 'type', 'app_status', 'purchase_lock')
+        $get_user_details = User::select('id', 'name', 'name_in_hindi', 'name_in_telugu', 'email', 'mobile', 'role', 'address_line_1', 'address_line_2', 'city', 'pincode', 'gstin', 'state', 'country', 'is_verified', 'type', 'app_status', 'purchase_lock', 'purchase_limit')
                                 ->where('role', 'user')->orderBy('name', 'asc')
                                 ->get();
     
@@ -938,6 +938,7 @@ class ViewController extends Controller
                 'verified' => $record->is_verified,
                 'last_viewed' => $record->app_status == 1 ? $last_viewed : '',
                 'purchase_lock' => $record->purchase_lock,
+                'purchase_limit' => $record->purchase_limit,
             ];
         });
     
