@@ -562,7 +562,7 @@ class UpdateController extends Controller
             }    
     }
 
-    public function updatePurchaseLock(Request $request, $id)
+    public function updatePurchaseLock(Request $request)
     {
         // Validate input
         $validated = $request->validate([
