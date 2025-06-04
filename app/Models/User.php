@@ -40,6 +40,8 @@ class User extends Authenticatable
         'country',
         'type',
         'app_status',
+        'purchase_lock',
+        'purchase_limit',
         // 'category_discount',
     ];
 
