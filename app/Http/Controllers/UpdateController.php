@@ -562,6 +562,40 @@ class UpdateController extends Controller
             }    
     }
 
+    public function updatePurchaseLock(Request $request, $id)
+    {
+        // Validate input
+        $validated = $request->validate([
+            'purchase_lock' => 'required|in:0,1',  // Ensure purchase_lock is either 0 or 1
+            'user_id' => 'required|exists:users,id', // Ensure user_id exists in the users table
+        ]);
+
+        try {
+            // Find the user by ID
+            $user = User::findOrFail($id);
+
+            // Update the purchase_lock value
+            $user->purchase_lock = $validated['purchase_lock'];
+
+            // Save the changes
+            $user->save();
+
+            // Return a success response
+            return response()->json([
+                'success' => true,
+                'message' => 'Purchase lock status updated successfully.',
+                'data' => $user
+            ]);
+        } catch (\Exception $e) {
+            // Return an error response if anything goes wrong
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while updating the purchase lock status.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     // public function edit_order(Request $request, $id)
     // {
     //     $get_user = Auth::User();
