@@ -572,7 +572,7 @@ class UpdateController extends Controller
 
         try {
             // Find the user by ID
-            $user = User::findOrFail($id);
+            $user = User::findOrFail($request->input('user_id'));
 
             // Update the purchase_lock value
             $user->purchase_lock = $validated['purchase_lock'];
