@@ -398,7 +398,6 @@ class UpdateController extends Controller
                 'quantity' => 'required',
                 // 'amount' => 'required',
                 'type' => 'required',
-                'size'=>'required',
             ]);
     
             $update_cart = CartModel::where('id', $id)
