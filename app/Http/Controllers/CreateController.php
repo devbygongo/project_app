@@ -959,7 +959,6 @@ class CreateController extends Controller
                 'rate' => 'required',
                 'quantity' => 'required',
                 'type' => 'required',
-                'size'=>'required',
             ]);
         }
 
