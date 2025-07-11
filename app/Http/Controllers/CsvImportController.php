@@ -311,7 +311,6 @@ class CsvImportController extends Controller
                     'name_in_telugu' => $record_csv['name_in_telugu'],
                     'order_by'       => $index,
                 ]);
-                $get_update_response = true;
             } 
             else 
             {
@@ -323,7 +322,6 @@ class CsvImportController extends Controller
                     'name_in_telugu' => $record_csv['name_in_telugu'],
                     'order_by'       => $index,
                 ]);
-                $get_insert_response = true;
             }
             $index++;
         }   
