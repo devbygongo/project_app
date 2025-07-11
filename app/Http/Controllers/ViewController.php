@@ -821,7 +821,7 @@ class ViewController extends Controller
     public function lng_categories($lang = 'eng')
 	{
 		// Fetch all categories with their product count
-		$categories = CategoryModel::withCount('get_products')->get();
+		$categories = CategoryModel::withCount('get_products')->orderBy('order_by')->get();
 
 		// Format and filter the categories data for a JSON response
 		$formattedCategories = $categories->map(function ($category) use ($lang) {
@@ -840,6 +840,7 @@ class ViewController extends Controller
 				'category_name' => $category_name,
 				'category_image' => $category->image,
 				'products_count' => $category->get_products_count,
+                'order_by'       => $category->order_by,
 			] : null;
 		})->filter(); // Filter out null values
 
