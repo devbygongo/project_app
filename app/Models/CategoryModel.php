@@ -14,6 +14,9 @@ class CategoryModel extends Model
     protected $fillable = [
         'name',
         'image',
+        'name_in_hindi',
+        'name_in_telugu',
+        'order_by'
     ];
 
     // Define the relationship: A category has many products, joined by the 'name' column

@@ -274,6 +274,8 @@ class CsvImportController extends Controller
         $get_insert_response = null;
         $get_update_response = null;
 
+        $index = 1; // Start from 1
+
         // Iterate through each record and create or update the product
         foreach ($records_csv as $record_csv) {
 
@@ -303,22 +305,27 @@ class CsvImportController extends Controller
             {
                 // If category exists, update it
                 $get_update_response = $category_csv->update([
-                    'name' => $record_csv['name'],
-                    'image' => $category_image,
-                    'name_in_hindi' => $record_csv['name_in_hindi'],
+                    'name'           => $record_csv['name'],
+                    'image'          => $category_image,
+                    'name_in_hindi'  => $record_csv['name_in_hindi'],
                     'name_in_telugu' => $record_csv['name_in_telugu'],
+                    'order_by'       => $index,
                 ]);
+                $get_update_response = true;
             } 
             else 
             {
                 // If user does not exist, create a new one
                 $get_insert_response = categoryModel::create([
-                    'name' => $record_csv['name'],
-                    'image' => $category_image,
-                    'name_in_hindi' => $record_csv['name_in_hindi'],
+                    'name'           => $record_csv['name'],
+                    'image'          => $category_image,
+                    'name_in_hindi'  => $record_csv['name_in_hindi'],
                     'name_in_telugu' => $record_csv['name_in_telugu'],
+                    'order_by'       => $index,
                 ]);
+                $get_insert_response = true;
             }
+            $index++;
         }   
 
         if ($get_update_response == 1 || isset($get_insert_response)) {
