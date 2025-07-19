@@ -11,6 +11,7 @@ class ProductModel extends Model
     protected $table = "t_products";
     protected $fillable = [
         // 'sku',
+        'order_by',
         'product_code',
         'product_name',
         'product_image',

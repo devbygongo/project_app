@@ -34,6 +34,8 @@ class CsvImportController extends Controller
         $product_insert_response = null;
         $product_update_response = null;
 
+        $index = 1; // Start from 1
+
         // Iterate through each record and create or update the product
         foreach ($records_csv as $record_csv) {
 
@@ -123,6 +125,7 @@ class CsvImportController extends Controller
                     'extra_images' => $extraImagesCsv, // Set the extra images
                     'video_link' => $record_csv['YouTube Link'],
                     'size' => $record_csv['Sizes'],
+                    'order_by'       => $index,
                 ]);
             } 
             else 
@@ -152,7 +155,9 @@ class CsvImportController extends Controller
                     // 'product_image' => null, // Set this if you have the image URL or path
                     'product_image' => $productImagePath,
                     'size' => $record_csv['Sizes'],
+                    'order_by'       => $index,
                 ]);
+                $index++;
             }
         }   
         if ($product_update_response == 1 || isset($product_insert_response)) {
