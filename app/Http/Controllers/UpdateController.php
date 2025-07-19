@@ -744,6 +744,7 @@ class UpdateController extends Controller
             'items.*.remarks' => 'nullable|string',
             'items.*.markedForDeletion' => 'nullable|boolean',
             'items.*.removalReason' => 'nullable|string',
+            'cancel_order_id' => 'nullable|string',
         ]);
 
         $order = OrderModel::find($id);
@@ -758,11 +759,42 @@ class UpdateController extends Controller
             ], 403);
         }
 
+        // $cancelOrderIds = array_filter(explode(',', $request->input('cancel_order_id')));
+        $cancelOrderIds = array_filter(array_map('trim', explode(',', $request->input('cancel_order_id'))));
+
+        // if (!empty($cancelOrderIds)) {
+        //     // Cancel all mentioned order IDs
+        //     foreach ($cancelOrderIds as $cancelId) {
+        //         $cancelId = trim($cancelId);
+        //         if (!empty($cancelId)) {
+        //             $cancelOrder = OrderModel::find($cancelId);
+        //             if ($cancelOrder) {
+        //                 $cancelOrder->status = 'cancelled'; // use actual column name if different
+        //                 $cancelOrder->save();
+        //             } else {
+        //                 Log::warning("Cancel Order ID {$cancelId} not found");
+        //             }
+        //         }
+        //     }
+        // }
+
+
         DB::beginTransaction();
 
         try {
             // $order->amount = $request->input('amount');
             // $order->save();
+             if (!empty($cancelOrderIds)) {
+                foreach ($cancelOrderIds as $cancelId) {
+                    $cancelOrder = OrderModel::find($cancelId);
+                    if ($cancelOrder) {
+                        $cancelOrder->status = 'cancelled';
+                        $cancelOrder->save();
+                    } else {
+                        Log::warning("Cancel Order ID {$cancelId} not found");
+                    }
+                }
+            }
 
             $existingItems = OrderItemsModel::where('order_id', $id)->get()->keyBy('product_code');
             OrderItemsModel::where('order_id', $id)->delete();
