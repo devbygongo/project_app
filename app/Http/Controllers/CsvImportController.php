@@ -157,8 +157,9 @@ class CsvImportController extends Controller
                     'size' => $record_csv['Sizes'],
                     'order_by'       => $index,
                 ]);
-                $index++;
+                
             }
+            $index++;
         }   
         if ($product_update_response == 1 || isset($product_insert_response)) {
             return response()->json(['message' => 'Products imported successfully'], 200);
