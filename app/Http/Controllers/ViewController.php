@@ -101,9 +101,25 @@ class ViewController extends Controller
 
     public function lng_product($lang = 'eng')
     {
-        $get_product_details = ProductModel::select('product_code','product_name', 'name_in_hindi','name_in_telugu','category','sub_category','product_image','basic','gst')
-                                            ->whereIn('type', ['MACHINE', 'ACCESSORIES'])
-                                            ->get();
+        // $get_product_details = ProductModel::select('product_code','product_name', 'name_in_hindi','name_in_telugu','category','sub_category','product_image','basic','gst')
+        //                                     ->whereIn('type', ['MACHINE', 'ACCESSORIES'])
+        //                                     ->get();
+        $get_product_details = ProductModel::select(
+            'product_code',
+            'product_name',
+            'name_in_hindi',
+            'name_in_telugu',
+            'category',
+            'sub_category',
+            'product_image',
+            'basic',
+            'gst'
+        )
+        ->whereIn('type', ['MACHINE', 'ACCESSORIES'])
+        ->orderByRaw("FIELD(type, 'MACHINE', 'ACCESSORIES')")
+        ->orderBy('order_by')
+        ->get();
+                                        
         
         $processed_prd_rec = $get_product_details->map(function($prd_rec) use ($lang)
         {
@@ -158,6 +174,8 @@ class ViewController extends Controller
             'product_image'
         )
         ->whereIn('type', ['MACHINE', 'ACCESSORIES'])
+        ->orderByRaw("FIELD(type, 'MACHINE', 'ACCESSORIES')")
+        ->orderBy('order_by')
         ->get();
 
         $processed_prd_rec = $get_product_details->map(function ($prd_rec) use ($lang) {
