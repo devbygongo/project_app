@@ -1191,9 +1191,9 @@ class UpdateController extends Controller
     public function splitOrder(Request $request, $id)
     {
         $data = $request->validate([
-            'items'            => 'required|array',
-            'items.*.id'       => 'required|integer|exists:t_order_items,id',
-            'items.*.quantity' => 'required|integer|min:0',
+            'items'                    => 'required|array',
+            'items.*.product_code'     => 'required|string|exists:t_order_items,product_code',
+            'items.*.quantity'         => 'required|integer|min:0',
         ]);
 
         try {
@@ -1204,9 +1204,9 @@ class UpdateController extends Controller
             $order = OrderModel::with('order_items')
                         ->findOrFail($id);
 
-            // 2) Build a map of keep‑quantities
+            // 2) Build a map of product_code → quantity
             $keepMap = collect($data['items'])
-                        ->keyBy('id')
+                        ->keyBy('product_code')
                         ->map(fn($i) => $i['quantity']);
 
             // 3) Calculate totals BEFORE punching any order
@@ -1215,10 +1215,10 @@ class UpdateController extends Controller
 
             foreach ($order->order_items as $item) {
                 $origQty = $item->quantity;
-                $keepQty = $keepMap->get($item->id, 0);
+                $keepQty = $keepMap->get($item->product_code, 0);
 
                 if ($keepQty > $origQty) {
-                    throw new \Exception("Cannot keep {$keepQty} > existing {$origQty} for item {$item->id}");
+                    throw new \Exception("Cannot keep {$keepQty} > existing {$origQty} for product {$item->product_code}");
                 }
 
                 $moveQty = $origQty - $keepQty;
@@ -1248,21 +1248,21 @@ class UpdateController extends Controller
             // 7) Now split or move each item‑row
             foreach ($order->order_items as $item) {
                 $origQty = $item->quantity;
-                $keepQty = $keepMap->get($item->id, 0);
+                $keepQty = $keepMap->get($item->product_code, 0);
                 $moveQty = $origQty - $keepQty;
 
-                // all stay → nothing to do
                 if ($keepQty === $origQty) {
                     continue;
                 }
 
-                // partial split → shrink & create remainder
                 if ($keepQty > 0) {
+                    // Shrink the original row
                     $item->update([
                         'quantity' => $keepQty,
                         'total'    => $keepQty * $item->rate,
                     ]);
 
+                    // Create the remainder for the new order
                     OrderItemsModel::create([
                         'order_id'     => $newOrder->id,
                         'product_code' => $item->product_code,
@@ -1274,16 +1274,14 @@ class UpdateController extends Controller
                         'remarks'      => $item->remarks,
                         'size'         => $item->size,
                     ]);
-
-                // keepQty == 0 → move the entire row
                 } else {
+                    // Move the entire row
                     $item->update(['order_id' => $newOrder->id]);
                 }
             }
 
             DB::commit();
 
-            // 8) Return both orders with their items
             return response()->json([
                 'message'        => 'Order split successfully.',
                 'original_order' => $order->fresh('order_items'),
