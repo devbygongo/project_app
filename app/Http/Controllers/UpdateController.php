@@ -1282,6 +1282,15 @@ class UpdateController extends Controller
 
             DB::commit();
 
+            // Generate invoices for both orders
+            $generate_order_invoice = new InvoiceController();
+            $generate_order_invoice->generateorderInvoice($order->id, true);
+            $generate_order_invoice->generatePackingSlip($order->id, true);
+
+            $generate_order_invoice->generateorderInvoice($newOrder->id, true);
+            $generate_order_invoice->generatePackingSlip($newOrder->id, true);
+
+
             return response()->json([
                 'message'        => 'Order split successfully.',
                 'original_order' => $order->fresh('order_items'),
