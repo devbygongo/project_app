@@ -81,6 +81,8 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
     Route::post('/complete_order/{id?}', [UpdateController::class, 'complete_order']);
 
     Route::post('/cancel_order/{id?}', [UpdateController::class, 'cancel_order']);
+
+    Route::post('/split_order/{id?}', [UpdateController::class, 'splitOrder']);
     
     Route::post('/view_user_order/{id?}', [ViewController::class, 'orders_user_id']);
     

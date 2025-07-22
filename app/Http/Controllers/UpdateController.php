@@ -1187,5 +1187,117 @@ class UpdateController extends Controller
         }
     }
 
+    // split order
+    public function splitOrder(Request $request, $id)
+    {
+        $data = $request->validate([
+            'items'            => 'required|array',
+            'items.*.id'       => 'required|integer|exists:t_order_items,id',
+            'items.*.quantity' => 'required|integer|min:0',
+        ]);
 
+        try {
+            DB::beginTransaction();
+
+            // 1) Load original order + items
+            /** @var OrderModel $order */
+            $order = OrderModel::with('order_items')
+                        ->findOrFail($id);
+
+            // 2) Build a map of keep‑quantities
+            $keepMap = collect($data['items'])
+                        ->keyBy('id')
+                        ->map(fn($i) => $i['quantity']);
+
+            // 3) Calculate totals BEFORE punching any order
+            $originalTotal = 0;
+            $movedTotal    = 0;
+
+            foreach ($order->order_items as $item) {
+                $origQty = $item->quantity;
+                $keepQty = $keepMap->get($item->id, 0);
+
+                if ($keepQty > $origQty) {
+                    throw new \Exception("Cannot keep {$keepQty} > existing {$origQty} for item {$item->id}");
+                }
+
+                $moveQty = $origQty - $keepQty;
+
+                // sum kept vs. moved
+                $originalTotal += ($keepQty * $item->rate);
+                $movedTotal    += ($moveQty * $item->rate);
+            }
+
+            // 4) Build new order_id (append “A” to segment #2)
+            $parts      = explode('/', $order->order_id);
+            $parts[1]  .= 'A';
+            $newOrderCode = implode('/', $parts);
+
+            // 5) Create the new order with the correct movedTotal
+            $newOrder = OrderModel::create([
+                'user_id'    => $order->user_id,
+                'order_id'   => $newOrderCode,
+                'order_date' => Carbon::now(),
+                'amount'     => $movedTotal,
+                'type'       => $order->type,
+            ]);
+
+            // 6) Update the original order’s amount
+            $order->update(['amount' => $originalTotal]);
+
+            // 7) Now split or move each item‑row
+            foreach ($order->order_items as $item) {
+                $origQty = $item->quantity;
+                $keepQty = $keepMap->get($item->id, 0);
+                $moveQty = $origQty - $keepQty;
+
+                // all stay → nothing to do
+                if ($keepQty === $origQty) {
+                    continue;
+                }
+
+                // partial split → shrink & create remainder
+                if ($keepQty > 0) {
+                    $item->update([
+                        'quantity' => $keepQty,
+                        'total'    => $keepQty * $item->rate,
+                    ]);
+
+                    OrderItemsModel::create([
+                        'order_id'     => $newOrder->id,
+                        'product_code' => $item->product_code,
+                        'product_name' => $item->product_name,
+                        'rate'         => $item->rate,
+                        'quantity'     => $moveQty,
+                        'total'        => $moveQty * $item->rate,
+                        'type'         => $item->type,
+                        'remarks'      => $item->remarks,
+                        'size'         => $item->size,
+                    ]);
+
+                // keepQty == 0 → move the entire row
+                } else {
+                    $item->update(['order_id' => $newOrder->id]);
+                }
+            }
+
+            DB::commit();
+
+            // 8) Return both orders with their items
+            return response()->json([
+                'message'        => 'Order split successfully.',
+                'original_order' => $order->fresh('order_items'),
+                'new_order'      => $newOrder->load('order_items'),
+            ], 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error("Order split error: {$e->getMessage()}");
+
+            return response()->json([
+                'message' => 'Failed to split order.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
 }
