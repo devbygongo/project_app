@@ -41,6 +41,9 @@
         <td>Mobile:</td><td>{{ $user->mobile }}</td>
         <td></td><td></td>
     </tr>
+    <tr>
+        <td colspan="4" class="value" style="background: yellow;"><strong>Remarks:</strong> {{ $order->remarks }}</td>
+    </tr>
 </table>
 
 <table class="order-summary">
