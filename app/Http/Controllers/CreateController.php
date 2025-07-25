@@ -390,8 +390,19 @@ class CreateController extends Controller
             $userId = $request->input('user_id');
         }
 
-        $current_user = User::select('type')->where('id', $userId)->first();
+        $current_user = User::select('type', 'purchase_lock')->where('id', $userId)->first();
         $user_type = $current_user->type;
+
+        if($userId == 181)
+        {
+            if($current_user->purchase_lock == 1)
+            {
+                return response()->json([
+                    'message' => 'Your outstanding payment exceeds the allocated purchase limit. Kindly clear the previous dues to continue placing your order.',
+                    'data' => 'Error!'
+                ], 400);
+            }
+        }
 
         if($user_type == 'zeroprice')
         {
