@@ -1203,7 +1203,7 @@ class UpdateController extends Controller
         $data = $request->validate([
             'items'                    => 'required|array',
             'items.*.product_code'     => 'required|string|exists:t_order_items,product_code',
-            'items.*.size'         => 'required|string',
+            'items.*.size'             => 'nullable|string',
             'items.*.quantity'         => 'required|integer|min:0',
         ]);
 
