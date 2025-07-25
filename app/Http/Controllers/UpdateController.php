@@ -759,6 +759,10 @@ class UpdateController extends Controller
             ], 403);
         }
 
+        if($request->input('user_id') == 181){
+            die($request->input('cancel_order_id'));
+        }
+
         // $cancelOrderIds = array_filter(explode(',', $request->input('cancel_order_id')));
         $cancelOrderIds = array_filter(array_map('trim', explode(',', $request->input('cancel_order_id'))));
 
