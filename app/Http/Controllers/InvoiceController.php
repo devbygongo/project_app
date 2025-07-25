@@ -92,7 +92,7 @@ class InvoiceController extends Controller
 				$htmlChunk = view('order_invoice_template_items', compact('item', 'index'))->render();
 				$mpdf->WriteHTML($htmlChunk);
 			}
-			ob_flush();
+			//ob_flush();
 			flush();
 		}
 
@@ -809,7 +809,7 @@ class InvoiceController extends Controller
 				$htmlChunk = view('packing_slip_template_items', compact('item', 'index'))->render();
 				$mpdf->WriteHTML($htmlChunk);
 			}
-			ob_flush();
+			//ob_flush();
 			flush();
 		}
 

@@ -804,9 +804,6 @@ class UpdateController extends Controller
                         Log::warning("Cancel Order ID {$cancelId} not found");
                     }
                     $is_merged = true;
-                    if($request->input('user_id') == 181){
-                        die($cancelOrder);
-                    }
                 }
             }
 
