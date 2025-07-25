@@ -399,7 +399,7 @@ class CreateController extends Controller
             {
                 return response()->json([
                     'message' => 'Your outstanding payment exceeds the allocated purchase limit. Kindly clear the previous dues to continue placing your order.',
-                    'data' => 'purchase_lock'
+                    'data' => 'locked'
                 ], 200);
             }
 
@@ -413,12 +413,13 @@ class CreateController extends Controller
                 $amount_total += (($product->rate) * ($product->quantity));
             }
 
-            if($current_user->purchase_lock == 1)
+            if($amount_total > 5)
             {
+                $message = "Apologies, but you have exceeded your purchase limit of ₹50,000. Kindly remove a few items from your cart to bring the total below the purchase limit and proceed with your order.";
                 return response()->json([
-                    'message' => 'Your outstanding payment exceeds the allocated purchase limit. Kindly clear the previous dues to continue placing your order.',
-                    'data' => 'Error!'
-                ], 400);
+                    'message' => $message,
+                    'data' => 'locked'
+                ], 200);
             }
         }
 
