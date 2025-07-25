@@ -32,6 +32,10 @@ use App\Http\Middleware\GetUserRole;
  Route::get('/public_view_category/{lang?}', [ViewController::class, 'lng_categories_public']);
     
 Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin'])->group(function () {
+
+    Route::post('/zoho_quote', [CreateController::class, 'zoho_quote']);
+
+    Route::post('/zoho_sales', [CreateController::class, 'zoho_sales']);
     
     Route::post('/generate-stock-report', [StockController::class, 'generateStockReport']);
     

@@ -1387,4 +1387,52 @@ class CreateController extends Controller
         }
     }
 
+    public function zoho_quote(Request $request)
+    {
+        $get_user = Auth::User();
+
+
+        $request->validate([
+            'order_id' => 'required|string',
+        ]);
+
+
+        $order = OrderModel::find($request->input('order_id'));
+
+        if (!$order) {
+            return response()->json(['message' => 'Order not found!'], 404);
+        }
+
+        $message = "Order : ".$order->order_id." has been successfully pushed as a quote to Zoho.";
+
+        return response()->json([
+            'message' => $message,
+            'data' => 'Successfully pushed!'
+        ], 200);
+    }
+
+    public function zoho_sales(Request $request)
+    {
+        $get_user = Auth::User();
+
+
+        $request->validate([
+            'order_id' => 'required|string',
+        ]);
+
+
+        $order = OrderModel::find($request->input('order_id'));
+
+        if (!$order) {
+            return response()->json(['message' => 'Order not found!'], 404);
+        }
+
+        $message = "Order : ".$order->order_id." has been successfully pushed as a sales invoice to Zoho.";
+
+        return response()->json([
+            'message' => $message,
+            'data' => 'Successfully pushed!'
+        ], 200);
+    }
+
 }
