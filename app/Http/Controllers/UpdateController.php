@@ -780,7 +780,8 @@ class UpdateController extends Controller
         //     }
         // }
 
-
+        $is_merged = false;
+        $merged_orders = '';
         DB::beginTransaction();
 
         try {
@@ -793,10 +794,16 @@ class UpdateController extends Controller
                     if ($cancelOrder) {
                         $cancelOrder->status = "cancelled";
                         $cancelOrder->save();
+
+                        // Append the cancelled order_id to the merged_orders string
+                        if ($merged_orders) {
+                            $merged_orders .= ', '; // Add a comma separator between IDs
+                        }
+                        $merged_orders .= $cancelOrder->order_id; // Add the current order_id
                     } else {
                         Log::warning("Cancel Order ID {$cancelId} not found");
                     }
-
+                    $is_merged = true;
                     if($request->input('user_id') == 181){
                         die($cancelOrder);
                     }
@@ -851,7 +858,7 @@ class UpdateController extends Controller
 
             // if ($get_user->mobile != "+918961043773") {
                 $generate_order_invoice = new InvoiceController();
-                $generate_order_invoice->generateorderInvoice($id, true);
+                $generate_order_invoice->generateorderInvoice($id, true, $is_merged, $merged_orders);
                 $generate_order_invoice->generatePackingSlip($id, true);
             // }
 
