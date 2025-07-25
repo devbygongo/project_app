@@ -1001,6 +1001,7 @@ class CreateController extends Controller
 				[
 					'user_id' => $request->input('user_id'),
 					'product_code' => $request->input('product_code'),
+					'size' => $request->input('size'),
 				], 
 				[
 					'product_name' => $request->input('product_name'),
