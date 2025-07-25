@@ -399,6 +399,24 @@ class CreateController extends Controller
             {
                 return response()->json([
                     'message' => 'Your outstanding payment exceeds the allocated purchase limit. Kindly clear the previous dues to continue placing your order.',
+                    'data' => 'purchase_lock'
+                ], 200);
+            }
+
+            $get_product = CartModel::select('amount', 'quantity', 'product_code', 'product_name', 'rate', 'type', 'remarks', 'size')
+                                        ->where('user_id', $userId)
+                                        ->get();
+
+            $amount_total = 0;
+            foreach ($get_product as $product) 
+            {
+                $amount_total += (($product->rate) * ($product->quantity));
+            }
+
+            if($current_user->purchase_lock == 1)
+            {
+                return response()->json([
+                    'message' => 'Your outstanding payment exceeds the allocated purchase limit. Kindly clear the previous dues to continue placing your order.',
                     'data' => 'Error!'
                 ], 400);
             }
