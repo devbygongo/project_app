@@ -791,7 +791,7 @@ class UpdateController extends Controller
                     
                     $cancelOrder = OrderModel::find($cancelId);
                     if ($cancelOrder) {
-                        $cancelOrder->status = 'cancelled';
+                        $cancelOrder->status = "cancelled";
                         $cancelOrder->save();
                     } else {
                         Log::warning("Cancel Order ID {$cancelId} not found");
