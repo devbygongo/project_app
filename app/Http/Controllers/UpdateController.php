@@ -790,14 +790,15 @@ class UpdateController extends Controller
                 foreach ($cancelOrderIds as $cancelId) {
                     
                     $cancelOrder = OrderModel::find($cancelId);
-                    if($request->input('user_id') == 181){
-                        die($cancelOrder);
-                    }
                     if ($cancelOrder) {
                         $cancelOrder->status = 'cancelled';
                         $cancelOrder->save();
                     } else {
                         Log::warning("Cancel Order ID {$cancelId} not found");
+                    }
+
+                    if($request->input('user_id') == 181){
+                        die($cancelOrder);
                     }
                 }
             }
