@@ -784,7 +784,7 @@ class UpdateController extends Controller
         try {
             // $order->amount = $request->input('amount');
             // $order->save();
-             if (!empty($cancelOrderIds)) {
+            if (!empty($cancelOrderIds)) {
                 foreach ($cancelOrderIds as $cancelId) {
                     $cancelOrder = OrderModel::find($cancelId);
                     if ($cancelOrder) {
