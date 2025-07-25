@@ -517,6 +517,7 @@ class ViewController extends Controller
                 'sub_category' => $prd_rec->sub_category,
                 'product_image' => $prd_rec->product_image,
                 'extra_images' => $prd_rec->extra_images,
+                'size' => $prd_rec->size,
                 'basic' => $prd_rec->basic,
                 'gst' => $prd_rec->gst,
                 'out_of_stock' => $prd_rec->out_of_stock,
