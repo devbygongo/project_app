@@ -884,7 +884,6 @@ class UpdateController extends Controller
         }
     }
 
-
     public function complete_order(Request $request, $id)
     {
         // Validate incoming request data
@@ -1204,6 +1203,7 @@ class UpdateController extends Controller
         $data = $request->validate([
             'items'                    => 'required|array',
             'items.*.product_code'     => 'required|string|exists:t_order_items,product_code',
+            'items.*.size'         => 'required|string',
             'items.*.quantity'         => 'required|integer|min:0',
         ]);
 
@@ -1216,9 +1216,15 @@ class UpdateController extends Controller
                         ->findOrFail($id);
 
             // 2) Build a map of product_code → quantity
+            // $keepMap = collect($data['items'])
+            //             ->keyBy('product_code')
+            //             ->map(fn($i) => $i['quantity']);
+
             $keepMap = collect($data['items'])
-                        ->keyBy('product_code')
-                        ->map(fn($i) => $i['quantity']);
+                ->keyBy(function($item) {
+                    return $item['product_code'] . '_' . $item['size'];
+                })
+                ->map(fn($i) => $i['quantity']);
 
             // 3) Calculate totals BEFORE punching any order
             $originalTotal = 0;
@@ -1226,7 +1232,9 @@ class UpdateController extends Controller
 
             foreach ($order->order_items as $item) {
                 $origQty = $item->quantity;
-                $keepQty = $keepMap->get($item->product_code, 0);
+                $key = $item->product_code . '_' . $item->size; // Create key based on product_code + size
+                // $keepQty = $keepMap->get($item->product_code, 0);
+                $keepQty = $keepMap->get($key, 0);
 
                 if ($keepQty > $origQty) {
                     throw new \Exception("Cannot keep {$keepQty} > existing {$origQty} for product {$item->product_code}");
@@ -1259,8 +1267,16 @@ class UpdateController extends Controller
             // 7) Now split or move each item‑row
             foreach ($order->order_items as $item) {
                 $origQty = $item->quantity;
-                $keepQty = $keepMap->get($item->product_code, 0);
+                $key = $item->product_code . '_' . $item->size; // Create key based on product_code + size
+                // $keepQty = $keepMap->get($item->product_code, 0);
+                $keepQty = $keepMap->get($key, 0);
                 $moveQty = $origQty - $keepQty;
+
+                // If quantity is zero, delete the item
+                if ($moveQty == 0) {
+                    $item->delete();
+                    continue;
+                }
 
                 if ($keepQty === $origQty) {
                     continue;
