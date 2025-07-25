@@ -759,9 +759,7 @@ class UpdateController extends Controller
             ], 403);
         }
 
-        if($request->input('user_id') == 181){
-            die($request->input('cancel_order_id'));
-        }
+        
 
         // $cancelOrderIds = array_filter(explode(',', $request->input('cancel_order_id')));
         $cancelOrderIds = array_filter(array_map('trim', explode(',', $request->input('cancel_order_id'))));
@@ -790,6 +788,9 @@ class UpdateController extends Controller
             // $order->save();
             if (!empty($cancelOrderIds)) {
                 foreach ($cancelOrderIds as $cancelId) {
+                    if($request->input('user_id') == 181){
+                        die($cancelId);
+                    }
                     $cancelOrder = OrderModel::find($cancelId);
                     if ($cancelOrder) {
                         $cancelOrder->status = 'cancelled';
