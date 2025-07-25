@@ -788,10 +788,11 @@ class UpdateController extends Controller
             // $order->save();
             if (!empty($cancelOrderIds)) {
                 foreach ($cancelOrderIds as $cancelId) {
-                    if($request->input('user_id') == 181){
-                        die($cancelId);
-                    }
+                    
                     $cancelOrder = OrderModel::find($cancelId);
+                    if($request->input('user_id') == 181){
+                        die($cancelOrder);
+                    }
                     if ($cancelOrder) {
                         $cancelOrder->status = 'cancelled';
                         $cancelOrder->save();
