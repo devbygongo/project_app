@@ -760,7 +760,7 @@ class InvoiceController extends Controller
         return $fileUrl;
     }
 
-    public function generatePackingSlip($orderId, $is_edited = false)
+    public function generatePackingSlip($orderId, $is_edited = false, $is_download = false)
     {
         $order = OrderModel::select('user_id','order_id', 'amount', 'order_date','type')
                             ->where('id', $orderId)
@@ -840,6 +840,11 @@ class InvoiceController extends Controller
             'packing_slip' => $fileUrl,
         ]);
 
+        if($is_download)
+        {
+            // If not downloading, return the file URL
+            return $fileUrl;
+        }
         // Directly create an instance of SendWhatsAppUtility
         $whatsAppUtility = new sendWhatsAppUtility();
 

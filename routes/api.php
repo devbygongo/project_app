@@ -116,6 +116,8 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
 
     Route::get('/generate_order_invoice/{orderId}', [InvoiceController::class, 'generateorderInvoice']);
 
+    Route::get('/download_packing_slip/{orderId}/{is_edited}/{is_download}', [InvoiceController::class, 'generatePackingSlip']);
+
     Route::get('/generate_invoice/{invoiceId}', [InvoiceController::class, 'generateInvoice']);
 
     Route::get('/return_order/{orderId}', [ViewController::class, 'return_order']);
