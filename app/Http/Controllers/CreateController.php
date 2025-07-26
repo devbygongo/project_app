@@ -413,7 +413,7 @@ class CreateController extends Controller
                 $amount_total += (($product->rate) * ($product->quantity));
             }
 
-            if($amount_total > 50000)
+            if($amount_total > 500000000)
             {
                 $message = "Apologies, but you have exceeded your purchase limit of ₹50,000. Kindly remove a few items from your cart to bring the total below the purchase limit and proceed with your order.";
                 return response()->json([
