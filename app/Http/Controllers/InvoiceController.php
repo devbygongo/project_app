@@ -14,6 +14,7 @@ use Mpdf\Mpdf;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use App\Utils\sendWhatsAppUtility;
+use App\Models\StockOrderItemsModel;
 use Carbon\Carbon;
 
 ini_set('memory_limit', '512M'); // Adjust as needed
