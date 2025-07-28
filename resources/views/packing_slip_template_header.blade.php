@@ -49,8 +49,8 @@
             <th class="center-align">SN</th>
             <th>Photo</th>
             <th>Product Name</th>
-            <th class="center-align">Current Stock</th>
             <th class="center-align">Qty</th>
+            <th class="center-align">Current Stock</th>
         </tr>
     </thead>
     <tbody>
