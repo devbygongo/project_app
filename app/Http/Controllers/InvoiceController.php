@@ -777,6 +777,31 @@ class InvoiceController extends Controller
                                     ->select('product_code', 'product_name', 'rate', 'quantity', 'total', 'remarks')
                                     ->where('order_id', $orderId)
                                     ->get();
+
+        // Get all product_codes used in this order
+        $productCodes = $order_items->pluck('product_code')->unique()->toArray();
+
+        // Fetch current stock for all product codes in one query
+        $stockMap = StockOrderItemsModel::select(
+                'product_code',
+                DB::raw("SUM(CASE WHEN type = 'IN' THEN quantity ELSE 0 END) AS total_in"),
+                DB::raw("SUM(CASE WHEN type = 'OUT' THEN quantity ELSE 0 END) AS total_out")
+            )
+            ->whereIn('product_code', $productCodes)
+            ->groupBy('product_code')
+            ->get()
+            ->mapWithKeys(function ($row) {
+                return [
+                    $row->product_code => ($row->total_in - $row->total_out),
+                ];
+            });
+
+        // Append `current_stock` to each order item
+        foreach ($order_items as $item) {
+            $item->current_stock = $stockMap[$item->product_code] ?? 0;
+        }
+
+
         $mobileNumbers = User::where('role', 'admin')->pluck('mobile')->toArray();
         
 
