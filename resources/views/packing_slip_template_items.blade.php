@@ -9,8 +9,7 @@
   </td>
   <td>
     {{ $item->product_name }}<br />Part No: {{ $item->product->product_code
-    }}<br /><span style="background: yellow">{{ $item->remarks }}</span>
+    }}<br />{{ $item->current_stock }}<span style="background: yellow">{{ $item->remarks }}</span>
   </td>
   <td class="center-align">{{ $item->quantity }}</td>
-  <td class="center-align stock-cell">{{ $item->current_stock }}</td>
 </tr>
