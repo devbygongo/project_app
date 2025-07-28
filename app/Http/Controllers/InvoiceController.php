@@ -840,9 +840,6 @@ class InvoiceController extends Controller
 			flush();
 		}
 
-        dd(view('packing_slip_template_items', compact('item', 'index'))->render());
-
-
 		// Render the footer
 		$footerHtml = view('packing_slip_template_footer', ['order' => $order])->render();
 		$mpdf->WriteHTML($footerHtml);

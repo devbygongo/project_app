@@ -100,7 +100,7 @@
           <th class="center-align">Stock</th>
         </tr>
       </thead>
-      <tbody></tbody>
+      <tbody>
     </table>
   </body>
 </html>
