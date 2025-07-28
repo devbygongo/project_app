@@ -101,6 +101,3 @@
         </tr>
       </thead>
       <tbody>
-    </table>
-  </body>
-</html>
