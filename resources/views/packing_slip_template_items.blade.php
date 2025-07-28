@@ -9,7 +9,7 @@
   </td>
   <td>
     {{ $item->product_name }}<br />Part No: {{ $item->product->product_code
-    }}<br />{{ $item->current_stock }}<span style="background: yellow">{{ $item->remarks }}</span>
+    }}<br /><span style="color: red;">{{ $item->current_stock }}</span><br /><span style="background: yellow">{{ $item->remarks }}</span>
   </td>
   <td class="center-align">{{ $item->quantity }}</td>
 </tr>
