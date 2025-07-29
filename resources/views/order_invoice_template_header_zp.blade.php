@@ -42,7 +42,7 @@
         <td></td><td></td>
     </tr>
     <tr>
-        <td colspan="4" class="value" style="background: yellow;"><strong>Remarks:</strong> {{ $order->remarks }}</td>
+        <td colspan="4" class="value" style="background: {{ $order->remarks ? 'yellow' : 'white' }};"><strong>Remarks:</strong> {{ $order->remarks }}</td>
     </tr>
 </table>
 
