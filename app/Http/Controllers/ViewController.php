@@ -1081,8 +1081,8 @@ class ViewController extends Controller
                 $order->order_invoice = $order->packing_slip;
             }
             $order->order_items->each(function($orderItem) {
-                // $orderItem->product_image = $orderItem->product->product_image ?? null;
-                $orderItem->product_image = $orderItem->product->product_image ? url($orderItem->product->product_image) : null;
+                $orderItem->product_image = $orderItem->product->product_image ?? null;
+                // $orderItem->product_image = $orderItem->product->product_image ? url($orderItem->product->product_image) : null;
                 unset($orderItem->product); // Remove the product object after extracting the image
             });
         });
