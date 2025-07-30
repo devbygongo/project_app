@@ -9,7 +9,13 @@
   </td>
   <td>
     {{ $item->product_name }}<br />Part No: {{ $item->product->product_code
-    }}<br /><span style="color: red;">{{ $item->current_stock }}</span><br /><span style="background: yellow">{{ $item->remarks }}</span>
+    }}<br />
+    @if(! empty($item->size))
+        <span style="background: yellow;">
+            Size: {{ $item->size }}
+        </span><br>
+    @endif
+    <span style="color: red;">{{ $item->current_stock }}</span><br /><span style="background: yellow">{{ $item->remarks }}</span>
   </td>
   <td class="center-align">{{ $item->quantity }}</td>
 </tr>
