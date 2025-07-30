@@ -1151,8 +1151,8 @@ class ViewController extends Controller
             // add product_image_url and hide the 'product' relation on each item
             $pendingOrders->transform(function($order) {
                 $order->order_items->transform(function($item) {
-                    $item->product_image_url = $item->product
-                        ? url($item->product->product_image)
+                    $item->product_image = $item->product
+                        ? ($item->product->product_image)
                         : null;
 
                     // hide the raw product relation
