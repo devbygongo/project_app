@@ -25,7 +25,7 @@ set_time_limit(300); // Increase timeout to 5 minutes or as needed
 class InvoiceController extends Controller
 {
     //
-    public function generateorderInvoice($orderId, $is_edited = false, $is_merged = false, $merged_orders = '')
+    public function generateorderInvoice($orderId, $is_edited = false, $is_merged = false, $merged_orders = '', $is_split = false, $old_order_id = '')
     {
         // $get_user = Auth::id();
         
@@ -229,108 +229,8 @@ class InvoiceController extends Controller
 
             $response = $whatsAppUtility->sendWhatsApp($user->mobile, $templateParams, '', 'User Order Invoice');
         }else{
-            if(!$is_merged)
+            if($is_merged)
             {
-                $fileUrlWithTimestamp = $fileUrl . '?t=' . time();
-                $templateParams = [
-                    'name' => 'ace_edit_order_admin', // Replace with your WhatsApp template name
-                    'language' => ['code' => 'en'],
-                    'components' => [
-                        [
-                            'type' => 'header',
-                            'parameters' => [
-                                [
-                                    'type' => 'document',
-                                    'document' => [
-                                        'link' =>  $fileUrlWithTimestamp, // Replace with the actual URL to the PDF document
-                                        'filename' => $sanitizedOrderId.'.pdf' // Optional: Set a custom file name for the PDF document
-                                    ]
-                                ]
-                            ]
-                        ],[
-                            'type' => 'body',
-                            'parameters' => [
-                                [
-                                    'type' => 'text',
-                                    'text' => $user->name,
-                                ],
-                                [
-                                    'type' => 'text',
-                                    'text' =>  substr($user->mobile, -10),
-                                ],
-                                [
-                                    'type' => 'text',
-                                    'text' => $order->order_id,
-                                ],
-                                [
-                                    'type' => 'text',
-                                    'text' => Carbon::parse($order->order_date)->format('d-m-Y'),
-                                ],
-                                [
-                                    'type' => 'text',
-                                    'text' => $order->amount,
-                                ],
-                            ],
-                        ]
-                    ],
-                ];
-
-                foreach ($mobileNumbers as $mobileNumber) 
-                {
-                    if($mobileNumber != '+919951263652')
-                    {
-                        // Send message for each number
-                        $response = $whatsAppUtility->sendWhatsApp($mobileNumber, $templateParams, '', 'Admin Order Invoice');
-
-                        // Check if the response has an error or was successful
-                        if (isset($responseArray['error'])) 
-                        {
-                            echo "Failed to send order to Whatsapp!";
-                        }
-                    }
-                }
-
-                $templateParams = [
-                    'name' => 'ace_edit_order_user', // Replace with your WhatsApp template name
-                    'language' => ['code' => 'en'],
-                    'components' => [
-                        [
-                            'type' => 'header',
-                            'parameters' => [
-                                [
-                                    'type' => 'document',
-                                    'document' => [
-                                        'link' =>  $fileUrlWithTimestamp, // Replace with the actual URL to the PDF document
-                                        'filename' => $sanitizedOrderId.'.pdf' // Optional: Set a custom file name for the PDF document
-                                    ]
-                                ]
-                            ]
-                        ],[
-                            'type' => 'body',
-                            'parameters' => [
-                                [
-                                    'type' => 'text',
-                                    'text' => $user->name,
-                                ],
-                                [
-                                    'type' => 'text',
-                                    'text' => $order->order_id,
-                                ],
-                                [
-                                    'type' => 'text',
-                                    'text' => Carbon::parse($order->order_date)->format('d-m-Y'),
-                                ],
-                                [
-                                    'type' => 'text',
-                                    'text' => $order->amount,
-                                ],
-                            ],
-                        ]
-                    ],
-                ];
-
-                $response = $whatsAppUtility->sendWhatsApp($user->mobile, $templateParams, '', 'User Order Invoice');
-            }else{
                 $fileUrlWithTimestamp = $fileUrl . '?t=' . time();
                 $templateParams = [
                     'name' => 'ace_merged_order_admin', // Replace with your WhatsApp template name
@@ -430,6 +330,206 @@ class InvoiceController extends Controller
                 ];
 
                 $response = $whatsAppUtility->sendWhatsApp($user->mobile, $templateParams, '', 'User Order Invoice');
+            }
+            else if($is_split)
+            {
+                $fileUrlWithTimestamp = $fileUrl . '?t=' . time();
+                $templateParams = [
+                    'name' => 'ace_split_order_admin', // Replace with your WhatsApp template name
+                    'language' => ['code' => 'en'],
+                    'components' => [
+                        [
+                            'type' => 'header',
+                            'parameters' => [
+                                [
+                                    'type' => 'document',
+                                    'document' => [
+                                        'link' =>  $fileUrlWithTimestamp, // Replace with the actual URL to the PDF document
+                                        'filename' => $sanitizedOrderId.'.pdf' // Optional: Set a custom file name for the PDF document
+                                    ]
+                                ]
+                            ]
+                        ],[
+                            'type' => 'body',
+                            'parameters' => [
+                                [
+                                    'type' => 'text',
+                                    'text' => $user->name,
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' =>  $old_order_id,
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => $order->order_id,
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => $order->amount,
+                                ],
+                            ],
+                        ]
+                    ],
+                ];
+
+                foreach ($mobileNumbers as $mobileNumber) 
+                {
+                    if($mobileNumber != '+919951263652')
+                    {
+                        // Send message for each number
+                        $response = $whatsAppUtility->sendWhatsApp($mobileNumber, $templateParams, '', 'Admin Order Invoice');
+
+                        // Check if the response has an error or was successful
+                        if (isset($responseArray['error'])) 
+                        {
+                            echo "Failed to send order to Whatsapp!";
+                        }
+                    }
+                }
+
+                $templateParams = [
+                    'name' => 'ace_split_order_user', // Replace with your WhatsApp template name
+                    'language' => ['code' => 'en'],
+                    'components' => [
+                        [
+                            'type' => 'header',
+                            'parameters' => [
+                                [
+                                    'type' => 'document',
+                                    'document' => [
+                                        'link' =>  $fileUrlWithTimestamp, // Replace with the actual URL to the PDF document
+                                        'filename' => $sanitizedOrderId.'.pdf' // Optional: Set a custom file name for the PDF document
+                                    ]
+                                ]
+                            ]
+                        ],[
+                            'type' => 'body',
+                            'parameters' => [
+                                [
+                                    'type' => 'text',
+                                    'text' => $user->name,
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => $old_order_id,
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => $order->order_id,
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => $order->amount,
+                                ],
+                            ],
+                        ]
+                    ],
+                ];
+
+                $response = $whatsAppUtility->sendWhatsApp($user->mobile, $templateParams, '', 'User Order Invoice');
+            }else{
+                
+                $fileUrlWithTimestamp = $fileUrl . '?t=' . time();
+                $templateParams = [
+                    'name' => 'ace_edit_order_admin', // Replace with your WhatsApp template name
+                    'language' => ['code' => 'en'],
+                    'components' => [
+                        [
+                            'type' => 'header',
+                            'parameters' => [
+                                [
+                                    'type' => 'document',
+                                    'document' => [
+                                        'link' =>  $fileUrlWithTimestamp, // Replace with the actual URL to the PDF document
+                                        'filename' => $sanitizedOrderId.'.pdf' // Optional: Set a custom file name for the PDF document
+                                    ]
+                                ]
+                            ]
+                        ],[
+                            'type' => 'body',
+                            'parameters' => [
+                                [
+                                    'type' => 'text',
+                                    'text' => $user->name,
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' =>  substr($user->mobile, -10),
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => $order->order_id,
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => Carbon::parse($order->order_date)->format('d-m-Y'),
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => $order->amount,
+                                ],
+                            ],
+                        ]
+                    ],
+                ];
+
+                foreach ($mobileNumbers as $mobileNumber) 
+                {
+                    if($mobileNumber != '+919951263652')
+                    {
+                        // Send message for each number
+                        $response = $whatsAppUtility->sendWhatsApp($mobileNumber, $templateParams, '', 'Admin Order Invoice');
+
+                        // Check if the response has an error or was successful
+                        if (isset($responseArray['error'])) 
+                        {
+                            echo "Failed to send order to Whatsapp!";
+                        }
+                    }
+                }
+
+                $templateParams = [
+                    'name' => 'ace_edit_order_user', // Replace with your WhatsApp template name
+                    'language' => ['code' => 'en'],
+                    'components' => [
+                        [
+                            'type' => 'header',
+                            'parameters' => [
+                                [
+                                    'type' => 'document',
+                                    'document' => [
+                                        'link' =>  $fileUrlWithTimestamp, // Replace with the actual URL to the PDF document
+                                        'filename' => $sanitizedOrderId.'.pdf' // Optional: Set a custom file name for the PDF document
+                                    ]
+                                ]
+                            ]
+                        ],[
+                            'type' => 'body',
+                            'parameters' => [
+                                [
+                                    'type' => 'text',
+                                    'text' => $user->name,
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => $order->order_id,
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => Carbon::parse($order->order_date)->format('d-m-Y'),
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => $order->amount,
+                                ],
+                            ],
+                        ]
+                    ],
+                ];
+
+                $response = $whatsAppUtility->sendWhatsApp($user->mobile, $templateParams, '', 'User Order Invoice');
+            
             }
         }
     

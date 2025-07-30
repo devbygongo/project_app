@@ -1381,7 +1381,7 @@ class UpdateController extends Controller
 
             // 4) Build new order_id (append “A” to segment #2)
             $parts      = explode('/', $order->order_id);
-            $parts[1]  .= 'A';
+            $parts[2]  .= 'SPL';
             $newOrderCode = implode('/', $parts);
 
             // 5) Create the new order with the correct movedTotal
@@ -1446,7 +1446,7 @@ class UpdateController extends Controller
             $generate_order_invoice->generateorderInvoice($order->id, true);
             $generate_order_invoice->generatePackingSlip($order->id, true);
 
-            $generate_order_invoice->generateorderInvoice($newOrder->id, true);
+            $generate_order_invoice->generateorderInvoice($newOrder->id, true, false, '', true, $order->id);
             $generate_order_invoice->generatePackingSlip($newOrder->id, true);
 
             return response()->json([
