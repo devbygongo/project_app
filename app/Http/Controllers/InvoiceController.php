@@ -29,11 +29,9 @@ class InvoiceController extends Controller
     {
         // $get_user = Auth::id();
         
-        $order = OrderModel::select('user_id','order_id', 'amount', 'order_date','type')
+        $order = OrderModel::select('user_id','order_id', 'amount', 'order_date','type', 'remarks')
                             ->where('id', $orderId)
                             ->first();
-		
-		
 
         $get_user = $order->user_id;
         
@@ -43,7 +41,7 @@ class InvoiceController extends Controller
 		
 
         $order_items = OrderItemsModel::with('product:product_code')
-                                    ->select('product_code', 'product_name', 'rate', 'quantity', 'total', 'remarks')
+                                    ->select('product_code', 'product_name', 'rate', 'quantity', 'total', 'remarks', 'size')
                                     ->where('order_id', $orderId)
                                     ->get();
         $mobileNumbers = User::where('role', 'admin')->pluck('mobile')->toArray();
@@ -764,7 +762,7 @@ class InvoiceController extends Controller
 
     public function generatePackingSlip($orderId, $is_edited = false, $is_download = false)
     {
-        $order = OrderModel::select('user_id','order_id', 'amount', 'order_date','type')
+        $order = OrderModel::select('user_id','order_id', 'amount', 'order_date','type', 'remarks')
                             ->where('id', $orderId)
                             ->first();
 
@@ -776,7 +774,7 @@ class InvoiceController extends Controller
 		
 
         $order_items = OrderItemsModel::with('product:product_code')
-                                    ->select('product_code', 'product_name', 'rate', 'quantity', 'total', 'remarks')
+                                    ->select('product_code', 'product_name', 'rate', 'quantity', 'total', 'remarks', 'size')
                                     ->where('order_id', $orderId)
                                     ->get();
 
