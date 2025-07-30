@@ -1482,6 +1482,10 @@ class UpdateController extends Controller
             $order = OrderModel::with('order_items')
                 ->findOrFail($id);
 
+            if (!$order) {
+                throw new \Exception("Order not loaded for ID: {$id}");
+            }
+
             // 2) Build a map of product_code + size → quantity
             $keepMap = collect($data['items'])
                 ->keyBy(function($item) {
