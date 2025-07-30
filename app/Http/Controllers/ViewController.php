@@ -1146,6 +1146,7 @@ class ViewController extends Controller
             // Attempt to fetch orders where the status is 'pending' and load the related user information
             $pendingOrders = OrderModel::where('status', 'pending')
                 ->with('user:id,name', 'order_items.product:id,product_code,product_image',) // Eager load the 'user' and 'order_items' relationships
+                ->orderByDesc('id')
                 ->get();
 
             // add product_image_url and hide the 'product' relation on each item
