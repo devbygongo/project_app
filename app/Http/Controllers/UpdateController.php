@@ -1556,7 +1556,7 @@ class UpdateController extends Controller
 
                     // Create a new row in the child order for the remaining quantity
                     OrderItemsModel::create([
-                        'order_id' => $newOrder->order_id,
+                        'order_id' => $newOrder->id,
                         'product_code' => $item->product_code,
                         'product_name' => $item->product_name,
                         'rate' => $item->rate,
