@@ -1148,6 +1148,22 @@ class ViewController extends Controller
                 ->with('user:id,name', 'order_items.product:id,product_code,product_image',) // Eager load the 'user' and 'order_items' relationships
                 ->get();
 
+            // 2) Transform the collection so each item has a product_image_url
+            $pendingOrders->transform(function($order) {
+                $order->order_items->transform(function($item) {
+                    // build a full URL using Laravel’s url() helper (adjust path if you store in 'storage/')
+                    $item->product_image_url = $item->product
+                        ? url($item->product->product_image)
+                        : null;
+
+                    // optionally, you can unset the raw product relation if you don’t want it in the JSON:
+                    // unset($item->product);
+
+                    return $item;
+                });
+                return $order;
+            });
+
             // Return the response with the orders and their respective user names
             return response()->json([
                 'success' => true,
