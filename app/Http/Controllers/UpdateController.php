@@ -1335,124 +1335,257 @@ class UpdateController extends Controller
     //     }
     // }
 
+    // public function splitOrder(Request $request, $id)
+    // {
+    //     $data = $request->validate([
+    //         'items'                    => 'required|array',
+    //         'items.*.product_code'     => 'required|string|exists:t_order_items,product_code',
+    //         'items.*.size'             => 'nullable|string',
+    //         'items.*.quantity'         => 'required|integer|min:0',
+    //     ]);
+
+    //     try {
+    //         DB::beginTransaction();
+
+    //         // 1) Load original order + items
+    //         /** @var OrderModel $order */
+    //         $order = OrderModel::with('order_items')
+    //                     ->findOrFail($id);
+
+    //         // 2) Build a map of product_code + size → quantity (using product_code + size for uniqueness)
+    //         $keepMap = collect($data['items'])
+    //             ->keyBy(function($item) {
+    //                 return $item['product_code'] . '_' . $item['size'];
+    //             })
+    //             ->map(fn($i) => $i['quantity']);
+
+    //         // 3) Calculate totals BEFORE punching any order
+    //         $originalTotal = 0;
+    //         $movedTotal    = 0;
+
+    //         foreach ($order->order_items as $item) {
+    //             $origQty = $item->quantity;
+    //             $key = $item->product_code . '_' . $item->size; // Create key based on product_code + size
+    //             $keepQty = $keepMap->get($key, 0);
+
+    //             // sum kept vs. moved
+    //             $originalTotal += ($keepQty * $item->rate);
+
+    //             // If quantity is 0, the entire original quantity is moved to the new order (child)
+    //             if ($keepQty == 0) {
+    //                 $movedTotal    += ($origQty * $item->rate); // Moving all quantity to the new order
+    //             } else {
+    //                 $movedTotal    += ($keepQty * $item->rate); // Only keeping the quantity in the original order
+    //             }
+    //         }
+
+    //         // 4) Build new order_id (append “A” to segment #2)
+    //         $parts      = explode('/', $order->order_id);
+    //         $parts[2]  .= 'SPL';
+    //         $newOrderCode = implode('/', $parts);
+
+    //         // 5) Create the new order with the correct movedTotal
+    //         $newOrder = OrderModel::create([
+    //             'user_id'    => $order->user_id,
+    //             'order_id'   => $newOrderCode,
+    //             'order_date' => Carbon::now(),
+    //             'amount'     => $movedTotal,
+    //             'type'       => $order->type,
+    //         ]);
+
+    //         // 6) Update the original order’s amount
+    //         $order->update(['amount' => $originalTotal]);
+
+    //         // 7) Now split or move each item‑row
+    //         foreach ($order->order_items as $item) {
+    //             $origQty = $item->quantity;
+    //             $key = $item->product_code . '_' . $item->size; // Create key based on product_code + size
+    //             $keepQty = $keepMap->get($key, 0);
+    //             $moveQty = $origQty - $keepQty;
+
+    //             // If quantity is 0 for the main table, move the entire quantity to the new order (child)
+    //             if ($moveQty == 0 && $keepQty == 0) {
+    //                 // Move the full quantity to the child order (new order)
+    //                 $item->update(['order_id' => $newOrder->id, 'quantity' => $origQty]);
+    //                 continue;
+    //             }
+
+    //             if ($keepQty === $origQty) {
+    //                 continue; // Nothing to move, skip
+    //             }
+
+    //             if ($keepQty > 0) {
+    //                 // Shrink the original row in the main table
+    //                 $item->update([
+    //                     'quantity' => $keepQty,
+    //                     'total'    => $keepQty * $item->rate,
+    //                 ]);
+
+    //                 // Create the remainder for the new order (child table)
+    //                 OrderItemsModel::create([
+    //                     'order_id'     => $newOrder->id,
+    //                     'product_code' => $item->product_code,
+    //                     'product_name' => $item->product_name,
+    //                     'rate'         => $item->rate,
+    //                     'quantity'     => $moveQty,
+    //                     'total'        => $moveQty * $item->rate,
+    //                     'type'         => $item->type,
+    //                     'remarks'      => $item->remarks,
+    //                     'size'         => $item->size,
+    //                 ]);
+    //             } else {
+    //                 // Move the entire row (if no quantity remains in the main table)
+    //                 $item->update(['order_id' => $newOrder->id]);
+    //             }
+    //         }
+
+    //         DB::commit();
+
+    //         // Generate invoices for both orders
+    //         $generate_order_invoice = new InvoiceController();
+    //         $generate_order_invoice->generateorderInvoice($order->id, true);
+    //         $generate_order_invoice->generatePackingSlip($order->id, true);
+
+    //         $generate_order_invoice->generateorderInvoice($newOrder->id, true, false, '', true, $order->id);
+    //         $generate_order_invoice->generatePackingSlip($newOrder->id, true);
+
+    //         return response()->json([
+    //             'message'        => 'Order split successfully.',
+    //             'original_order' => $order->fresh('order_items'),
+    //             'new_order'      => $newOrder->load('order_items'),
+    //         ], 200);
+
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         \Log::error("Order split error: {$e->getMessage()}");
+
+    //         return response()->json([
+    //             'message' => 'Failed to split order.',
+    //             'error'   => $e->getMessage(),
+    //         ], 500);
+    //     }
+    // }
+
     public function splitOrder(Request $request, $id)
     {
         $data = $request->validate([
-            'items'                    => 'required|array',
-            'items.*.product_code'     => 'required|string|exists:t_order_items,product_code',
-            'items.*.size'             => 'nullable|string',
-            'items.*.quantity'         => 'required|integer|min:0',
+            'items' => 'required|array',
+            'items.*.product_code' => 'required|string|exists:t_order_items,product_code',
+            'items.*.size' => 'nullable|string',
+            'items.*.quantity' => 'required|integer|min:0',
         ]);
 
         try {
             DB::beginTransaction();
 
-            // 1) Load original order + items
-            /** @var OrderModel $order */
+            // 1) Load the original order and items
             $order = OrderModel::with('order_items')
-                        ->findOrFail($id);
+                ->findOrFail($id);
 
-            // 2) Build a map of product_code + size → quantity (using product_code + size for uniqueness)
+            // 2) Build a map of product_code + size → quantity
             $keepMap = collect($data['items'])
                 ->keyBy(function($item) {
                     return $item['product_code'] . '_' . $item['size'];
                 })
                 ->map(fn($i) => $i['quantity']);
 
-            // 3) Calculate totals BEFORE punching any order
+            // 3) Calculate the totals before splitting the order
             $originalTotal = 0;
-            $movedTotal    = 0;
+            $movedTotal = 0;
 
             foreach ($order->order_items as $item) {
                 $origQty = $item->quantity;
-                $key = $item->product_code . '_' . $item->size; // Create key based on product_code + size
+                $key = $item->product_code . '_' . $item->size;  // Create key based on product_code + size
                 $keepQty = $keepMap->get($key, 0);
 
-                // sum kept vs. moved
+                // Sum the original total and moved total
                 $originalTotal += ($keepQty * $item->rate);
 
-                // If quantity is 0, the entire original quantity is moved to the new order (child)
+                // If quantity is 0, move the entire quantity to the new order (child order)
                 if ($keepQty == 0) {
-                    $movedTotal    += ($origQty * $item->rate); // Moving all quantity to the new order
+                    $movedTotal += ($origQty * $item->rate);  // Moving full quantity to new order
                 } else {
-                    $movedTotal    += ($keepQty * $item->rate); // Only keeping the quantity in the original order
+                    $movedTotal += ($keepQty * $item->rate);  // Only keeping the quantity in the original order
                 }
             }
 
-            // 4) Build new order_id (append “A” to segment #2)
-            $parts      = explode('/', $order->order_id);
-            $parts[2]  .= 'SPL';
+            // 4) Generate the new order ID
+            $parts = explode('/', $order->order_id);
+            $parts[2] .= 'SPL';
             $newOrderCode = implode('/', $parts);
 
-            // 5) Create the new order with the correct movedTotal
+            // 5) Create the new order (child order)
             $newOrder = OrderModel::create([
-                'user_id'    => $order->user_id,
-                'order_id'   => $newOrderCode,
+                'user_id' => $order->user_id,
+                'order_id' => $newOrderCode,
                 'order_date' => Carbon::now(),
-                'amount'     => $movedTotal,
-                'type'       => $order->type,
+                'amount' => $movedTotal,
+                'type' => $order->type,
             ]);
 
-            // 6) Update the original order’s amount
+            // 6) Update the original order's amount
             $order->update(['amount' => $originalTotal]);
 
-            // 7) Now split or move each item‑row
+            // 7) Split or move the items
             foreach ($order->order_items as $item) {
                 $origQty = $item->quantity;
-                $key = $item->product_code . '_' . $item->size; // Create key based on product_code + size
+                $key = $item->product_code . '_' . $item->size;  // Create key based on product_code + size
                 $keepQty = $keepMap->get($key, 0);
                 $moveQty = $origQty - $keepQty;
 
-                // If quantity is 0 for the main table, move the entire quantity to the new order (child)
+                // If quantity is 0, move the full quantity to the child order
                 if ($moveQty == 0 && $keepQty == 0) {
-                    // Move the full quantity to the child order (new order)
-                    $item->update(['order_id' => $newOrder->id, 'quantity' => $origQty]);
-                    continue;
+                    // Move the full quantity to the new order (child)
+                    $item->update(['order_id' => $newOrder->order_id, 'quantity' => $origQty]);
+                    continue;  // Skip to the next item
                 }
 
-                if ($keepQty === $origQty) {
-                    continue; // Nothing to move, skip
+                // If quantity is 0 for the original order, move it entirely to the child order
+                if ($keepQty === 0) {
+                    $item->update(['order_id' => $newOrder->order_id, 'quantity' => $origQty]);
+                    continue;  // Skip to the next item
                 }
 
+                // If the original quantity is more than the kept quantity, split the item
                 if ($keepQty > 0) {
-                    // Shrink the original row in the main table
+                    // Update the original item to the kept quantity
                     $item->update([
                         'quantity' => $keepQty,
-                        'total'    => $keepQty * $item->rate,
+                        'total' => $keepQty * $item->rate,
                     ]);
 
-                    // Create the remainder for the new order (child table)
+                    // Create a new row in the child order for the remaining quantity
                     OrderItemsModel::create([
-                        'order_id'     => $newOrder->id,
+                        'order_id' => $newOrder->order_id,
                         'product_code' => $item->product_code,
                         'product_name' => $item->product_name,
-                        'rate'         => $item->rate,
-                        'quantity'     => $moveQty,
-                        'total'        => $moveQty * $item->rate,
-                        'type'         => $item->type,
-                        'remarks'      => $item->remarks,
-                        'size'         => $item->size,
+                        'rate' => $item->rate,
+                        'quantity' => $moveQty,
+                        'total' => $moveQty * $item->rate,
+                        'type' => $item->type,
+                        'remarks' => $item->remarks,
+                        'size' => $item->size,
                     ]);
                 } else {
-                    // Move the entire row (if no quantity remains in the main table)
-                    $item->update(['order_id' => $newOrder->id]);
+                    // If no quantity remains in the original order, just move it to the child order
+                    $item->update(['order_id' => $newOrder->order_id]);
                 }
             }
 
             DB::commit();
 
-            // Generate invoices for both orders
+            // Generate invoices for both the original and new orders
             $generate_order_invoice = new InvoiceController();
-            $generate_order_invoice->generateorderInvoice($order->id, true);
-            $generate_order_invoice->generatePackingSlip($order->id, true);
+            $generate_order_invoice->generateorderInvoice($order->order_id, true);
+            $generate_order_invoice->generatePackingSlip($order->order_id, true);
 
-            $generate_order_invoice->generateorderInvoice($newOrder->id, true, false, '', true, $order->id);
+            $generate_order_invoice->generateorderInvoice($newOrder->id, true, false, '', true, $order->order_id);
             $generate_order_invoice->generatePackingSlip($newOrder->id, true);
 
             return response()->json([
-                'message'        => 'Order split successfully.',
+                'message' => 'Order split successfully.',
                 'original_order' => $order->fresh('order_items'),
-                'new_order'      => $newOrder->load('order_items'),
+                'new_order' => $newOrder->load('order_items'),
             ], 200);
 
         } catch (\Exception $e) {
@@ -1461,9 +1594,8 @@ class UpdateController extends Controller
 
             return response()->json([
                 'message' => 'Failed to split order.',
-                'error'   => $e->getMessage(),
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
-
 }
