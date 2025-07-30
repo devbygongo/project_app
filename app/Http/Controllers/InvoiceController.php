@@ -844,7 +844,7 @@ class InvoiceController extends Controller
 
 		// Output the PDF
 		$publicPath = 'uploads/packing_slip/';
-		$fileName = 'ps_' . $sanitizedUserId . '.pdf';
+		$fileName = 'ps_' . $sanitizedUserId . '_' . $sanitizedUserId . '.pdf';
 		$filePath = storage_path('app/public/' . $publicPath . $fileName);
 
         // Check if the file already exists and delete it
