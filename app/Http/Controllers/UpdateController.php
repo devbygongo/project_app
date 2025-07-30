@@ -1536,13 +1536,13 @@ class UpdateController extends Controller
                 // If quantity is 0, move the full quantity to the child order
                 if ($moveQty == 0 && $keepQty == 0) {
                     // Move the full quantity to the new order (child)
-                    $item->update(['order_id' => $newOrder->order_id, 'quantity' => $origQty]);
+                    $item->update(['order_id' => $newOrder->id, 'quantity' => $origQty]);
                     continue;  // Skip to the next item
                 }
 
                 // If quantity is 0 for the original order, move it entirely to the child order
                 if ($keepQty === 0) {
-                    $item->update(['order_id' => $newOrder->order_id, 'quantity' => $origQty]);
+                    $item->update(['order_id' => $newOrder->id, 'quantity' => $origQty]);
                     continue;  // Skip to the next item
                 }
 
