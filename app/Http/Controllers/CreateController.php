@@ -547,6 +547,7 @@ class CreateController extends Controller
                         'order_date' => Carbon::now(),
                         'amount' => $basic_amount_total,
                         'type' => 'basic',
+                        'remarks' => $request->input('remarks'),
                     ]);
                     //order_table_id
 
@@ -593,6 +594,7 @@ class CreateController extends Controller
                         'order_date' => Carbon::now(),
                         'amount' => $gst_amount_total,
                         'type' => 'gst',
+                        'remarks' => $request->input('remarks'),
                     ]);
 
                     //order_table_id
