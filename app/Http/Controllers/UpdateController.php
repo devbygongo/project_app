@@ -1485,7 +1485,8 @@ class UpdateController extends Controller
             // 2) Build a map of product_code + size → quantity
             $keepMap = collect($data['items'])
                 ->keyBy(function($item) {
-                    return $item['product_code'] . '_' . $item['size'];
+                    // return $item['product_code'] . '_' . $item['size'];
+                    return $item['product_code'] . '_' . ($item['size'] ?? '');
                 })
                 ->map(fn($i) => $i['quantity']);
 
@@ -1499,14 +1500,16 @@ class UpdateController extends Controller
                 $keepQty = $keepMap->get($key, 0);
 
                 // Sum the original total and moved total
-                $originalTotal += ($keepQty * $item->rate);
+                // $originalTotal += ($keepQty * $item->rate);
 
                 // If quantity is 0, move the entire quantity to the new order (child order)
-                if ($keepQty == 0) {
-                    $movedTotal += ($origQty * $item->rate);  // Moving full quantity to new order
-                } else {
-                    $movedTotal += ($keepQty * $item->rate);  // Only keeping the quantity in the original order
-                }
+                // if ($keepQty == 0) {
+                //     $movedTotal += ($origQty * $item->rate);  // Moving full quantity to new order
+                // } else {
+                //     $movedTotal += ($keepQty * $item->rate);  // Only keeping the quantity in the original order
+                // }
+                $originalTotal += ($keepQty * $item->rate);
+                $movedTotal += (($origQty - $keepQty) * $item->rate);
             }
 
             // 4) Generate the new order ID
@@ -1534,11 +1537,17 @@ class UpdateController extends Controller
                 $moveQty = $origQty - $keepQty;
 
                 // If quantity is 0, move the full quantity to the child order
-                if ($moveQty == 0 && $keepQty == 0) {
-                    // Move the full quantity to the new order (child)
+                // if ($moveQty == 0 && $keepQty == 0) {
+                //     // Move the full quantity to the new order (child)
+                //     $item->update(['order_id' => $newOrder->id, 'quantity' => $origQty]);
+                //     continue;  // Skip to the next item
+                // }
+
+                if ($keepQty == 0) {
                     $item->update(['order_id' => $newOrder->id, 'quantity' => $origQty]);
-                    continue;  // Skip to the next item
+                    continue;
                 }
+
 
                 // If quantity is 0 for the original order, move it entirely to the child order
                 if ($keepQty === 0) {
@@ -1555,20 +1564,22 @@ class UpdateController extends Controller
                     ]);
 
                     // Create a new row in the child order for the remaining quantity
-                    OrderItemsModel::create([
-                        'order_id' => $newOrder->id,
-                        'product_code' => $item->product_code,
-                        'product_name' => $item->product_name,
-                        'rate' => $item->rate,
-                        'quantity' => $moveQty,
-                        'total' => $moveQty * $item->rate,
-                        'type' => $item->type,
-                        'remarks' => $item->remarks,
-                        'size' => $item->size,
-                    ]);
+                    if ($moveQty > 0) {
+                        OrderItemsModel::create([
+                            'order_id' => $newOrder->id,
+                            'product_code' => $item->product_code,
+                            'product_name' => $item->product_name,
+                            'rate' => $item->rate,
+                            'quantity' => $moveQty,
+                            'total' => $moveQty * $item->rate,
+                            'type' => $item->type,
+                            'remarks' => $item->remarks,
+                            'size' => $item->size,
+                        ]);
+                    }
                 } else {
                     // If no quantity remains in the original order, just move it to the child order
-                    $item->update(['order_id' => $newOrder->order_id]);
+                    $item->update(['order_id' => $newOrder->id]);
                 }
             }
 
