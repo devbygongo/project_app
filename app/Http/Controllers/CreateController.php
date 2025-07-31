@@ -563,7 +563,6 @@ class CreateController extends Controller
                             'total' => $basic_product->rate * $basic_product->quantity,
                             'type' => $basic_product->type,
                             'remarks' => $basic_product->remarks,
-                            'size' => $product->size,
                         ]);
                     }
                 }
