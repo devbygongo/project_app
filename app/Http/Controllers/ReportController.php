@@ -12,8 +12,11 @@ use Carbon\Carbon;
 
 class ReportController extends Controller
 {
-    public function pendingOrderReport()
+    public function pendingOrderReport(Request $request)
     {
+
+        $sendWhatsApp = $request->input('send_whatsapp', true); // default true
+
         // Fetch pending orders
         $pendingOrders = OrderModel::select('order_id', 'order_date', 'type', 'user_id', 'amount')
             ->where('status', 'pending') // Assuming 'pending' is the status for pending orders
@@ -113,49 +116,51 @@ class ReportController extends Controller
 
         $fileUrl = asset('storage/' . $publicPath . $fileName);
 
-        // Send WhatsApp message
-        $whatsAppUtility = new sendWhatsAppUtility();
-        $fileUrlWithTimestamp = $fileUrl . '?t=' . time();
-        $templateParams = [
-            'name' => 'pending_order_report', // Replace with your WhatsApp template name
-            'language' => ['code' => 'en'],
-            'components' => [
-                [
-                    'type' => 'header',
-                    'parameters' => [
-                        [
-                            'type' => 'document',
-                            'document' => [
-                                'link' => $fileUrlWithTimestamp,
-                                'filename' => $fileName,
+        if ($sendWhatsApp) {
+            // Send WhatsApp message
+            $whatsAppUtility = new sendWhatsAppUtility();
+            $fileUrlWithTimestamp = $fileUrl . '?t=' . time();
+            $templateParams = [
+                'name' => 'pending_order_report', // Replace with your WhatsApp template name
+                'language' => ['code' => 'en'],
+                'components' => [
+                    [
+                        'type' => 'header',
+                        'parameters' => [
+                            [
+                                'type' => 'document',
+                                'document' => [
+                                    'link' => $fileUrlWithTimestamp,
+                                    'filename' => $fileName,
+                                ],
+                            ],
+                        ],
+                    ],
+                    [
+                        'type' => 'body',
+                        'parameters' => [
+                            [
+                                'type' => 'text',
+                                'text' => "Pending Orders",
+                            ],
+                            [
+                                'type' => 'text',
+                                'text' => Carbon::now()->format('d-m-Y'),
                             ],
                         ],
                     ],
                 ],
-                [
-                    'type' => 'body',
-                    'parameters' => [
-                        [
-                            'type' => 'text',
-                            'text' => "Pending Orders",
-                        ],
-                        [
-                            'type' => 'text',
-                            'text' => Carbon::now()->format('d-m-Y'),
-                        ],
-                    ],
-                ],
-            ],
-        ];
+            ];
 
-        $adminMobileNumbers = User::where('role', 'admin')->pluck('mobile')->toArray();
+            $adminMobileNumbers = User::where('role', 'admin')->pluck('mobile')->toArray();
 
-        foreach ($adminMobileNumbers as $mobileNumber) {
-            if($mobileNumber == '+918961043773' || true)
-            {
-                $response = $whatsAppUtility->sendWhatsApp($mobileNumber, $templateParams, '', 'Pending Order Report');
-                if (isset($response['error'])) {
-                    echo "Failed to send WhatsApp message to $mobileNumber!";
+            foreach ($adminMobileNumbers as $mobileNumber) {
+                if($mobileNumber == '+918961043773' || true)
+                {
+                    $response = $whatsAppUtility->sendWhatsApp($mobileNumber, $templateParams, '', 'Pending Order Report');
+                    if (isset($response['error'])) {
+                        echo "Failed to send WhatsApp message to $mobileNumber!";
+                    }
                 }
             }
         }
