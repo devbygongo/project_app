@@ -740,7 +740,8 @@ class UpdateController extends Controller
             }
         }
         
-
+        Log::info('Split order request payload', $request->all());
+        
         $request->validate([
             'order_id' => 'required|string',
             'order_type' => 'required|string',
