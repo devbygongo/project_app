@@ -656,13 +656,17 @@ class CreateController extends Controller
                     // Check if the current order is of type 'basic' and has an id
                     if ($order->type === 'basic') {
                         // Generate invoice and append to the current order as 'pdf'
-                        $order->pdf = $generate_order_invoice->generateorderInvoice($create_order_basic->id);
+                        $order->pdf = $generate_order_invoice->generateorderInvoice($create_order_basic->id, [
+                            'is_edited' => false
+                        ]);
                         $order->packing_slip = $generate_order_invoice->generatePackingSlip($create_order_basic->id);
                     }
                     // Check if the current order is of type 'gst' and has an id
                     elseif ($order->type === 'gst') {
                         // Generate invoice and append to the current order as 'pdf'
-                        $order->pdf = $generate_order_invoice->generateorderInvoice($create_order_gst->id);
+                        $order->pdf = $generate_order_invoice->generateorderInvoice($create_order_gst->id, [
+                            'is_edited' => false
+                        ]);
                         $order->packing_slip = $generate_order_invoice->generatePackingSlip($create_order_gst->id);
                     }
 
