@@ -780,12 +780,22 @@ class UpdateController extends Controller
             }
 
             if ($editType === 'split') {
+
+                Log::info('Split operation started', ['order_id' => $order->id]);
+
                 $splitItems = [];
                 $keepItems = [];
                 $splitTotal = 0;
                 $keepTotal = 0;
 
                 foreach ($request->items as $item) {
+                    Log::debug('Processing item', [
+                        'product_code' => $item['product_code'],
+                        'orig_quantity' => $item['orig_quantity'] ?? null,
+                        'quantity' => $item['quantity'],
+                        'markedForDeletion' => $item['markedForDeletion'] ?? false
+                    ]);
+
                     $moveQty = ($item['markedForDeletion'] ?? false)
                         ? $item['orig_quantity']
                         : max(0, ($item['orig_quantity'] ?? 0) - $item['quantity']);
@@ -813,6 +823,8 @@ class UpdateController extends Controller
                         $newOrderCode = $baseOrderId . 'SPL2';
                     }
 
+                    Log::info('Creating new split order', ['base_order_id' => $order->order_id]);
+
                     $newOrder = OrderModel::create([
                         'user_id' => $order->user_id,
                         'order_id' => $newOrderCode,
@@ -822,6 +834,8 @@ class UpdateController extends Controller
                     ]);
 
                     foreach ($splitItems as $item) {
+                        Log::debug('Creating item in split order', ['product_code' => $item['product_code'], 'quantity' => $item['quantity']]);
+
                         OrderItemsModel::create([
                             'order_id' => $newOrder->id,
                             'product_code' => $item['product_code'],
@@ -837,6 +851,8 @@ class UpdateController extends Controller
 
                     $is_split = true;
                     $old_order_id = $order->order_id;
+
+                    Log::info('Updating original order amount', ['keep_total' => $keepTotal]);
 
                     $order->update(['amount' => $keepTotal]);
                     $request->merge(['items' => $keepItems]);
