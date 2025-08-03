@@ -726,6 +726,7 @@ class UpdateController extends Controller
         $get_user = Auth::user();
 
         Log::info('Split order request payload', $request->all());
+        Log::info('ID', $id);
 
 
         $request->validate([
