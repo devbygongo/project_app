@@ -590,7 +590,7 @@ class InvoiceController extends Controller
 
         $fileUrl = asset('storage/' . $publicPath . $fileName);
 
-        $order->update(['order_invoice' => $fileUrl]);
+        OrderModel::where('id', $orderId)->update(['order_invoice' => $fileUrl]);
 
         $whatsAppUtility = new sendWhatsAppUtility();
         $fileUrlWithTimestamp = $fileUrl . '?t=' . time();
