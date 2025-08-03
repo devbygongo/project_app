@@ -40,7 +40,6 @@ use App\Utils\sendWhatsAppUtility;
 
 class CreateController extends Controller
 {
-    //
     public function user(Request $request)
     {
         $request->validate([
@@ -403,7 +402,7 @@ class CreateController extends Controller
                 ], 200);
             }
 
-            $get_product = CartModel::select('amount', 'quantity', 'product_code', 'product_name', 'rate', 'type', 'remarks', 'size')
+            $get_product = CartModel::select('amount', 'quantity', 'product_code', 'product_name', 'rate', 'size', 'type', 'remarks')
                                         ->where('user_id', $userId)
                                         ->get();
 
@@ -426,7 +425,7 @@ class CreateController extends Controller
         if($user_type == 'zeroprice')
         {
 
-            $get_product = CartModel::select('amount', 'quantity', 'product_code', 'product_name', 'rate', 'type', 'remarks', 'size')
+            $get_product = CartModel::select('amount', 'quantity', 'product_code', 'product_name', 'rate', 'size', 'type', 'remarks')
                                         ->where('user_id', $userId)
                                         ->get();
 
@@ -465,9 +464,9 @@ class CreateController extends Controller
                             'rate' => $product->rate,
                             'quantity' => $product->quantity,
                             'total' => $product->rate * $product->quantity,
+                            'size' => $product->size,
                             'type' => $product->type,
                             'remarks' => $product->remarks,
-                            'size' => $product->size,
                         ]);
                     }
                 }
@@ -521,7 +520,7 @@ class CreateController extends Controller
             $create_order_basic = null;
             $create_order_gst = null;
 
-            $get_basic_product = CartModel::select('amount', 'quantity', 'product_code', 'product_name', 'rate', 'type', 'remarks')
+            $get_basic_product = CartModel::select('amount', 'quantity', 'product_code', 'product_name', 'rate', 'size', 'type', 'remarks')
                                         ->where('user_id', $userId)
                                         ->where('type', 'basic')
                                         ->get();
@@ -561,6 +560,7 @@ class CreateController extends Controller
                             'rate' => $basic_product->rate,
                             'quantity' => $basic_product->quantity,
                             'total' => $basic_product->rate * $basic_product->quantity,
+                            'size' => $basic_product->size,
                             'type' => $basic_product->type,
                             'remarks' => $basic_product->remarks,
                         ]);
@@ -569,7 +569,7 @@ class CreateController extends Controller
 
             }
 
-            $get_gst_product = CartModel::select('amount', 'quantity', 'product_code', 'product_name', 'rate', 'type', 'remarks')
+            $get_gst_product = CartModel::select('amount', 'quantity', 'product_code', 'product_name', 'rate', 'size', 'type', 'remarks')
                                         ->where('user_id', $userId)
                                         ->where('type', 'gst')
                                         ->get();
@@ -607,6 +607,7 @@ class CreateController extends Controller
                             'rate' => $gst_product->rate,
                             'quantity' => $gst_product->quantity,
                             'total' => $gst_product->rate * $gst_product->quantity,
+                            'size' => $gst_product->size,
                             'type' => $gst_product->type,
                             'remarks' => $gst_product->remarks,
                         ]);
@@ -684,256 +685,6 @@ class CreateController extends Controller
             }  
         }  
     }
-
-    //
-    public function new_orders(Request $request)
-    {
-        $get_user = Auth::User();
-
-        if($get_user->role == 'user') {
-            $userId = $get_user->id;
-        } else {
-            $request->validate([
-                'user_id' => 'required',
-            ]);
-            $userId = $request->input('user_id');
-        }
-
-        $current_user = User::select('type')->where('id', $userId)->first();
-        $user_type = $current_user->type;
-
-        $orders_data = [];
-        $invoice_queue = [];
-
-        if ($user_type == 'zeroprice') {
-
-            $get_product = CartModel::select('amount', 'quantity', 'product_code', 'product_name', 'rate', 'type', 'remarks')
-                ->where('user_id', $userId)
-                ->get();
-
-            $get_counter = CounterModel::select('prefix', 'counter', 'postfix')->where('name', 'order_zeroprice')->first();
-
-            if ($get_counter && count($get_product) > 0) {
-
-                $get_order_id = $get_counter->prefix . $get_counter->counter . $get_counter->postfix;
-
-                $amount_total = 0;
-                foreach ($get_product as $product) {
-                    $amount_total += (($product->rate) * ($product->quantity));
-                }
-
-                $create_order = OrderModel::create([
-                    'user_id' => $userId,
-                    'order_id' => $get_order_id,
-                    'order_date' => Carbon::now(),
-                    'amount' => $amount_total,
-                    'type' => 'basic',
-                ]);
-
-                foreach ($get_product as $product) {
-                    OrderItemsModel::create([
-                        'order_id' => $create_order->id,
-                        'product_code' => $product->product_code,
-                        'product_name' => $product->product_name,
-                        'rate' => $product->rate,
-                        'quantity' => $product->quantity,
-                        'total' => $product->rate * $product->quantity,
-                        'type' => $product->type,
-                        'remarks' => $product->remarks,
-                    ]);
-                }
-
-                CounterModel::where('name', 'order_zeroprice')
-                    ->update(['counter' => ($get_counter->counter + 1)]);
-
-                $orders_data[] = [
-                    'order_id' => $create_order->order_id,
-                    'amount' => $create_order->amount,
-                    'type' => $create_order->type,
-                    'order_date' => $create_order->order_date,
-                ];
-
-                $invoice_queue[] = [
-                    'type' => 'zeroprice',
-                    'order_table_id' => $create_order->id
-                ];
-
-                CartModel::where('user_id', $userId)->delete();
-            }
-
-        } else {
-            $create_order_basic = null;
-            $create_order_gst = null;
-
-            // BASIC PRODUCTS
-            $get_basic_product = CartModel::select('amount', 'quantity', 'product_code', 'product_name', 'rate', 'type', 'remarks')
-                ->where('user_id', $userId)
-                ->where('type', 'basic')
-                ->get();
-
-            $get_counter_basic = CounterModel::select('prefix', 'counter', 'postfix')->where('name', 'order_basic')->first();
-
-            if ($get_counter_basic && count($get_basic_product) > 0) {
-                $get_order_id = $get_counter_basic->prefix . $get_counter_basic->counter . $get_counter_basic->postfix;
-
-                $basic_amount_total = 0;
-                foreach ($get_basic_product as $basic_product) {
-                    $basic_amount_total += (($basic_product->rate) * ($basic_product->quantity));
-                }
-
-                $create_order_basic = OrderModel::create([
-                    'user_id' => $userId,
-                    'order_id' => $get_order_id,
-                    'order_date' => Carbon::now(),
-                    'amount' => $basic_amount_total,
-                    'type' => 'basic',
-                ]);
-
-                foreach ($get_basic_product as $basic_product) {
-                    OrderItemsModel::create([
-                        'order_id' => $create_order_basic->id,
-                        'product_code' => $basic_product->product_code,
-                        'product_name' => $basic_product->product_name,
-                        'rate' => $basic_product->rate,
-                        'quantity' => $basic_product->quantity,
-                        'total' => $basic_product->rate * $basic_product->quantity,
-                        'type' => $basic_product->type,
-                        'remarks' => $basic_product->remarks,
-                    ]);
-                }
-
-                CounterModel::where('name', 'order_basic')
-                    ->update(['counter' => ($get_counter_basic->counter + 1)]);
-
-                $orders_data[] = [
-                    'order_id' => $create_order_basic->order_id,
-                    'amount' => $create_order_basic->amount,
-                    'type' => $create_order_basic->type,
-                    'order_date' => $create_order_basic->order_date,
-                ];
-
-                $invoice_queue[] = [
-                    'type' => 'basic',
-                    'order_table_id' => $create_order_basic->id
-                ];
-            }
-
-            // GST PRODUCTS
-            $get_gst_product = CartModel::select('amount', 'quantity', 'product_code', 'product_name', 'rate', 'type', 'remarks')
-                ->where('user_id', $userId)
-                ->where('type', 'gst')
-                ->get();
-
-            $get_counter_gst = CounterModel::select('prefix', 'counter', 'postfix')->where('name', 'order_gst')->first();
-
-            if ($get_counter_gst && count($get_gst_product) > 0) {
-                $get_order_id = $get_counter_gst->prefix . $get_counter_gst->counter . $get_counter_gst->postfix;
-
-                $gst_amount_total = 0;
-                foreach ($get_gst_product as $gst_product) {
-                    $gst_amount_total += (($gst_product->rate) * ($gst_product->quantity));
-                }
-
-                $create_order_gst = OrderModel::create([
-                    'user_id' => $userId,
-                    'order_id' => $get_order_id,
-                    'order_date' => Carbon::now(),
-                    'amount' => $gst_amount_total,
-                    'type' => 'gst',
-                ]);
-
-                foreach ($get_gst_product as $gst_product) {
-                    OrderItemsModel::create([
-                        'order_id' => $create_order_gst->id,
-                        'product_code' => $gst_product->product_code,
-                        'product_name' => $gst_product->product_name,
-                        'rate' => $gst_product->rate,
-                        'quantity' => $gst_product->quantity,
-                        'total' => $gst_product->rate * $gst_product->quantity,
-                        'type' => $gst_product->type,
-                        'remarks' => $gst_product->remarks,
-                    ]);
-                }
-
-                CounterModel::where('name', 'order_gst')
-                    ->update(['counter' => ($get_counter_gst->counter + 1)]);
-
-                $orders_data[] = [
-                    'order_id' => $create_order_gst->order_id,
-                    'amount' => $create_order_gst->amount,
-                    'type' => $create_order_gst->type,
-                    'order_date' => $create_order_gst->order_date,
-                ];
-
-                $invoice_queue[] = [
-                    'type' => 'gst',
-                    'order_table_id' => $create_order_gst->id
-                ];
-            }
-
-            CartModel::where('user_id', $userId)->delete();
-        }
-
-        // Respond immediately
-        $hardcodedMobile = '+918777623806'; // <-- update this number
-
-        // Generate invoice and send to WhatsApp in background
-        // dispatch(function () use ($invoice_queue, $hardcodedMobile) {
-        //     foreach ($invoice_queue as $item) {
-        //         if ($item['type'] === 'zeroprice') {
-        //             $pdf = (new InvoiceControllerZP())->new_generateorderInvoice($item['order_table_id']);
-        //             // sendInvoiceToWhatsApp($hardcodedMobile, $pdf, $item['order_table_id']);
-        //             $whatsAppUtility = new \App\Utilities\sendWhatsAppUtility();
-        //             $whatsAppUtility->sendWhatsApp($hardcodedMobile, $pdf, $item['order_table_id']);
-        //         } else {
-        //             $pdf = (new InvoiceController())->new_generateorderInvoice($item['order_table_id']);
-        //             // Optionally also generate packing slip:
-        //             $packing_slip = (new InvoiceController())->new_generatePackingSlip($item['order_table_id']);
-        //             // sendInvoiceToWhatsApp($hardcodedMobile, $pdf, $item['order_table_id']);
-        //             $whatsAppUtility = new \App\Utilities\sendWhatsAppUtility();
-        //             $whatsAppUtility->sendWhatsApp($hardcodedMobile, $pdf, $item['order_table_id']);
-        //             // Optionally send packing slip too
-        //         }
-        //     }
-        // })->afterResponse();
-
-        dispatch(function () use ($invoice_queue, $hardcodedMobile) {
-            foreach ($invoice_queue as $item) {
-                if ($item['type'] === 'zeroprice') {
-                    $pdf = (new InvoiceControllerZP())->new_generateorderInvoice($item['order_table_id']);
-                    // Call WhatsApp Utility here with your parameters
-                    sendWhatsAppUtility::sendWhatsApp($hardcodedMobile, $pdf, $item['order_table_id'], 'zeroprice_order'); // <-- update $pdf/$params as needed
-                } else {
-                    $pdf = (new InvoiceController())->new_generateorderInvoice($item['order_table_id']);
-                    // Optionally generate packing slip (as you do)
-                    $packing_slip = (new InvoiceController())->new_generatePackingSlip($item['order_table_id']);
-                    // Call WhatsApp Utility
-                    // sendWhatsAppUtility::sendWhatsApp($hardcodedMobile, $pdf, $item['order_table_id'], 'normal_order');
-                    $response = sendWhatsAppUtility::sendWhatsApp($hardcodedMobile, $pdf, $item['order_table_id'], 'normal_order');
-                    \Log::info("WhatsApp Utility called for order {$item['order_table_id']}, response: {$response}");
-                }
-            }
-        })->afterResponse();
-
-        if (!empty($orders_data)) {
-            return response()->json([
-                'message' => 'Order created successfully! Invoice will be generated and sent to WhatsApp shortly.',
-                'data' => $orders_data
-            ], 201);
-        } else {
-            return response()->json([
-                'message' => 'Sorry, failed to create order!',
-                'data' => 'Error!'
-            ], 400);
-        }
-    }
-
-    // Helper function (update this with your WhatsApp logic)
-    // function sendInvoiceToWhatsApp($mobile, $pdf, $orderId) {
-    //     // Implement your actual WhatsApp sending logic here
-    //     \Log::info("Invoice for order {$orderId} sent to WhatsApp: {$mobile} (PDF: {$pdf})");
-    // }
-    //
 
     public function orders_items(Request $request)
     {
@@ -1186,7 +937,6 @@ class CreateController extends Controller
         }
     }
 
-    // make products image upload
     public function uploadProductsImage(Request $request)
     {
         $request->validate([
@@ -1237,38 +987,6 @@ class CreateController extends Controller
         : response()->json(['message' => 'No changes detected.'], 304);
     }  
 
-    // Create operation
-    // public function stock_cart_store(Request $request)
-    // {
-    //     $validated = $request->validate([
-    //         'product_code' => 'required|string|exists:t_products,product_code',
-    //         'product_name' => 'required|string|exists:t_products,product_name',
-    //         'quantity' => 'required|integer|min:1',
-    //         'godown_id' => 'required|integer|exists:t_godown,id',
-    //         'type' => 'required|in:IN,OUT',
-    //     ]);
-
-    //     $create_stock_cart = StockCartModel::create([
-    //         'user_id' => Auth::id(),
-    //         'product_code' => $validated['product_code'],
-    //         'product_name' => $validated['product_name'],
-    //         'quantity' => $validated['quantity'],
-    //         'godown_id' => $validated['godown_id'],
-    //         'type' => $validated['type'],
-    //     ]);
-
-    //     return $create_stock_cart
-    //     ? response()->json([
-    //         'status' => true,
-    //         'message' => 'Stock cart item created successfully.',
-    //         'data' => $create_stock_cart->makeHidden(['id', 'updated_at', 'created_at']),
-    //     ], 200)
-    //     : response()->json([
-    //         'status' => false,
-    //         'message' => 'Failed to create stock cart item.',
-    //     ], 200);
-    // }
-
     public function stock_cart_store(Request $request)
     {
         $validated = $request->validate([
@@ -1304,7 +1022,6 @@ class CreateController extends Controller
                 'message' => 'Failed to create stock cart items.',
             ], 200);
     }
-
 
     public function createStockOrder(Request $request)
     {
