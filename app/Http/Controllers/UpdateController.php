@@ -727,6 +727,19 @@ class UpdateController extends Controller
 
         Log::info('Split order request payload', $request->all());
 
+        if (is_numeric($request->input('order_id'))) {
+            $internalId = (int) $request->input('order_id');
+            $dbOrder = OrderModel::select('order_id')->where('id', $internalId)->first();
+        
+            if ($dbOrder) {
+                $request->merge([
+                    'order_id' => $dbOrder->order_id
+                ]);
+            } else {
+                return response()->json(['message' => 'Order ID not found for numeric input.'], 404);
+            }
+        }
+        
 
         $request->validate([
             'order_id' => 'required|string',
