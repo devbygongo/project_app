@@ -515,8 +515,8 @@ class ViewController extends Controller
                 ->first();
 
             // Check if the product code appears in other product's machine_part_no
-            $has_spares = ProductModel::where('machine_part_no', 'like', "%{$product->product_code}%")
-            ->where('product_code', '!=', $product->product_code) // Exclude the current product
+            $has_spares = ProductModel::where('machine_part_no', 'like', "%{$prd_rec->product_code}%")
+            ->where('product_code', '!=', $prd_rec->product_code) // Exclude the current product
             ->exists();
 
             // Return processed product data
