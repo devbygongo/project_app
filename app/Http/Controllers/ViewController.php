@@ -550,6 +550,26 @@ class ViewController extends Controller
                 'count' => $total_products_count], 200);
     }
 
+    public function getLatestUpdate($platform)
+    {
+        // Hardcoded update data for Android and iOS
+        if ($platform === 'android') {
+            return response()->json([
+                'platform' => 'android',
+                'update_type' => true, // Android update is forced
+            ]);
+        }
+
+        if ($platform === 'ios') {
+            return response()->json([
+                'platform' => 'ios',
+                'update_type' => false, // iOS update is optional
+            ]);
+        }
+
+        return response()->json(['message' => 'No updates found for this platform.'], 404);
+    }
+
     public function get_spares(Request $request, $lang = 'eng', $code = null)
     {
         $get_user = Auth::User();
