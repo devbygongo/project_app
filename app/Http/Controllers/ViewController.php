@@ -556,7 +556,7 @@ class ViewController extends Controller
         if ($platform === 'android') {
             return response()->json([
                 'platform' => 'android',
-                'update_type' => "true", // Android update is forced
+                'update_type' => "false", // Android update is forced
             ]);
         }
 
