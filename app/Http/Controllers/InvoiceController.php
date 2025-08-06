@@ -540,6 +540,11 @@ class InvoiceController extends Controller
 
     public function generateorderInvoice($orderId, array $options = [])
     {
+
+        $get_user = Auth::User();
+
+        $logged_user_id = $get_user->id;
+
         $is_edited = $options['is_edited'] ?? false;
         $is_merged = $options['is_merged'] ?? false;
         $merged_orders = $options['merged_orders'] ?? '';
@@ -684,19 +689,28 @@ class InvoiceController extends Controller
             ];
         };
 
-        foreach ($mobileNumbers as $mobileNumber) {
-            if ($mobileNumber != '+919951263652') {
-                $whatsAppUtility->sendWhatsApp($mobileNumber, $sendDocParam($adminTemplate, $adminBodyParams), '', 'Admin Order Invoice');
+        if($logged_user_id != 75){
+            foreach ($mobileNumbers as $mobileNumber) {
+                if ($mobileNumber != '+919951263652') {
+                    $whatsAppUtility->sendWhatsApp($mobileNumber, $sendDocParam($adminTemplate, $adminBodyParams), '', 'Admin Order Invoice');
+                }
             }
-        }
 
-        $whatsAppUtility->sendWhatsApp($user->mobile, $sendDocParam($userTemplate, $userBodyParams), '', 'User Order Invoice');
+            $whatsAppUtility->sendWhatsApp($user->mobile, $sendDocParam($userTemplate, $userBodyParams), '', 'User Order Invoice');
+        }else{
+            $mobileNumber = '+917003541353';
+            $whatsAppUtility->sendWhatsApp($mobileNumber, $sendDocParam($adminTemplate, $adminBodyParams), '', 'Admin Order Invoice');
+        }
 
         return $fileUrl;
     }
 
     public function generatePackingSlip($orderId, $is_edited = false, $is_download = false)
     {
+        $get_user = Auth::User();
+
+        $logged_user_id = $get_user->id;
+
         $order = OrderModel::select('user_id','order_id', 'amount', 'order_date','type', 'remarks')
                             ->where('id', $orderId)
                             ->first();
@@ -856,18 +870,19 @@ class InvoiceController extends Controller
                     ]
                 ],
             ];
-
-            foreach ($mobileNumbers as $mobileNumber) 
-            {
-                if($mobileNumber == '+919951263652')
+            if($logged_user_id != 75){
+                foreach ($mobileNumbers as $mobileNumber) 
                 {
-                    // Send message for each number
-                    $response = $whatsAppUtility->sendWhatsApp($mobileNumber, $templateParams, '', 'Admin Order Invoice');
-
-                    // Check if the response has an error or was successful
-                    if (isset($responseArray['error'])) 
+                    if($mobileNumber == '+919951263652')
                     {
-                        echo "Failed to send order to Whatsapp!";
+                        // Send message for each number
+                        $response = $whatsAppUtility->sendWhatsApp($mobileNumber, $templateParams, '', 'Admin Order Invoice');
+
+                        // Check if the response has an error or was successful
+                        if (isset($responseArray['error'])) 
+                        {
+                            echo "Failed to send order to Whatsapp!";
+                        }
                     }
                 }
             }
@@ -916,17 +931,19 @@ class InvoiceController extends Controller
                 ],
             ];
 
-            foreach ($mobileNumbers as $mobileNumber) 
-            {
-                if($mobileNumber == '+919951263652')
+            if($logged_user_id != 75){
+                foreach ($mobileNumbers as $mobileNumber) 
                 {
-                    // Send message for each number
-                    $response = $whatsAppUtility->sendWhatsApp($mobileNumber, $templateParams, '', 'Admin Order Invoice');
-
-                    // Check if the response has an error or was successful
-                    if (isset($responseArray['error'])) 
+                    if($mobileNumber == '+919951263652')
                     {
-                        echo "Failed to send order to Whatsapp!";
+                        // Send message for each number
+                        $response = $whatsAppUtility->sendWhatsApp($mobileNumber, $templateParams, '', 'Admin Order Invoice');
+
+                        // Check if the response has an error or was successful
+                        if (isset($responseArray['error'])) 
+                        {
+                            echo "Failed to send order to Whatsapp!";
+                        }
                     }
                 }
             }
