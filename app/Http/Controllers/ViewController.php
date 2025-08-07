@@ -1116,8 +1116,9 @@ class ViewController extends Controller
 
         if ($get_user_orders->isEmpty()) {
             return response()->json([
-                'message' => 'Sorry, no data available!',
-            ], 404);
+                'message' => 'Fetch data successfully!',
+                'data' => []
+            ], 200);
         } else {
             return response()->json([
                 'message' => 'Fetched data successfully!',
