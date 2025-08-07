@@ -1068,8 +1068,9 @@ class ViewController extends Controller
 
         else {
             return response()->json([
-                'message' => 'Failed get data successfully!',
-            ], 404);
+                'message' => 'Fetch data successfully!',
+                'data' => []
+            ], 200);
         }    
     }
 
