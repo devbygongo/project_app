@@ -17,6 +17,7 @@ class StockCartModel extends Model
         'quantity',
         'godown_id',
         'type',
+        'size',
     ];
 
     // Relationship with GodownModel

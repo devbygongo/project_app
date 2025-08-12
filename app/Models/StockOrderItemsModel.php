@@ -17,6 +17,7 @@ class StockOrderItemsModel extends Model
         'godown_id',
         'quantity',
         'type',
+        'size',
     ];
 
     // Define the relationship to the Product model
