@@ -1079,6 +1079,7 @@ class UpdateController extends Controller
                     'quantity' => 'required|integer|min:1',
                     'godown_id' => 'required|integer|exists:t_godown,id',
                     'type' => 'required|in:IN,OUT',
+                    'size' => 'nullable',
                 ]);
 
                 // Update the stock cart item
