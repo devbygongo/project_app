@@ -1011,6 +1011,7 @@ class CreateController extends Controller
                 'quantity' => $item['quantity'],
                 'godown_id' => $item['godown_id'],
                 'type' => $item['type'],
+                'size' => $item['size'] ?? null, // Optional size field
             ]);
             $createdItems[] = $createdItem->makeHidden(['id', 'created_at', 'updated_at']);
         }
@@ -1082,6 +1083,7 @@ class CreateController extends Controller
                     'godown_id' => $item->godown_id,
                     'quantity' => $item->quantity,
                     'type' => $item->type,
+                    'size' => $item->size,
                 ]);
             }
 
@@ -1099,7 +1101,7 @@ class CreateController extends Controller
                     'type' => $stockOrder->type,
                     'remarks' => $stockOrder->remarks,
                     'items' => $cartItems->map(function ($item) {
-                        return $item->only(['product_code', 'product_name', 'godown_id', 'quantity', 'type']);
+                        return $item->only(['product_code', 'product_name', 'godown_id', 'quantity', 'type', 'size']);
                     }),
                 ],
                 'status' => 'true',
