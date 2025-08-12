@@ -1000,6 +1000,7 @@ class CreateController extends Controller
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.godown_id' => 'required|integer|exists:t_godown,id',
             'items.*.type' => 'required|in:IN,OUT',
+            'items.*.size' => 'nullable',
         ]);
 
         $createdItems = [];
