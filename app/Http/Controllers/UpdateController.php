@@ -1088,6 +1088,7 @@ class UpdateController extends Controller
                     'quantity' => $validated['quantity'],
                     'godown_id' => $validated['godown_id'],
                     'type' => $validated['type'],
+                    'size' => $validated['size'],
                 ]);
 
                 // Return the success response
