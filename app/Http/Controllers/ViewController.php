@@ -1541,7 +1541,7 @@ class ViewController extends Controller
                         'attachment' => $stockOrder->pdf,
                         'user' => $stockOrder->user ? $stockOrder->user->name : '-',
                         'items' => $stockOrder->items->map(function ($item) {
-                            return array_merge($item->only(['product_code', 'product_name','godown_id', 'quantity', 'type']), [
+                            return array_merge($item->only(['product_code', 'product_name','godown_id', 'quantity', 'type', 'size']), [
                                 'product_image' => ProductModel::where('product_code', $item->product_code)->value('product_image'),
                             ]);
                         }),
@@ -1566,7 +1566,7 @@ class ViewController extends Controller
                             'attachment' => $order->pdf,
                             'user' => $order->user ? $order->user->name : '-',
                             'items' => $order->items->map(function ($item) {
-                                return array_merge($item->only(['product_code', 'product_name', 'godown_id', 'quantity', 'type']), [
+                                return array_merge($item->only(['product_code', 'product_name', 'godown_id', 'quantity', 'type', 'size']), [
                                     'product_image' => ProductModel::where('product_code', $item->product_code)->value('product_image'),
                                 ]);
                             }),
