@@ -1112,6 +1112,7 @@ class UpdateController extends Controller
                 'items.*.godown_id' => 'required|integer|exists:t_godown,id',
                 'items.*.quantity' => 'required|integer|min:1',
                 'items.*.type' => 'required|in:IN,OUT',
+                'items.*.size' => 'nullable',
             ]);
 
             // Fetch the stock order by order_id
@@ -1153,6 +1154,7 @@ class UpdateController extends Controller
                     'godown_id' => $item['godown_id'],
                     'quantity' => $item['quantity'],
                     'type' => $item['type'],
+                    'size' => $item['size'] ?? null,
                 ]);
             }
 
