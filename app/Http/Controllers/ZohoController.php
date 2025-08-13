@@ -91,6 +91,13 @@ class ZohoController extends Controller
             return response()->json(['message' => 'Order not found!'], 404);
         }
 
+        // Calculate the tax-exclusive total and tax amount if the order total is inclusive of tax
+        // Assuming tax is 18% (adjust the tax rate as needed)
+        $taxRate = 0.18;  // Example: 18% tax
+
+        $taxExclusiveAmount = $order->amount / (1 + $taxRate);  // Exclude tax
+        $taxAmount = $order->amount - $taxExclusiveAmount;  // Calculate the tax amount
+
         // Prepare the line items for the Zoho quote
         $lineItems = [];
 
@@ -100,7 +107,7 @@ class ZohoController extends Controller
                 "description" => $item->remarks ?? "No description",  // Optional description
                 "quantity" => $item->quantity,
                 "rate" => $item->rate,
-                "amount" => $item->total,
+                "amount" => $item->total,  // The total of each item (including tax)
             ];
         }
 
@@ -109,8 +116,13 @@ class ZohoController extends Controller
             "customer_id" => 786484000000198301,  // Assuming the user_id is the customer_id in Zoho Books
             "date" => now()->format('Y-m-d'),
             "line_items" => $lineItems,
-            "total" => $order->amount,  // Total amount from the order
+            "total" => $taxExclusiveAmount,  // Total excluding tax
             "status" => "draft",  // Status can be 'draft' or 'sent'
+            "tax" => [
+                "name" => "GST",  // Replace with your actual tax name (e.g., GST, VAT, etc.)
+                "percentage" => $taxRate * 100,  // Tax rate (as a percentage)
+                "amount" => $taxAmount,  // Tax amount to be applied
+            ],
         ];
 
         // Get access token and the organization ID
@@ -136,6 +148,7 @@ class ZohoController extends Controller
 
         return response()->json(['error' => 'Failed to create estimate', 'details' => $response->json()], 400);
     }
+
 
 
 }
