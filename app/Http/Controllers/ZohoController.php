@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Models\OrderModel;
+
+use App\Models\OrderItemsModel;
 
 class ZohoController extends Controller
 {
@@ -64,6 +68,70 @@ class ZohoController extends Controller
 
         if ($response->successful()) {
             return response()->json(['message' => 'Estimate created successfully', 'data' => $response->json()]);
+        }
+
+        return response()->json(['error' => 'Failed to create estimate', 'details' => $response->json()], 400);
+    }
+
+    public function zoho_quote(Request $request)
+    {
+        $get_user = Auth::user();  // Get the authenticated user
+
+        // Validate the incoming request to ensure order_id is provided
+        $request->validate([
+            'order_id' => 'required|string',
+        ]);
+
+        // Fetch the order using the order_id passed in the request
+        $order = OrderModel::with('order_items.product')  // Eager load order items and product details
+            ->where('order_id', $request->input('order_id'))
+            ->first();
+
+        if (!$order) {
+            return response()->json(['message' => 'Order not found!'], 404);
+        }
+
+        // Prepare the line items for the Zoho quote
+        $lineItems = [];
+
+        foreach ($order->order_items as $item) {
+            $lineItems[] = [
+                "name" => $item->product_name.' '.$item->product_code,  // Using product name
+                "description" => $item->remarks ?? "No description",  // Optional description
+                "quantity" => $item->quantity,
+                "rate" => $item->rate,
+                "amount" => $item->total,
+            ];
+        }
+
+        // Now create the estimate (quote) data for Zoho Books
+        $estimateData = [
+            "customer_id" => $order->user_id,  // Assuming the user_id is the customer_id in Zoho Books
+            "date" => now()->format('Y-m-d'),
+            "line_items" => $lineItems,
+            "total" => $order->amount,  // Total amount from the order
+            "status" => "draft",  // Status can be 'draft' or 'sent'
+        ];
+
+        // Get access token and the organization ID
+        $accessToken = $this->getAccessToken();
+
+        if (!$accessToken) {
+            return response()->json(['error' => 'Unable to retrieve access token'], 400);
+        }
+
+        $organizationId = '60012918151';  // Replace with your actual organization ID
+
+        // Send the request to Zoho Books to create the estimate (quote)
+        $response = Http::withToken($accessToken)
+            ->withHeaders(['X-com-zoho-books-organizationid' => $organizationId])
+            ->post(env('ZOHO_API_BASE_URL') . '/books/v3/estimates', $estimateData);
+
+        if ($response->successful()) {
+            return response()->json([
+                'message' => "Order : " . $order->order_id . " has been successfully pushed as a quote to Zoho.",
+                'data' => $response->json()
+            ], 200);
         }
 
         return response()->json(['error' => 'Failed to create estimate', 'details' => $response->json()], 400);
