@@ -33,6 +33,8 @@ class ZohoController extends Controller
             return response()->json(['error' => 'Unable to retrieve access token'], 400);
         }
 
+        $organizationId = '60012918151';  // Use the correct organization ID here
+
         $estimateData = [
             "customer_id" => 123456,  // Replace with actual customer ID
             "date" => now()->format('Y-m-d'),
@@ -56,7 +58,9 @@ class ZohoController extends Controller
             "status" => "draft",  // Status can be 'draft' or 'sent'
         ];
 
+        // Include the organization ID in the request
         $response = Http::withToken($accessToken)
+            ->withHeaders(['X-com-zoho-books-organizationid' => $organizationId])  // Add organization ID to the headers
             ->post(env('ZOHO_API_BASE_URL') . '/books/v3/estimates', $estimateData);
 
         if ($response->successful()) {
@@ -65,4 +69,5 @@ class ZohoController extends Controller
 
         return response()->json(['error' => 'Failed to create estimate', 'details' => $response->json()], 400);
     }
+
 }
