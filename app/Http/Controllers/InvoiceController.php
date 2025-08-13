@@ -840,7 +840,8 @@ class InvoiceController extends Controller
         if($is_download)
         {
             // If not downloading, return the file URL
-            return $fileUrl;
+            $fileUrlWithTimestamp = $fileUrl . '?t=' . time();
+            return $fileUrlWithTimestamp;
         }
         // Directly create an instance of SendWhatsAppUtility
         $whatsAppUtility = new sendWhatsAppUtility();
