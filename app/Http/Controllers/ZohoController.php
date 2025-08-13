@@ -76,10 +76,7 @@ class ZohoController extends Controller
 
     public function zoho_quote(Request $request)
     {
-        return response()->json([
-            'message' => $message,
-            'data' => 'Successfully pushed!'
-        ], 200);
+
         $get_user = Auth::user();  // Get the authenticated user
 
         // Validate the incoming request to ensure order_id is provided
@@ -87,11 +84,11 @@ class ZohoController extends Controller
             'order_id' => 'required',
         ]);
 
-        Log::info('Zoho Quote Request', ['user_id' => $get_user->id, 'order_id' => $request->input('id')]);
+        // Log::info('Zoho Quote Request', ['user_id' => $get_user->id, 'order_id' => $request->input('id')]);
 
         // Fetch the order using the order_id passed in the request
         $order = OrderModel::with('order_items.product')  // Eager load order items and product details
-            ->where('order_id', $request->input('id'))
+            ->where('order_id', $request->input('order_id'))
             ->first();
 
         if (!$order) {
