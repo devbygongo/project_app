@@ -33,34 +33,33 @@ class ZohoController extends Controller
             return response()->json(['error' => 'Unable to retrieve access token'], 400);
         }
 
-        $organizationId = '60012918151';  // Use the correct organization ID here
+        $organizationId = '60012918151';  // Use your correct organization ID
 
         $estimateData = [
             "customer_id" => 123456,  // Replace with actual customer ID
             "date" => now()->format('Y-m-d'),
             "line_items" => [
                 [
-                    "item_id" => 987654,  // Replace with actual item ID
-                    "name" => "Product A",
+                    "name" => "Custom Product A",  // Custom item name
+                    "description" => "Description for Custom Product A",  // Optional description
                     "quantity" => 2,
                     "rate" => 100.00,
                     "amount" => 200.00,
                 ],
                 [
-                    "item_id" => 123789,  // Replace with actual item ID
-                    "name" => "Product B",
+                    "name" => "Custom Product B",  // Custom item name
+                    "description" => "Description for Custom Product B",  // Optional description
                     "quantity" => 3,
                     "rate" => 50.00,
                     "amount" => 150.00,
                 ],
             ],
-            "total" => 350.00,
+            "total" => 350.00,  // Total amount
             "status" => "draft",  // Status can be 'draft' or 'sent'
         ];
 
-        // Include the organization ID in the request
         $response = Http::withToken($accessToken)
-            ->withHeaders(['X-com-zoho-books-organizationid' => $organizationId])  // Add organization ID to the headers
+            ->withHeaders(['X-com-zoho-books-organizationid' => $organizationId])
             ->post(env('ZOHO_API_BASE_URL') . '/books/v3/estimates', $estimateData);
 
         if ($response->successful()) {
@@ -69,5 +68,6 @@ class ZohoController extends Controller
 
         return response()->json(['error' => 'Failed to create estimate', 'details' => $response->json()], 400);
     }
+
 
 }
