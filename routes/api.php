@@ -34,6 +34,8 @@ use App\Http\Controllers\ZohoController;
  Route::get('/update_type/{platform}', [ViewController::class, 'getLatestUpdate']);
 
  Route::get('/zoho/estimate', [ZohoController::class, 'createEstimate']);
+ Route::post('/tax_rates', [ZohoController::class, 'getTaxRates']);
+
 
     
 Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin'])->group(function () {

@@ -91,11 +91,10 @@ class ZohoController extends Controller
             return response()->json(['message' => 'Order not found!'], 404);
         }
 
-        // Calculate the tax-exclusive total and tax amount if the order total is inclusive of tax
-        // Assuming tax is 18% (adjust the tax rate as needed)
-        $taxRate = 0.18;  // Example: 18% tax
+        // Tax rate for GST18 (18%)
+        $taxRate = 0.18;  // Example: 18% tax (GST18)
 
-        // Tax-inclusive total (from the order)
+        // Calculate the tax-exclusive total and tax amount if the order total is inclusive of tax
         $taxExclusiveAmount = $order->amount / (1 + $taxRate);  // Exclude tax
         $taxAmount = $order->amount - $taxExclusiveAmount;  // Calculate the tax amount
 
@@ -105,13 +104,18 @@ class ZohoController extends Controller
         foreach ($order->order_items as $item) {
             // Calculate tax-exclusive rate for each item
             $taxExclusiveRate = $item->rate / (1 + $taxRate);  // Exclude tax from rate
+            $taxExclusiveAmountForItem = $item->total / (1 + $taxRate);  // Exclude tax from total
+
+            // Tax ID for GST18 (replace with your actual tax_id for GST18)
+            $taxId = '786484000000013214';  // Replace with your actual tax_id for GST18
 
             $lineItems[] = [
                 "name" => $item->product_name.' '.$item->product_code,  // Using product name
                 "description" => $item->remarks ?? "No description",  // Optional description
                 "quantity" => $item->quantity,
-                "rate" => $taxExclusiveRate,  // The tax-exclusive rate
-                "amount" => $item->total / (1 + $taxRate),  // The total of each item (excluding tax)
+                "rate" => $taxExclusiveRate,  // Tax-exclusive rate
+                "amount" => $taxExclusiveAmountForItem,  // Tax-exclusive amount
+                "tax_id" => $taxId,  // Pass the tax_id for GST18
             ];
         }
 
@@ -123,7 +127,7 @@ class ZohoController extends Controller
             "total" => $taxExclusiveAmount,  // Total amount excluding tax
             "status" => "draft",  // Status can be 'draft' or 'sent'
             "tax" => [
-                "name" => "GST18",  // Replace with your actual tax name (e.g., GST, VAT, etc.)
+                "name" => "GST",  // Replace with your actual tax name (e.g., GST, VAT, etc.)
                 "percentage" => $taxRate * 100,  // Tax rate (as a percentage)
                 "amount" => $taxAmount,  // Tax amount to be applied
             ],
@@ -152,6 +156,31 @@ class ZohoController extends Controller
 
         return response()->json(['error' => 'Failed to create estimate', 'details' => $response->json()], 400);
     }
+
+    public function getTaxRates()
+    {
+        $accessToken = $this->getAccessToken();
+
+        if (!$accessToken) {
+            return response()->json(['error' => 'Unable to retrieve access token'], 400);
+        }
+
+        $organizationId = '60012918151';  // Replace with your actual organization ID
+
+        // Fetch tax rates using the Zoho Books API
+        $response = Http::withToken($accessToken)
+            ->withHeaders(['X-com-zoho-books-organizationid' => $organizationId])
+            ->get(env('ZOHO_API_BASE_URL') . '/books/v3/taxes');
+
+        if ($response->successful()) {
+            // Return the list of tax rates and their tax_id
+            return response()->json($response->json());
+        }
+
+        return response()->json(['error' => 'Failed to fetch tax rates', 'details' => $response->json()], 400);
+    }
+
+
 
 
 
