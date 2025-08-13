@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\OrderModel;
+use Illuminate\Support\Facades\Log;
 
 use App\Models\OrderItemsModel;
 
@@ -81,6 +82,8 @@ class ZohoController extends Controller
         $request->validate([
             'order_id' => 'required',
         ]);
+
+        Log::info('Zoho Quote Request', ['user_id' => $get_user->id, 'order_id' => $request->input('id')]);
 
         // Fetch the order using the order_id passed in the request
         $order = OrderModel::with('order_items.product')  // Eager load order items and product details
