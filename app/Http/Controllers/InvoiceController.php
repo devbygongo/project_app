@@ -750,6 +750,25 @@ class InvoiceController extends Controller
             $item->current_stock = $stockMap[$item->product_code] ?? 0;
         }
 
+        // Get the total pending quantity of each product (if any orders are pending)
+        $pendingQuantities = OrderItemsModel::select('product_code', DB::raw('SUM(quantity) as total_pending'))
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('orders.status', 'pending') // Filter orders that are pending
+            ->groupBy('product_code')
+            ->get()
+            ->keyBy('product_code')
+            ->map(function ($item) {
+                return $item->total_pending;
+            }
+        );
+
+        // Append pending_qty and balance_stock to each item
+        foreach ($order_items as $item) {
+            $pending_qty = $pendingQuantities[$item->product_code] ?? 0; // If not set, default to 0
+            $item->pending_qty = $pending_qty;
+            $item->balance_stock = $item->current_stock - $pending_qty; // Calculate balance stock
+        }
+
 
         $mobileNumbers = User::where('role', 'admin')->pluck('mobile')->toArray();
         
