@@ -157,9 +157,10 @@ class ZohoController extends Controller
         return response()->json(['error' => 'Failed to create estimate', 'details' => $response->json()], 400);
     }
 
-    public function getTaxRates()
+    public function getEstimate()
     {
-        $accessToken = $this->getAccessToken();
+        $estimateId = 786484000002756062;
+        $accessToken = $this->getAccessToken();  // Get the access token
 
         if (!$accessToken) {
             return response()->json(['error' => 'Unable to retrieve access token'], 400);
@@ -167,18 +168,26 @@ class ZohoController extends Controller
 
         $organizationId = '60012918151';  // Replace with your actual organization ID
 
-        // Fetch tax rates using the Zoho Books API
+        // Send the GET request to Zoho Books API to fetch the estimate details
         $response = Http::withToken($accessToken)
             ->withHeaders(['X-com-zoho-books-organizationid' => $organizationId])
-            ->get(env('ZOHO_API_BASE_URL') . '/books/v3/taxes');
+            ->get(env('ZOHO_API_BASE_URL') . '/books/v3/estimates/' . $estimateId);
 
         if ($response->successful()) {
-            // Return the list of tax rates and their tax_id
-            return response()->json($response->json());
+            // Return the estimate data
+            return response()->json([
+                'message' => 'Estimate fetched successfully',
+                'data' => $response->json()
+            ], 200);
         }
 
-        return response()->json(['error' => 'Failed to fetch tax rates', 'details' => $response->json()], 400);
+        // Handle failure response
+        return response()->json([
+            'error' => 'Failed to fetch estimate',
+            'details' => $response->json()
+        ], 400);
     }
+
 
 
 
