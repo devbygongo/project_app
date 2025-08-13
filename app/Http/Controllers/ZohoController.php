@@ -103,12 +103,15 @@ class ZohoController extends Controller
         $lineItems = [];
 
         foreach ($order->order_items as $item) {
+            // Calculate tax-exclusive rate for each item
+            $taxExclusiveRate = $item->rate / (1 + $taxRate);  // Exclude tax from rate
+
             $lineItems[] = [
                 "name" => $item->product_name.' '.$item->product_code,  // Using product name
                 "description" => $item->remarks ?? "No description",  // Optional description
                 "quantity" => $item->quantity,
-                "rate" => $item->rate,
-                "amount" => $item->total,  // The total of each item (including tax)
+                "rate" => $taxExclusiveRate,  // The tax-exclusive rate
+                "amount" => $item->total / (1 + $taxRate),  // The total of each item (excluding tax)
             ];
         }
 
@@ -149,6 +152,7 @@ class ZohoController extends Controller
 
         return response()->json(['error' => 'Failed to create estimate', 'details' => $response->json()], 400);
     }
+
 
 
 
