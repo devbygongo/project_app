@@ -36,7 +36,7 @@ class ZohoController extends Controller
         $organizationId = '60012918151';  // Use your correct organization ID
 
         $estimateData = [
-            "customer_id" => 123456,  // Replace with actual customer ID
+            "customer_id" => 786484000000198301,  // Replace with actual customer ID
             "date" => now()->format('Y-m-d'),
             "line_items" => [
                 [
