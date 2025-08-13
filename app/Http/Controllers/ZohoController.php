@@ -95,6 +95,7 @@ class ZohoController extends Controller
         // Assuming tax is 18% (adjust the tax rate as needed)
         $taxRate = 0.18;  // Example: 18% tax
 
+        // Tax-inclusive total (from the order)
         $taxExclusiveAmount = $order->amount / (1 + $taxRate);  // Exclude tax
         $taxAmount = $order->amount - $taxExclusiveAmount;  // Calculate the tax amount
 
@@ -116,7 +117,7 @@ class ZohoController extends Controller
             "customer_id" => 786484000000198301,  // Assuming the user_id is the customer_id in Zoho Books
             "date" => now()->format('Y-m-d'),
             "line_items" => $lineItems,
-            "total" => $taxExclusiveAmount,  // Total excluding tax
+            "total" => $taxExclusiveAmount,  // Total amount excluding tax
             "status" => "draft",  // Status can be 'draft' or 'sent'
             "tax" => [
                 "name" => "GST",  // Replace with your actual tax name (e.g., GST, VAT, etc.)
@@ -148,6 +149,7 @@ class ZohoController extends Controller
 
         return response()->json(['error' => 'Failed to create estimate', 'details' => $response->json()], 400);
     }
+
 
 
 
