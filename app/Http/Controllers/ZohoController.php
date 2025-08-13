@@ -123,7 +123,7 @@ class ZohoController extends Controller
             "total" => $taxExclusiveAmount,  // Total amount excluding tax
             "status" => "draft",  // Status can be 'draft' or 'sent'
             "tax" => [
-                "name" => "GST",  // Replace with your actual tax name (e.g., GST, VAT, etc.)
+                "name" => "GST18",  // Replace with your actual tax name (e.g., GST, VAT, etc.)
                 "percentage" => $taxRate * 100,  // Tax rate (as a percentage)
                 "amount" => $taxAmount,  // Tax amount to be applied
             ],
