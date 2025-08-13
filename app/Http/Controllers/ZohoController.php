@@ -117,8 +117,8 @@ class ZohoController extends Controller
             $taxExclusiveAmountForItem = $item->total / (1 + $taxRate);  // Exclude tax from total
 
             $lineItems[] = [
-                "name" => $item->product_name.' '.$item->product_code,  // Using product name
-                "description" => $item->remarks ?? "No description",  // Optional description
+                "name" => $item->product_name.' - '.$item->product_code,  // Using product name
+                "description" => $item->remarks ?? "",  // Optional description
                 "quantity" => $item->quantity,
                 "rate" => $taxExclusiveRate,  // Tax-exclusive rate
                 "amount" => $taxExclusiveAmountForItem,  // Tax-exclusive amount
