@@ -76,7 +76,13 @@ class ZohoController extends Controller
 
     public function zoho_quote(Request $request)
     {
-
+        // Return a structured response with more details
+        return response()->json([
+            'error' => 'Failed to create estimate',
+            'message' => 'There was an error while attempting to create the estimate in Zoho.',
+            'details' => $request->json()->all(), // Including the full request data if needed
+        ], 400); // HTTP 400 for Bad Request
+        
         $get_user = Auth::user();  // Get the authenticated user
 
         // Validate the incoming request to ensure order_id is provided
