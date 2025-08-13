@@ -99,7 +99,7 @@ class ZohoController extends Controller
         $taxAmount = $order->amount - $taxExclusiveAmount;  // Calculate the tax amount
 
         // Tax ID for GST18 (replace with your actual tax_id for GST18)
-        $taxId = '786484000000013215';  // GST18 tax ID
+        $taxId = '786484000000013221';  // GST18 tax ID
 
         // Prepare the line items for the Zoho quote
         $lineItems = [];
