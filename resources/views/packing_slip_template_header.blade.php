@@ -61,7 +61,7 @@
     </style>
   </head>
   <body>
-    <div class="order-title">Order</div>
+    <div class="order-title">Packing Slip</div>
 
     <div class="header">
       <img src="{{ asset('storage/uploads/s1.jpg') }}" alt="Logo" />
