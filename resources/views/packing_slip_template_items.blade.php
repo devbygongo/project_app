@@ -15,9 +15,9 @@
             Size: {{ $item->size }}
         </span><br>
     @endif
-    <!-- <span style="color: red;">{{ $item->current_stock }}</span> -->
-    <span style="color: red;">{{ $item->pending_qty }}</span> | 
-    <span style="color: green;">{{ $item->balance_stock }}</span><br />
+    <span style="color: red;">{{ $item->current_stock }}</span>
+    <!-- <span style="color: red;">{{ $item->pending_qty }}</span> |  -->
+    <!-- <span style="color: green;">{{ $item->balance_stock }}</span><br /> -->
     
     <br /><span style="background: yellow">{{ $item->remarks }}</span>
   </td>
