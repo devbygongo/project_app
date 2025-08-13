@@ -14,16 +14,17 @@ class ZohoController extends Controller
             'client_secret' => env('ZOHO_CLIENT_SECRET'),
             'refresh_token' => env('ZOHO_REFRESH_TOKEN'),
             'grant_type' => 'refresh_token',
+            'scope' => 'ZohoBooks.estimates.ALL',
         ]);
 
         if ($response->successful()) {
             return $response->json()['access_token'];
         }
 
-        return response()->json(['error' => 'Failed to fetch access token'], 400);
+        return response()->json(['error' => 'Failed to fetch access token', 'details' => $response->json()], 400);
     }
 
-    // Function to create an estimate in Zoho
+    // Function to create an estimate in Zoho Books
     public function createEstimate()
     {
         $accessToken = $this->getAccessToken();
@@ -33,32 +34,30 @@ class ZohoController extends Controller
         }
 
         $estimateData = [
-            "data" => [
+            "customer_id" => 123456,  // Replace with actual customer ID
+            "date" => now()->format('Y-m-d'),
+            "line_items" => [
                 [
-                    "customer_name" => "John Doe",  // Replace with customer name
-                    "date" => now()->format('Y-m-d'),  // Current date
-                    "line_items" => [
-                        [
-                            "item_name" => "Product A",
-                            "quantity" => 2,
-                            "rate" => 100.00,
-                            "total" => 200.00,
-                        ],
-                        [
-                            "item_name" => "Product B",
-                            "quantity" => 3,
-                            "rate" => 50.00,
-                            "total" => 150.00,
-                        ],
-                    ],
-                    "total" => 350.00,
-                    "status" => "draft",
+                    "item_id" => 987654,  // Replace with actual item ID
+                    "name" => "Product A",
+                    "quantity" => 2,
+                    "rate" => 100.00,
+                    "amount" => 200.00,
+                ],
+                [
+                    "item_id" => 123789,  // Replace with actual item ID
+                    "name" => "Product B",
+                    "quantity" => 3,
+                    "rate" => 50.00,
+                    "amount" => 150.00,
                 ],
             ],
+            "total" => 350.00,
+            "status" => "draft",  // Status can be 'draft' or 'sent'
         ];
 
         $response = Http::withToken($accessToken)
-            ->post(env('ZOHO_API_BASE_URL') . '/crm/v2/Deals', $estimateData);
+            ->post(env('ZOHO_API_BASE_URL') . '/books/v3/estimates', $estimateData);
 
         if ($response->successful()) {
             return response()->json(['message' => 'Estimate created successfully', 'data' => $response->json()]);
