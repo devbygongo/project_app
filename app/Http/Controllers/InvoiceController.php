@@ -751,23 +751,24 @@ class InvoiceController extends Controller
         }
 
         // Get the total pending quantity of each product (if any orders are pending)
-        // $pendingQuantities = OrderItemsModel::select('product_code', DB::raw('SUM(quantity) as total_pending'))
-        //     ->join('orders', 'order_items.order_id', '=', 'orders.id')
-        //     ->where('orders.status', 'pending') // Filter orders that are pending
-        //     ->groupBy('product_code')
-        //     ->get()
-        //     ->keyBy('product_code')
-        //     ->map(function ($item) {
-        //         return $item->total_pending;
-        //     }
-        // );
+        $pendingQuantities = OrderItemsModel::select('t_order_items.product_code', DB::raw('SUM(t_order_items.quantity) as total_pending'))
+            ->join('t_orders', 't_order_items.order_id', '=', 't_orders.id') // Correct join between t_order_items and t_orders
+            ->where('t_orders.status', 'pending') // Filter for orders with status 'pending'
+            ->groupBy('t_order_items.product_code') // Group by product_code
+            ->get()
+            ->keyBy('product_code') // Key by product_code for easier lookup
+            ->map(function ($item) {
+                return $item->total_pending; // Return the total_pending value
+            }
+        );
 
-        // // Append pending_qty and balance_stock to each item
-        // foreach ($order_items as $item) {
-        //     $pending_qty = $pendingQuantities[$item->product_code] ?? 0; // If not set, default to 0
-        //     $item->pending_qty = $pending_qty;
-        //     $item->balance_stock = $item->current_stock - $pending_qty; // Calculate balance stock
-        // }
+
+        // Append pending_qty and balance_stock to each item
+        foreach ($order_items as $item) {
+            $pending_qty = $pendingQuantities[$item->product_code] ?? 0; // If not set, default to 0
+            $item->pending_qty = $pending_qty;
+            $item->balance_stock = $item->current_stock - $pending_qty; // Calculate balance stock
+        }
 
 
         $mobileNumbers = User::where('role', 'admin')->pluck('mobile')->toArray();
