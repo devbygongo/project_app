@@ -32,6 +32,9 @@ use App\Http\Middleware\GetUserRole;
  Route::get('/public_view_category/{lang?}', [ViewController::class, 'lng_categories_public']);
 
  Route::get('/update_type/{platform}', [ViewController::class, 'getLatestUpdate']);
+
+ Route::get('/zoho/estimate', [ZohoController::class, 'createEstimate']);
+
     
 Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin'])->group(function () {
 
