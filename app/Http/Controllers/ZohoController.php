@@ -98,6 +98,9 @@ class ZohoController extends Controller
         $taxExclusiveAmount = $order->amount / (1 + $taxRate);  // Exclude tax
         $taxAmount = $order->amount - $taxExclusiveAmount;  // Calculate the tax amount
 
+        // Tax ID for GST18 (replace with your actual tax_id for GST18)
+        $taxId = '786484000000013215';  // GST18 tax ID
+
         // Prepare the line items for the Zoho quote
         $lineItems = [];
 
@@ -106,16 +109,13 @@ class ZohoController extends Controller
             $taxExclusiveRate = $item->rate / (1 + $taxRate);  // Exclude tax from rate
             $taxExclusiveAmountForItem = $item->total / (1 + $taxRate);  // Exclude tax from total
 
-            // Tax ID for GST18 (replace with your actual tax_id for GST18)
-            $taxId = '786484000000013214';  // Replace with your actual tax_id for GST18
-
             $lineItems[] = [
                 "name" => $item->product_name.' '.$item->product_code,  // Using product name
                 "description" => $item->remarks ?? "No description",  // Optional description
                 "quantity" => $item->quantity,
                 "rate" => $taxExclusiveRate,  // Tax-exclusive rate
                 "amount" => $taxExclusiveAmountForItem,  // Tax-exclusive amount
-                "tax_id" => $taxId,  // Pass the tax_id for GST18
+                "tax_id" => $taxId,  // Pass the correct tax_id for GST18
             ];
         }
 
@@ -156,6 +156,7 @@ class ZohoController extends Controller
 
         return response()->json(['error' => 'Failed to create estimate', 'details' => $response->json()], 400);
     }
+
 
     public function getEstimate()
     {
