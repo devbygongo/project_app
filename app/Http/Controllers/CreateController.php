@@ -1115,7 +1115,7 @@ class CreateController extends Controller
         }
     }
 
-    public function zoho_quote(Request $request)
+    public function zoho_quote_old(Request $request)
     {
         $get_user = Auth::User();
 
