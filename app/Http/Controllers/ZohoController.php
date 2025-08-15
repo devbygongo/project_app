@@ -87,7 +87,7 @@ class ZohoController extends Controller
 
         // Fetch the order using the order_id passed in the request
         $order = OrderModel::with('order_items.product')  // Eager load order items and product details
-            ->where('order_id', $request->input('order_id'))
+            ->where('order_id', $request->input('id'))
             ->first();
 
         if (!$order) {
