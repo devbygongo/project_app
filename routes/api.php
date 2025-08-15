@@ -40,7 +40,7 @@ use App\Http\Controllers\ZohoController;
     
 Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin'])->group(function () {
 
-    Route::post('/zoho_quote', [CreateController::class, 'zoho_quote_old']);
+    Route::post('/zoho_quote', [ZohoController::class, 'zoho_quote']);
 
     Route::post('/zoho_sales', [CreateController::class, 'zoho_sales']);
     

@@ -76,10 +76,6 @@ class ZohoController extends Controller
 
     public function zoho_quote(Request $request)
     {
-        // return response()->json([
-        //     'message' => "Order : " . $request->input('order_id') . " has been successfully pushed as a quote to Zoho.",
-        //     'data' => $response->json()
-        // ], 200);
         $get_user = Auth::user();  // Get the authenticated user
 
         // Validate the incoming request to ensure order_id is provided
