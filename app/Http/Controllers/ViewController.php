@@ -992,6 +992,7 @@ class ViewController extends Controller
                 'last_viewed' => $record->app_status == 1 ? $last_viewed : '',
                 'purchase_lock' => $record->purchase_lock,
                 'purchase_limit' => $record->purchase_limit,
+                'admin_type' => 'owner', // Assuming all users are managed by the owner
             ];
         });
     
