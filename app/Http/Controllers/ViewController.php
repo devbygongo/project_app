@@ -992,7 +992,7 @@ class ViewController extends Controller
                 'last_viewed' => $record->app_status == 1 ? $last_viewed : '',
                 'purchase_lock' => $record->purchase_lock,
                 'purchase_limit' => $record->purchase_limit,
-                'admin_type' => 'owner', // Assuming all users are managed by the owner
+                
             ];
         });
     
@@ -1005,7 +1005,7 @@ class ViewController extends Controller
     
         return $processed_rec_user->isEmpty()
             ? response()->json(['Failed get data successfully!'], 404)
-            : response()->json(['Fetch data successfully!', 'data' => $processed_rec_user, 'types' => $types], 200);
+            : response()->json(['Fetch data successfully!', 'data' => $processed_rec_user, 'types' => $types, 'admin_type' => 'owner'], 200);
     }
 
     public function find_user($search = null)
