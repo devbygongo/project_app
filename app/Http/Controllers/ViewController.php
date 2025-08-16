@@ -1719,7 +1719,87 @@ class ViewController extends Controller
         }
     }
 
+    /**
+     * GET /api/admin/products/pending/{product_code}
+     * Response:
+     * {
+     *   current_stock: int,
+     *   pending_orders: [{client_name, order_no, order_date, qty}],
+     *   balance: int
+     * }
+     */
+    public function productPendingSummary(string $product_code)
+    {
+        // -----------------------------
+        // 1) CURRENT STOCK from movements (all time)
+        // -----------------------------
+        // Define your IN/OUT types used in StockOrderItemsModel->type
+        // Change these arrays to match your real values.
+        $inTypes  = ['in', 'purchase', 'opening', 'adjust_in', 'transfer_in'];
+        $outTypes = ['out', 'sale', 'issue', 'adjust_out', 'transfer_out'];
 
+        $stockAgg = StockOrderItemsModel::query()
+            ->from('t_stock_order_items as soi')
+            ->selectRaw("
+                SUM(CASE WHEN soi.type IN (" . $this->placeholders($inTypes) . ") THEN soi.quantity ELSE 0 END) as in_qty,
+                SUM(CASE WHEN soi.type IN (" . $this->placeholders($outTypes) . ") THEN soi.quantity ELSE 0 END) as out_qty
+            ")
+            ->where('soi.product_code', $product_code)
+            ->setBindings(array_merge($inTypes, $outTypes))
+            ->first();
+
+        $inQty  = (int) ($stockAgg->in_qty  ?? 0);
+        $outQty = (int) ($stockAgg->out_qty ?? 0);
+        $currentStock = $inQty - $outQty;
+
+        // -----------------------------
+        // 2) PENDING ORDERS list for this product
+        // -----------------------------
+        $pending = OrderItemsModel::query()
+            ->from('t_order_items as oi')
+            ->selectRaw('
+                o.order_id  as order_no,
+                o.order_date as order_date,
+                u.name       as client_name,
+                SUM(oi.quantity) as qty
+            ')
+            ->join('t_orders as o', 'o.id', '=', 'oi.order_id')
+            ->join('users as u', 'u.id', '=', 'o.user_id')
+            ->where('oi.product_code', $product_code)
+            ->where('o.status', 'pending')
+            ->groupBy('o.id', 'o.order_id', 'o.order_date', 'u.name')
+            ->orderBy('o.order_date', 'asc')
+            ->get()
+            ->map(function ($row) {
+                return [
+                    'client_name' => $row->client_name,
+                    'order_no'    => $row->order_no,
+                    // dd/mm/YYYY like your card: e.g., 9/2/2025
+                    'order_date'  => Carbon::parse($row->order_date)->format('j/n/Y'),
+                    'qty'         => (int) $row->qty,
+                ];
+            });
+
+        // -----------------------------
+        // 3) BALANCE
+        // -----------------------------
+        $totalPendingQty = (int) $pending->sum('qty');
+        $balance = $currentStock - $totalPendingQty;
+
+        return response()->json([
+            'current_stock'  => $currentStock,
+            'pending_orders' => $pending->values(),
+            'balance'        => $balance,
+        ]);
+    }
+
+    /**
+     * Helper to create a ?, ?, ? placeholder string for IN ()
+     */
+    private function placeholders(array $values): string
+    {
+        return implode(',', array_fill(0, max(count($values), 1), '?'));
+    }
 
     // return blade file
     

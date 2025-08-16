@@ -73,6 +73,8 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
 
     Route::post('/get_product/{lang?}', [ViewController::class, 'lng_get_product']);
 
+    Route::get('/products/pending/{product_code}', [ViewController::class, 'productPendingSummary']);
+
     Route::post('/lng_get_product', [ViewController::class, 'get_product']);
 
     Route::get('/category/{lang?}', [ViewController::class, 'lng_categories']);
