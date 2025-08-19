@@ -1811,7 +1811,7 @@ class ViewController extends Controller
             // Fallback: allow env/config override if you keep an ID in config/inventory.php
             if (!$directDispatchGodown && config('inventory.direct_dispatch_godown_id')) {
                 $ddId = (int) config('inventory.direct_dispatch_godown_id');
-                $directDispatchGodown = DB::table('t_godowns')->select('id','name')->where('id', $ddId)->first();
+                $directDispatchGodown = DB::table('t_godown')->select('id','name')->where('id', $ddId)->first();
             }
 
             if (!$directDispatchGodown) {
@@ -1852,7 +1852,7 @@ class ViewController extends Controller
             if (!in_array($directDispatchGodown->id, $godownIds, true)) {
                 $godownIds[] = $directDispatchGodown->id;
             }
-            $godownMap = DB::table('t_godowns')
+            $godownMap = DB::table('t_godown')
                 ->whereIn('id', $godownIds)
                 ->pluck('name', 'id'); // [id => name]
 
