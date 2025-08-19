@@ -62,7 +62,7 @@ class StockController extends Controller
         }
 
         // Fetch all Godown Names dynamically
-        $allGodowns = GodownModel::pluck('name')->toArray();
+        $allGodowns = GodownModel::pluck('name')->where('name', '!=', 'DIRECT DISPATCH')->toArray();
 
         // Generate PDF
         $mpdf = new Mpdf([
