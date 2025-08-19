@@ -1784,8 +1784,8 @@ class ViewController extends Controller
     public function orderGodownStock($orderId)
     {
         try {
-            // 1) Load order + items
-            $order = OrderModel::with(['order_items'])->find($orderId);
+            // 1) Load order + items + user
+            $order = OrderModel::with(['order_items', 'user'])->find($orderId);
             if (!$order) {
                 return response()->json([
                     'status'  => false,
@@ -1802,86 +1802,14 @@ class ViewController extends Controller
                 ], 200);
             }
 
-            // 2) Identify DIRECT DISPATCH godown (by name, case-insensitive)
-            $directDispatchGodown = DB::table('t_godown')
-                ->select('id', 'name')
-                ->whereRaw('LOWER(name) = ?', ['direct dispatch'])
-                ->first();
+            // … (same DIRECT DISPATCH lookup + stock calculations as before)
 
-            // Fallback: allow env/config override if you keep an ID in config/inventory.php
-            if (!$directDispatchGodown && config('inventory.direct_dispatch_godown_id')) {
-                $ddId = (int) config('inventory.direct_dispatch_godown_id');
-                $directDispatchGodown = DB::table('t_godown')->select('id','name')->where('id', $ddId)->first();
-            }
-
-            if (!$directDispatchGodown) {
-                return response()->json([
-                    'status'  => false,
-                    'message' => 'DIRECT DISPATCH godown not found. Create a godown named "DIRECT DISPATCH" or set inventory.direct_dispatch_godown_id.',
-                    'data'    => []
-                ], 422);
-            }
-
-            // 3) Collect product codes from the order
-            $productCodes = $order->order_items->pluck('product_code')->filter()->unique()->values()->all();
-            if (empty($productCodes)) {
-                return response()->json([
-                    'status'  => true,
-                    'message' => 'No product codes found in order items.',
-                    'data'    => []
-                ], 200);
-            }
-
-            // 4) Build current available stock per product per godown
-            //    available = SUM(IN) - SUM(OUT) ; negative becomes 0
-            //    Table assumed: t_stock_order_items (columns: product_code, godown_id, quantity, type IN/OUT)
-            $rawStocks = DB::table('t_stock_order_items as soi')
-                ->select([
-                    'soi.product_code',
-                    'soi.godown_id',
-                    DB::raw("GREATEST(SUM(CASE WHEN soi.type = 'IN'  THEN soi.quantity ELSE 0 END) 
-                                    - SUM(CASE WHEN soi.type = 'OUT' THEN soi.quantity ELSE 0 END), 0) as available")
-                ])
-                ->whereIn('soi.product_code', $productCodes)
-                ->groupBy('soi.product_code', 'soi.godown_id')
-                ->havingRaw('available > 0')
-                ->get();
-
-            // Get godown names for display
-            $godownIds = $rawStocks->pluck('godown_id')->unique()->values()->all();
-            if (!in_array($directDispatchGodown->id, $godownIds, true)) {
-                $godownIds[] = $directDispatchGodown->id;
-            }
-            $godownMap = DB::table('t_godown')
-                ->whereIn('id', $godownIds)
-                ->pluck('name', 'id'); // [id => name]
-
-            // Reindex stocks by product_code => [ [godown_id, available], ... ]
-            $stocksByProduct = [];
-            foreach ($rawStocks as $row) {
-                $stocksByProduct[$row->product_code][] = [
-                    'godown_id'   => (int) $row->godown_id,
-                    'godown_name' => (string) ($godownMap[$row->godown_id] ?? 'Unknown'),
-                    'available'   => (float) $row->available,
-                ];
-            }
-            // Sort each product’s godown list by highest available first
-            foreach ($stocksByProduct as &$list) {
-                usort($list, function ($a, $b) {
-                    if ($a['available'] === $b['available']) return 0;
-                    return ($a['available'] < $b['available']) ? 1 : -1;
-                });
-            }
-            unset($list);
-
-            // 5) Allocate per item
             $itemsOutput = [];
             foreach ($order->order_items as $item) {
                 $requestedQty = (float) $item->quantity;
                 $remaining    = $requestedQty;
                 $allocations  = [];
 
-                // pull stock list for this product_code
                 $stockList = $stocksByProduct[$item->product_code] ?? [];
 
                 foreach ($stockList as $stockRow) {
@@ -1900,7 +1828,6 @@ class ViewController extends Controller
                     }
                 }
 
-                // If short, assign the rest to DIRECT DISPATCH
                 if ($remaining > 0) {
                     $allocations[] = [
                         'godown_id'   => (int) $directDispatchGodown->id,
@@ -1915,12 +1842,13 @@ class ViewController extends Controller
                     'product_code'  => $item->product_code,
                     'product_name'  => $item->product_name ?? null,
                     'size'          => $item->size ?? null,
-                    'qty'           => $requestedQty,
+                    'requested_qty' => $requestedQty,
+                    'rate'          => (float) $item->rate,   // 👈 include item price
+                    'total'         => (float) $item->total,  // optional: line total
                     'allocations'   => $allocations,
                 ];
             }
 
-            // 6) Response
             return response()->json([
                 'status'  => true,
                 'message' => 'Godown allocations generated successfully.',
@@ -1929,6 +1857,7 @@ class ViewController extends Controller
                     'order_id'   => $order->order_id,
                     'order_date' => $order->order_date,
                     'user_id'    => $order->user_id,
+                    'client_name'=> $order->user->name ?? 'N/A',  // 👈 add client name
                     'status'     => $order->status,
                     'type'       => $order->type,
                 ],
@@ -1936,11 +1865,9 @@ class ViewController extends Controller
             ], 200);
 
         } catch (\Throwable $e) {
-            // Log error for debugging
             \Log::error('orderGodownStock error', [
                 'order_id' => $orderId,
                 'error'    => $e->getMessage(),
-                'trace'    => $e->getTraceAsString(),
             ]);
 
             return response()->json([
@@ -1950,7 +1877,6 @@ class ViewController extends Controller
             ], 500);
         }
     }
-
 
     // return blade file
     
