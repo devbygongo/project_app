@@ -40,6 +40,8 @@ use App\Http\Controllers\ZohoController;
     
 Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin'])->group(function () {
 
+    Route::get('/order_godown_stock/{orderId}', [ViewController::class, 'orderGodownStock']);
+
     Route::post('/zoho_quote', [ZohoController::class, 'zoho_quote']);
 
     Route::post('/zoho_sales', [CreateController::class, 'zoho_sales']);
