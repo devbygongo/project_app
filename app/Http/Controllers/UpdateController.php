@@ -984,6 +984,28 @@ class UpdateController extends Controller
         ], 200);
     }
 
+    public function complete_order_stock(Request $request, $id)
+    {
+
+        // Find the order by its ID
+        $order = OrderModel::find($id);
+
+        if (!$order) {
+            return response()->json([
+                'message' => 'Order not found!'
+            ], 404);
+        }
+
+        // Update the status of the order to 'completed'
+        // $order->status = 'completed';
+        // $order->save();
+
+        return response()->json([
+            'message' => 'Order status updated to completed successfully!',
+            'order' => $order
+        ], 200);
+    }
+
     public function cancel_order(Request $request, $id)
     {
         // Validate incoming request data
