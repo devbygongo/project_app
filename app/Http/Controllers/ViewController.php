@@ -1915,7 +1915,7 @@ class ViewController extends Controller
                     'product_code'  => $item->product_code,
                     'product_name'  => $item->product_name ?? null,
                     'size'          => $item->size ?? null,
-                    'requested_qty' => $requestedQty,
+                    'qty'           => $requestedQty,
                     'allocations'   => $allocations,
                 ];
             }
