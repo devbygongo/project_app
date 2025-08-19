@@ -1592,18 +1592,19 @@ class ViewController extends Controller
     {
         if ($productCode == null) {
             $get_godown_record = GodownModel::select('id', 'name', 'description')
-                                      ->get();
+                                    ->where('name', '!=', 'DIRECT DISPATCH')
+                                    ->get();
 
                                 
             return response()->json([
-            'message' => 'Godown records fetched successfully!',
-            'data' => $get_godown_record,
-            'status' => 'true',
-        ], 200);
+                'message' => 'Godown records fetched successfully!',
+                'data' => $get_godown_record,
+                'status' => 'true',
+            ], 200);
         }else{
             try {        
                  // Fetch all godowns
-                $godowns = GodownModel::select('id', 'name', 'description')->get()->keyBy('id');
+                $godowns = GodownModel::select('id', 'name', 'description')->where('name', '!=', 'DIRECT DISPATCH')->get()->keyBy('id');
 
                 // Fetch stock order items for the product code
                 $stockOrderItems = StockOrderItemsModel::with('godown:name,id')
