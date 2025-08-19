@@ -1780,7 +1780,7 @@ class ViewController extends Controller
             'balance'        => $balance,
         ]);
     }
-    
+
     public function orderGodownStock($orderId)
     {
         try {
@@ -1803,7 +1803,7 @@ class ViewController extends Controller
             }
 
             // 2) Identify DIRECT DISPATCH godown (by name, case-insensitive)
-            $directDispatchGodown = DB::table('t_godowns')
+            $directDispatchGodown = DB::table('t_godown')
                 ->select('id', 'name')
                 ->whereRaw('LOWER(name) = ?', ['direct dispatch'])
                 ->first();
