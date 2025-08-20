@@ -212,7 +212,6 @@ class ViewController extends Controller
         }
     }
 
-
     public function get_product(Request $request)
     {
         // Retrieve offset and limit from the request with default values
@@ -1099,6 +1098,8 @@ class ViewController extends Controller
             $id = $request->input('user_id');
         }
 
+        $user_id = $id;
+
         // Fetch all orders and their associated order items with product image
         $get_user_orders = OrderModel::when($id, function ($query, $id) {
             return $query->where('user_id', $id);
@@ -1126,14 +1127,22 @@ class ViewController extends Controller
             });
         });
 
+        $show_basic = false;
+        if($user_id == 113 || $user_id == 98 || $user_id == 89 || $user_id == 103) {
+            // If the user is admin or has a specific mobile number, show basic prices
+            $show_basic = true;
+        }
+
         if ($get_user_orders->isEmpty()) {
             return response()->json([
                 'message' => 'Fetch data successfully!',
+                'show_basic' => $show_basic,
                 'data' => []
             ], 200);
         } else {
             return response()->json([
                 'message' => 'Fetched data successfully!',
+                'show_basic' => $show_basic,
                 'data' => $get_user_orders
             ], 200);
         }
