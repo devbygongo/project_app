@@ -1261,6 +1261,7 @@ class ViewController extends Controller
         if ($get_user->role == 'admin') {
 
             $user_type = User::select('type')->where('id', $id)->first();
+            $user_id = $id;
             $basic_column = 'basic';
             $gst_column = 'gst';
 
@@ -1301,6 +1302,7 @@ class ViewController extends Controller
         } else {
 
             $user_type = User::select('type')->where('id', $get_user->id)->first();
+            $user_id = $get_user->id;
             $basic_column = 'basic';
             $gst_column = 'gst';
 
@@ -1338,11 +1340,16 @@ class ViewController extends Controller
                 ->get();
         }
 
-
+        $show_basic = false;
+        if($user_id == 113 || $user_id == 98 || $user_id == 89 || $user_id == 103) {
+            // If the user is admin or has a specific mobile number, show basic prices
+            $show_basic = true;
+        }
     
         if (isset($get_items_for_user)) {
             return response()->json([
                 'message' => 'Fetch data successfully!',
+                'show_basic' => $show_basic,
                 'data' => $get_items_for_user,
                 'record count' => count($get_items_for_user)
             ], 200);
