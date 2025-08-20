@@ -566,14 +566,14 @@ class ViewController extends Controller
         if ($platform === 'android') {
             return response()->json([
                 'platform' => 'android',
-                'update_type' => "false", // Android update is forced
+                'update_type' => "true", // Android update is forced
             ]);
         }
 
         if ($platform === 'ios') {
             return response()->json([
                 'platform' => 'ios',
-                'update_type' => "false", // iOS update is optional
+                'update_type' => "true", // iOS update is optional
             ]);
         }
 

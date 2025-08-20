@@ -419,6 +419,7 @@ class UpdateController extends Controller
                     // 'products_id' => $request->input('products_id'),
                     'product_code' => $request->input('product_code'),
                     'quantity' => $request->input('quantity'),
+                    'amount' => ($request->input('rate')) * ($request->input('quantity')),
                     'type' => $request->input('type'),
                     'remarks' => $request->input('remarks'),
                     'size' => $request->input('size'),
