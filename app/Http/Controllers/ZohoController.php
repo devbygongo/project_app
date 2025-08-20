@@ -90,6 +90,10 @@ class ZohoController extends Controller
             ->where('id', $request->input('order_id'))
             ->first();
 
+        $user_id = $order->user_id;
+
+        $user = User::find($user_id);
+
         if (!$order) {
             return response()->json(['message' => 'Order not found!'], 404);
         }
@@ -122,7 +126,7 @@ class ZohoController extends Controller
             ];
         }
 
-        $customer_id = $get_user->zoho_customer_id;  // Assuming the user has a zoho_customer_id field
+        $customer_id = $user->zoho_customer_id;  // Assuming the user has a zoho_customer_id field
         if($customer_id == '' || $customer_id == null){
             $customer_id = '786484000000198301';
         }
