@@ -485,12 +485,6 @@ class ViewController extends Controller
 
         // Process products for language and cart details
         $processed_prd_lang_rec = $get_products->map(function ($prd_rec) use ($lang, $user_id) {
-
-            $show_basic = false;
-            if($user_id == 113 || $user_id == 98 || $user_id == 89 || $user_id == 103) {
-                // If the user is admin or has a specific mobile number, show basic prices
-                $show_basic = true;
-            }
             
             // Set product name based on the selected language
             $product_name = $prd_rec->product_name;
@@ -551,6 +545,12 @@ class ViewController extends Controller
                 
             ];
         });
+
+        $show_basic = false;
+        if($user_id == 113 || $user_id == 98 || $user_id == 89 || $user_id == 103) {
+            // If the user is admin or has a specific mobile number, show basic prices
+            $show_basic = true;
+        }
 
         // Return response based on the result
         return $processed_prd_lang_rec->isEmpty()
