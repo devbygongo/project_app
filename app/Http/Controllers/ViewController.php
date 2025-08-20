@@ -352,6 +352,11 @@ class ViewController extends Controller
             $user_id = $request->input('user_id');
         }
 
+        $show_basic = false;
+        if($user_id == 113 || $user_id == 98 || $user_id == 89 || $user_id == 103) {
+            // If the user is admin or has a specific mobile number, show basic prices
+            $show_basic = true;
+        }
         // Get the user type
 		$user_type = User::select('type')->where('id', $user_id)->first();
 
@@ -541,6 +546,7 @@ class ViewController extends Controller
                 'cart_quantity' => $cart_item->quantity ?? null,
                 'cart_type' => $cart_item->type ?? null,
                 'cart_remarks' => $cart_item->remarks ?? null,
+                'show_basic' => $show_basic,
             ];
         });
 
@@ -1586,7 +1592,6 @@ class ViewController extends Controller
             ], 500);
         }
     }
-
 
     public function get_godown($productCode = null)
     {
