@@ -116,15 +116,20 @@ class ZohoController extends Controller
                 "name" => $item->product_name.' - '.$item->product_code,  // Using product name
                 "description" => $item->remarks ?? "",  // Optional description
                 "quantity" => $item->quantity,
-                "rate" => $taxExclusiveRate,  // Tax-exclusive rate
+                "rate" => round($taxExclusiveRate, 2),  // Tax-exclusive rate
                 "amount" => $taxExclusiveAmountForItem,  // Tax-exclusive amount
                 "tax_id" => $taxId,  // Pass the correct tax_id for GST18
             ];
         }
 
+        $customer_id = $get_user->zoho_customer_id;  // Assuming the user has a zoho_customer_id field
+        if($customer_id == '' || $customer_id == null){
+            $customer_id = '786484000000198301';
+        }
+
         // Now create the estimate (quote) data for Zoho Books
         $estimateData = [
-            "customer_id" => 786484000000198301,  // Assuming the user_id is the customer_id in Zoho Books
+            "customer_id" => $customer_id,  // Assuming the user_id is the customer_id in Zoho Books
             "date" => now()->format('Y-m-d'),
             "line_items" => $lineItems,
             "total" => $taxExclusiveAmount,  // Total amount excluding tax
