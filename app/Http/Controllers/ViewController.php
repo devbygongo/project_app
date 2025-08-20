@@ -546,7 +546,7 @@ class ViewController extends Controller
                 'cart_quantity' => $cart_item->quantity ?? null,
                 'cart_type' => $cart_item->type ?? null,
                 'cart_remarks' => $cart_item->remarks ?? null,
-                'show_basic' => $show_basic,
+                // 'show_basic' => $show_basic,
             ];
         });
 
