@@ -548,7 +548,7 @@ class ViewController extends Controller
                 'cart_quantity' => $cart_item->quantity ?? null,
                 'cart_type' => $cart_item->type ?? null,
                 'cart_remarks' => $cart_item->remarks ?? null,
-                'show_basic' => $show_basic,
+                
             ];
         });
 
@@ -556,6 +556,7 @@ class ViewController extends Controller
         return $processed_prd_lang_rec->isEmpty()
         ? response()->json(['Failed to fetch data!'], 404)
         : response()->json(['message' => 'Fetch data successfully!',
+                'show_basic' => $show_basic,
                 'data' => $processed_prd_lang_rec,
                 'count' => $total_products_count], 200);
     }
