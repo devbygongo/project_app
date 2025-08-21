@@ -42,6 +42,7 @@ class User extends Authenticatable
         'app_status',
         'purchase_lock',
         'purchase_limit',
+        'zoho_customer_id',
         // 'category_discount',
     ];
 

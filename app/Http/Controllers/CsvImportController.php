@@ -224,6 +224,7 @@ class CsvImportController extends Controller
                     'country' => $record_user['Country'],
                     'type' => $markup_user, // Ensure this is a valid number
                     'purchase_limit' => isset($record_user['Purchase Limit']) ? $record_user['Purchase Limit'] : '0',  // Default to '0' if blank,
+                    'zoho_customer_id' => $record_user['Zoho Customer ID'],
                 ]);
             } 
             else 
@@ -247,6 +248,7 @@ class CsvImportController extends Controller
                         'country' => $record_user['Country'],
                         'type' => $markup_user, // Ensure this is a valid number
                         'purchase_limit' => isset($record_user['Purchase Limit']) ? $record_user['Purchase Limit'] : '0',  // Default to '0' if blank,
+                        'zoho_customer_id' => $record_user['Zoho Customer ID'],
                     ]);
                 }
                 
