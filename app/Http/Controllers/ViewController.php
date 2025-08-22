@@ -1939,6 +1939,7 @@ class ViewController extends Controller
                     'order_item_id' => $item->id ?? null,
                     'product_code'  => $item->product_code,
                     'product_name'  => $item->product_name ?? null,
+                    'product_image' => $item->product_image,
                     'size'          => $item->size ?? null,
                     'qty'           => $requestedQty,
                     'rate'          => (float) $item->rate,   // 👈 include item price
