@@ -108,6 +108,8 @@ class CsvImportController extends Controller
                     'category' => $record_csv['Category'],
                     'sub_category' => $record_csv['Sub Category'],
                     'type' => $record_csv['Type'],
+                    'hsn' => $record_csv['HSN'],
+                    'tax' => $record_csv['Tax'],
                     'machine_part_no' => $record_csv['Machine Part No'],
                     'purchase' => $purchasePrice_product, // Ensure this is a valid number
                     'basic' => $basicPrice_product, // Ensure this is a valid number

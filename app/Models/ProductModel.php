@@ -22,6 +22,8 @@ class ProductModel extends Model
         'category',
         'sub_category',
         'type',
+        'hsn',
+        'tax',
         'size',
         'machine_part_no',
         'purchase',
