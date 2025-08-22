@@ -185,6 +185,7 @@ class ZohoController extends Controller
         $estimateData = [
             "customer_id" => $customer_id,  // Assuming the user_id is the customer_id in Zoho Books
             "date" => now()->format('Y-m-d'),
+            "reference_number" => $order->order_id,  // Reference number for the estimate
             "line_items" => $lineItems,
             "total" => $taxExclusiveAmount,  // Total amount excluding tax
             "status" => "draft",  // Status can be 'draft' or 'sent'
