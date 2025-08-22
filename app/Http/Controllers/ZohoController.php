@@ -145,7 +145,7 @@ class ZohoController extends Controller
         
             if ($product) {
                 // If your table uses one of these columns, adjust as needed
-                $rawPct = $product->gst ?? $product->tax ?? null;
+                $rawPct = $product->tax ?? $product->tax ?? null;
             }
         
             // Normalize to an integer percent we support (5/12/18/28), default 18
