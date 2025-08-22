@@ -1857,6 +1857,12 @@ class ViewController extends Controller
                 ], 200);
             }
 
+            // 🔹 NEW: Get product images mapped by product_code
+            $productImagesByCode = DB::table('t_products')
+            ->select('product_code', 'image_url')
+            ->whereIn('product_code', $productCodes)
+            ->pluck('image_url', 'product_code'); // [code => url]
+
             // 4) Build current available stock per product per godown
             //    available = SUM(IN) - SUM(OUT) ; negative becomes 0
             //    Table assumed: t_stock_order_items (columns: product_code, godown_id, quantity, type IN/OUT)
@@ -1935,11 +1941,14 @@ class ViewController extends Controller
                     ];
                 }
 
+                // 🔹 Assign product image from lookup map
+                $productImage = $productImagesByCode[$item->product_code] ?? null;
+
                 $itemsOutput[] = [
                     'order_item_id' => $item->id ?? null,
                     'product_code'  => $item->product_code,
                     'product_name'  => $item->product_name ?? null,
-                    'product_image' => $item->product_image,
+                    'product_image' => $productImage,   // 👈 added
                     'size'          => $item->size ?? null,
                     'qty'           => $requestedQty,
                     'rate'          => (float) $item->rate,   // 👈 include item price
