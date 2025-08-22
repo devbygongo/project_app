@@ -107,24 +107,72 @@ class ZohoController extends Controller
         $taxAmount = $order->amount - $taxExclusiveAmount;  // Calculate the tax amount
 
         // Tax ID for GST18 (replace with your actual tax_id for GST18)
-        $taxId = '786484000000013221';  // GST18 tax ID
+        // $taxId = '786484000000013221';  // GST18 tax ID
 
-        // Prepare the line items for the Zoho quote
+        // // Prepare the line items for the Zoho quote
+        // $lineItems = [];
+
+        // foreach ($order->order_items as $item) {
+        //     // Calculate tax-exclusive rate for each item
+        //     $taxExclusiveRate = $item->rate / (1 + $taxRate);  // Exclude tax from rate
+        //     $taxExclusiveAmountForItem = $item->total / (1 + $taxRate);  // Exclude tax from total
+
+        //     $lineItems[] = [
+        //         "name" => $item->product_name.' - '.$item->product_code,  // Using product name
+        //         "description" => $item->remarks ?? "",  // Optional description
+        //         "quantity" => $item->quantity,
+        //         "rate" => round($taxExclusiveRate, 2),  // Tax-exclusive rate
+        //         "amount" => $taxExclusiveAmountForItem,  // Tax-exclusive amount
+        //         "tax_id" => $taxId,  // Pass the correct tax_id for GST18
+        //         "hsn_or_sac"   => optional($item->product)->hsn,
+        //     ];
+        // }
+
+        $taxIdMap = [
+            5  => '786484000000013205',
+            12 => '786484000000013213',
+            18 => '786484000000013221',
+            28 => '786484000000013229',
+        ];
+        
         $lineItems = [];
-
+        
         foreach ($order->order_items as $item) {
-            // Calculate tax-exclusive rate for each item
-            $taxExclusiveRate = $item->rate / (1 + $taxRate);  // Exclude tax from rate
-            $taxExclusiveAmountForItem = $item->total / (1 + $taxRate);  // Exclude tax from total
-
+            // ----- 1) Resolve product tax rate (%), default to 18 if null/missing -----
+            // Prefer $product->gst; fall back to $product->tax; default 18
+            $product = $item->product; // already eager-loaded
+            $rawPct  = null;
+        
+            if ($product) {
+                // If your table uses one of these columns, adjust as needed
+                $rawPct = $product->gst ?? $product->tax ?? null;
+            }
+        
+            // Normalize to an integer percent we support (5/12/18/28), default 18
+            $supported = [5, 12, 18, 28];
+            $pct = (int) round((float) $rawPct);
+            if (!in_array($pct, $supported, true)) {
+                $pct = 18;
+            }
+        
+            $taxRate = $pct / 100.0;                          // e.g. 0.18
+            $taxId   = $taxIdMap[$pct];                       // pick correct Zoho tax_id
+        
+            // ----- 2) Convert inclusive rates/totals to exclusive (your current logic) -----
+            // If your stored $item->rate and $item->total are inclusive, remove tax per line:
+            $taxExclusiveRate  = (float) $item->rate  / (1 + $taxRate);
+            $taxExclusiveTotal = (float) $item->total / (1 + $taxRate);
+        
+            // ----- 3) Build line item -----
             $lineItems[] = [
-                "name" => $item->product_name.' - '.$item->product_code,  // Using product name
-                "description" => $item->remarks ?? "",  // Optional description
-                "quantity" => $item->quantity,
-                "rate" => round($taxExclusiveRate, 2),  // Tax-exclusive rate
-                "amount" => $taxExclusiveAmountForItem,  // Tax-exclusive amount
-                "tax_id" => $taxId,  // Pass the correct tax_id for GST18
-                "hsn_or_sac"   => optional($item->product)->hsn,
+                "name"         => $item->product_name . ' - ' . $item->product_code,
+                "description"  => $item->remarks ?? "",
+                "quantity"     => (float) $item->quantity,
+                "rate"         => round($taxExclusiveRate, 2),   // exclusive rate
+                "amount"       => round($taxExclusiveTotal, 2),  // exclusive amount (optional; Zoho can compute)
+                "tax_id"       => $taxId,                        // mapped per tax rate
+                "hsn_or_sac"   => optional($product)->hsn,       // HSN from product
+                "product_type" => "goods",
             ];
         }
 
