@@ -124,6 +124,7 @@ class ZohoController extends Controller
                 "rate" => round($taxExclusiveRate, 2),  // Tax-exclusive rate
                 "amount" => $taxExclusiveAmountForItem,  // Tax-exclusive amount
                 "tax_id" => $taxId,  // Pass the correct tax_id for GST18
+                "hsn_or_sac"   => optional($item->product)->hsn,
             ];
         }
 
