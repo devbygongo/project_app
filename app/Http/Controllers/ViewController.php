@@ -1859,9 +1859,9 @@ class ViewController extends Controller
 
             // 🔹 NEW: Get product images mapped by product_code
             $productImagesByCode = DB::table('t_products')
-            ->select('product_code', 'image_url')
+            ->select('product_code', 'product_image')
             ->whereIn('product_code', $productCodes)
-            ->pluck('image_url', 'product_code'); // [code => url]
+            ->pluck('product_image', 'product_code'); // [code => url]
 
             // 4) Build current available stock per product per godown
             //    available = SUM(IN) - SUM(OUT) ; negative becomes 0
