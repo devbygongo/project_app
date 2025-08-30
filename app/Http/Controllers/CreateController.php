@@ -1139,7 +1139,6 @@ class CreateController extends Controller
         ], 200);
     }
 
-
     public function zoho_sales(Request $request)
     {
         $get_user = Auth::User();

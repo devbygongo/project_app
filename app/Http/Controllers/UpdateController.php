@@ -20,6 +20,8 @@ use App\Models\StockOrdersModel;
 
 use App\Models\StockOrderItemsModel;
 
+use App\Models\RequestJson;
+
 use App\Http\Controllers\InvoiceController;
 
 use App\Http\Controllers\WishlistController;
@@ -996,6 +998,17 @@ class UpdateController extends Controller
                 'message' => 'Order not found!'
             ], 404);
         }
+
+        // ✅ Save request details into t_request_json
+        RequestJson::create([
+            'function'   => 'complete_order_stock',
+            'request'    => json_encode([
+                'params' => $request->all(),   // Request data
+                'order_id' => $id,             // Explicit order id
+                'user_id' => Auth::id()        // Who triggered it (optional, if Auth is used)
+            ]),
+            'created_at' => now(),
+        ]);
 
         // Update the status of the order to 'completed'
         // $order->status = 'completed';
