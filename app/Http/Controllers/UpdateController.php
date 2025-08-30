@@ -20,7 +20,7 @@ use App\Models\StockOrdersModel;
 
 use App\Models\StockOrderItemsModel;
 
-use App\Models\RequestJson;
+use App\Models\LogsModel;
 
 use App\Http\Controllers\InvoiceController;
 
