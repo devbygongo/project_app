@@ -1000,7 +1000,7 @@ class UpdateController extends Controller
         }
 
         // ✅ Save request details into t_request_json
-        RequestJson::create([
+        LogsModel::create([
             'function'   => 'complete_order_stock',
             'request'    => json_encode([
                 'params' => $request->all(),   // Request data
