@@ -745,23 +745,23 @@ class UpdateController extends Controller
         
         Log::info('Split order request payload', $request->all());
 
-        try {
-            LogsModel::create([
-                'function'   => 'edit_order',
-                'request'    => json_encode([
-                    'params'   => $request->all(),
-                    'order_id' => $id,
-                    'user_id'  => Auth::id(),
-                ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-                'created_at' => now(),
-            ]);
-        } catch (\Throwable $e) {
-            Log::warning('Failed to write request log (t_request_json) for edit_order', [
-                'order_id' => $id,
-                'error'    => $e->getMessage(),
-            ]);
-            // continue without failing the main operation
-        }
+        // try {
+        //     LogsModel::create([
+        //         'function'   => 'edit_order',
+        //         'request'    => json_encode([
+        //             'params'   => $request->all(),
+        //             'order_id' => $id,
+        //             'user_id'  => Auth::id(),
+        //         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+        //         'created_at' => now(),
+        //     ]);
+        // } catch (\Throwable $e) {
+        //     Log::warning('Failed to write request log (t_request_json) for edit_order', [
+        //         'order_id' => $id,
+        //         'error'    => $e->getMessage(),
+        //     ]);
+        //     // continue without failing the main operation
+        // }
         
         $request->validate([
             'order_id' => 'required|string',
