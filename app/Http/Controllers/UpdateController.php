@@ -1081,7 +1081,7 @@ class UpdateController extends Controller
             'type' => 'OUT', // Main order with OUT type
             't_order_id' => $id,  // Optional: Store the original order id for reference
             'pdf' => null, // Placeholder for PDF path (to be generated later)
-            'remarks' => "Stock out for order ID {$id}",
+            'remarks' => "Stock out for order ID {$order->order_id}",
         ]);
 
         // Prepare a stock order for items allocated to "DIRECT DISPATCH" with type "IN"
@@ -1111,7 +1111,7 @@ class UpdateController extends Controller
                             'type' => 'IN', // Stock is coming in
                             't_order_id' => $id,  // Optional: Store the original order id for reference
                             'pdf' => null, // Placeholder for PDF path (to be generated later)
-                            'remarks' => "Stock in for order ID {$id} from DIRECT DISPATCH",
+                            'remarks' => "Stock in for order ID {$order->order_id} from DIRECT DISPATCH",
                         ]);
                     }
 
