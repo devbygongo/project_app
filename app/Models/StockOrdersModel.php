@@ -15,6 +15,7 @@ class StockOrdersModel extends Model
         'user_id',
         'order_date',
         'type',
+        't_order_id',
         'pdf',
         'remarks',
     ];
