@@ -8,6 +8,8 @@ use App\Models\User;
 
 use App\Models\CartModel;
 
+use App\Models\CounterModel;
+
 use App\Models\OrderModel;
 
 use App\Models\ProductModel;
