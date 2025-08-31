@@ -1145,7 +1145,7 @@ class UpdateController extends Controller
                     'type'       => 'OUT',
                     't_order_id' => $id,
                     'pdf'        => null,
-                    'remarks'    => "Stock OUT for order {$order->order_id} (split by godown)",
+                    'remarks'    => "{$order->order_id}",
                 ]);
 
                 foreach ($outAgg as $row) {
@@ -1172,7 +1172,7 @@ class UpdateController extends Controller
                     'type'       => 'IN',
                     't_order_id' => $id,
                     'pdf'        => null,
-                    'remarks'    => "Stock IN for order {$order->order_id} (DIRECT only)",
+                    'remarks'    => "{$order->order_id}",
                 ]);
 
                 foreach ($inDDAgg as $row) {
