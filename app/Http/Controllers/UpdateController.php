@@ -1042,109 +1042,184 @@ class UpdateController extends Controller
 
     public function complete_order_stock(Request $request, $id)
     {
-        // Find the order by its ID
-        $order = OrderModel::find($id);
+        try {
+            DB::beginTransaction();
 
-        if (!$order) {
-            return response()->json([
-                'message' => 'Order not found!'
-            ], 404);
-        }
+            $order = OrderModel::find($id);
+            if (!$order) {
+                return response()->json(['message' => 'Order not found!'], 404);
+            }
 
-        // ✅ Save request details into t_request_json
-        LogsModel::create([
-            'function'   => 'complete_order_stock',
-            'request'    => json_encode([
-                'params' => $request->all(),   // Request data
-                'order_id' => $id,             // Explicit order id
-                'user_id' => Auth::id()        // Who triggered it (optional, if Auth is used)
-            ]),
-            'created_at' => now(),
-        ]);
+            // Log the raw request
+            LogsModel::create([
+                'function'   => 'complete_order_stock',
+                'request'    => json_encode([
+                    'params'  => $request->all(),
+                    'order_id'=> $id,
+                    'user_id' => Auth::id()
+                ]),
+                'created_at' => now(),
+            ]);
 
-        // Mark the order as completed
-        $order->status = 'completed';
-        $order->save();
+            // Mark completed
+            $order->status = 'completed';
+            $order->save();
 
-        // Fetch counter details to generate order_id
-        $counter = CounterModel::where('name', 'stock_order')->firstOrFail();
+            // Atomic counter fetcher
+            $nextOrderId = function () {
+                $counter = CounterModel::where('name', 'stock_order')->lockForUpdate()->firstOrFail();
+                $oid = $counter->prefix . str_pad($counter->counter, 5, '0', STR_PAD_LEFT) . $counter->postfix;
+                $counter->increment('counter');
+                return $oid;
+            };
 
-        // Generate the order_id
-        $orderId = $counter->prefix . str_pad($counter->counter, 5, '0', STR_PAD_LEFT) . $counter->postfix;
+            // Helper: match "DIRECT" godown variants safely
+            $isDirect = function (?string $name): bool {
+                if (!$name) return false;
+                $n = mb_strtoupper(trim($name));
+                return $n === 'DIRECT DISPATCH' || $n === 'DIRECT GODOWN' || str_starts_with($n, 'DIRECT');
+            };
 
-        // Increment the counter
-        $counter->increment('counter');
+            // Optionally resolve DIRECT godown id (if you maintain one)
+            $directGodownId = null;
+            if (class_exists(\App\Models\GodownModel::class)) {
+                $directGodownId = \App\Models\GodownModel::whereIn('name', ['DIRECT DISPATCH','DIRECT GODOWN'])->value('id');
+            }
 
-        // Prepare the stock order for type "OUT"
-        $stockOrder = StockOrdersModel::create([
-            'order_id' => $orderId,
-            'user_id' => Auth::id(),
-            'order_date' => now(),
-            'type' => 'OUT', // Main order with OUT type
-            't_order_id' => $id,  // Optional: Store the original order id for reference
-            'pdf' => null, // Placeholder for PDF path (to be generated later)
-            'remarks' => "Stock out for order ID {$order->order_id}",
-        ]);
+            // ===== Aggregation =====
+            // OUT: all allocations, grouped by product|size|godown
+            // IN : only DIRECT allocations, grouped by product|size  (single DD line per SKU/size)
+            $outAgg = []; // key: product|size|godown_id
+            $inDDAgg = []; // key: product|size
 
-        // Prepare a stock order for items allocated to "DIRECT DISPATCH" with type "IN"
-        $stockOrderIn = null;
-        foreach ($request->input() as $item) {
-            // Loop through each allocation in the item
-            foreach ($item['allocations'] as $allocation) {
-                // For OUT type, create stock order items for the main stock order
-                StockOrderItemsModel::create([
-                    'stock_order_id' => $stockOrder->id,
-                    'product_code' => $item['product_code'],
-                    'product_name' => $item['product_name'],
-                    'godown_id' => $allocation['godown_id'],
-                    'quantity' => $allocation['qty'],
-                    'type' => 'OUT',  // Type is OUT for stock removal
-                    'size' => $item['size'] ?? null, // Handle size if it is present
+            $items = $request->input(); // expected: [ { product_code, product_name, size?, allocations:[{godown_id, godown_name, qty}] }, ... ]
+            foreach ($items as $item) {
+                $pcode = $item['product_code'];
+                $pname = $item['product_name'];
+                $size  = $item['size'] ?? null;
+
+                foreach ($item['allocations'] as $a) {
+                    $qty   = (float) ($a['qty'] ?? 0);
+                    if ($qty <= 0) continue;
+                    $gid   = $a['godown_id'] ?? null;
+                    $gname = $a['godown_name'] ?? '';
+
+                    // OUT (always, split by godown)
+                    $keyOut = $pcode.'|'.($size ?? '').'|'.($gid ?? '0');
+                    if (!isset($outAgg[$keyOut])) {
+                        $outAgg[$keyOut] = [
+                            'product_code' => $pcode,
+                            'product_name' => $pname,
+                            'size'         => $size,
+                            'godown_id'    => $gid,
+                            'quantity'     => 0,
+                        ];
+                    }
+                    $outAgg[$keyOut]['quantity'] += $qty;
+
+                    // IN (only DIRECT xfers)
+                    if ($isDirect($gname)) {
+                        $keyIn = $pcode.'|'.($size ?? '');
+                        if (!isset($inDDAgg[$keyIn])) {
+                            $inDDAgg[$keyIn] = [
+                                'product_code' => $pcode,
+                                'product_name' => $pname,
+                                'size'         => $size,
+                                'godown_id'    => $directGodownId ?? $gid, // prefer canonical DIRECT id
+                                'quantity'     => 0,
+                            ];
+                        }
+                        $inDDAgg[$keyIn]['quantity'] += $qty;
+                    }
+                }
+            }
+
+            // ===== Create OUT order (all godowns) =====
+            $stockOrderOut = null;
+            if (!empty($outAgg)) {
+                $outId = $nextOrderId();
+                $stockOrderOut = StockOrdersModel::create([
+                    'order_id'   => $outId,
+                    'user_id'    => Auth::id(),
+                    'order_date' => now(),
+                    'type'       => 'OUT',
+                    't_order_id' => $id,
+                    'pdf'        => null,
+                    'remarks'    => "Stock OUT for order {$order->order_id} (split by godown)",
                 ]);
 
-                // If the godown is "DIRECT DISPATCH", create a stock order with type "IN"
-                if ($allocation['godown_name'] === 'DIRECT DISPATCH') {
-                    if (!$stockOrderIn) {
-                        // Create a stock order with type "IN" for all items allocated to "DIRECT DISPATCH"
-                        $stockOrderIn = StockOrdersModel::create([
-                            'order_id' => $orderId,
-                            'user_id' => Auth::id(),
-                            'order_date' => now(),
-                            'type' => 'IN', // Stock is coming in
-                            't_order_id' => $id,  // Optional: Store the original order id for reference
-                            'pdf' => null, // Placeholder for PDF path (to be generated later)
-                            'remarks' => "Stock in for order ID {$order->order_id} from DIRECT DISPATCH",
-                        ]);
-                    }
-
-                    // Create stock order items for the "IN" stock order
+                foreach ($outAgg as $row) {
                     StockOrderItemsModel::create([
-                        'stock_order_id' => $stockOrderIn->id,
-                        'product_code' => $item['product_code'],
-                        'product_name' => $item['product_name'],
-                        'godown_id' => $allocation['godown_id'],
-                        'quantity' => $allocation['qty'],
-                        'type' => 'IN',  // Type is IN for stock addition
-                        'size' => $item['size'] ?? null, // Handle size if it is present
+                        'stock_order_id' => $stockOrderOut->id,
+                        'product_code'   => $row['product_code'],
+                        'product_name'   => $row['product_name'],
+                        'godown_id'      => $row['godown_id'],
+                        'quantity'       => $row['quantity'],
+                        'type'           => 'OUT',
+                        'size'           => $row['size'],
                     ]);
                 }
             }
+
+            // ===== Create IN order (DIRECT only) =====
+            $stockOrderIn = null;
+            if (!empty($inDDAgg)) {
+                $inId = $nextOrderId();
+                $stockOrderIn = StockOrdersModel::create([
+                    'order_id'   => $inId,
+                    'user_id'    => Auth::id(),
+                    'order_date' => now(),
+                    'type'       => 'IN',
+                    't_order_id' => $id,
+                    'pdf'        => null,
+                    'remarks'    => "Stock IN for order {$order->order_id} (DIRECT only)",
+                ]);
+
+                foreach ($inDDAgg as $row) {
+                    StockOrderItemsModel::create([
+                        'stock_order_id' => $stockOrderIn->id,
+                        'product_code'   => $row['product_code'],
+                        'product_name'   => $row['product_name'],
+                        'godown_id'      => $row['godown_id'], // DIRECT godown id
+                        'quantity'       => $row['quantity'],
+                        'type'           => 'IN',
+                        'size'           => $row['size'],
+                    ]);
+                }
+            }
+
+            // Generate PDFs after items are created
+            $invoice = new InvoiceControllerZP();
+            if ($stockOrderOut) {
+                $stockOrderOut->pdf = $invoice->generatestockorderInvoice($stockOrderOut->id);
+                $stockOrderOut->save();
+            }
+            if ($stockOrderIn) {
+                $stockOrderIn->pdf = $invoice->generatestockorderInvoice($stockOrderIn->id);
+                $stockOrderIn->save();
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Done. OUT has all items split by godown; IN has only DIRECT quantities.',
+                'order'   => $order,
+                'stock_orders' => [
+                    'out' => $stockOrderOut ? $stockOrderOut->order_id : null,
+                    'in'  => $stockOrderIn ? $stockOrderIn->order_id : null,
+                ],
+            ], 200);
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('complete_order_stock failed', ['error' => $e->getMessage()]);
+            return response()->json([
+                'message' => 'Failed to complete order stock.',
+                'error'   => $e->getMessage(),
+            ], 500);
         }
-
-        // Generate PDF for the OUT stock order (after items have been added)
-        $generate_stock_order_invoice = new InvoiceControllerZP();
-        $stockOrder->pdf = $generate_stock_order_invoice->generatestockorderInvoice($stockOrder->id);
-
-        // Generate PDF for the IN stock order (if applicable, after items have been added)
-        if ($stockOrderIn) {
-            $stockOrderIn->pdf = $generate_stock_order_invoice->generatestockorderInvoice($stockOrderIn->id);
-        }
-
-        return response()->json([
-            'message' => 'Order status updated to completed successfully, stock orders created!',
-            'order' => $order
-        ], 200);
     }
+
 
 
     public function cancel_order(Request $request, $id)
