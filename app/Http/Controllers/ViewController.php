@@ -1722,7 +1722,7 @@ class ViewController extends Controller
                         'date' => $order->created_at->format('Y-m-d'),
                         'product_code' => $item->product_code,
                         'product_name' => $item->product_name ?? 'Unknown',
-                        'godown_name' => $item->godown->name ?? 'Unknown',
+                        'godown_name' => $item->godown->name . " ( " . $item->t_order_id . " ) " ?? 'Unknown',
                         'quantity' => $item->quantity,
                         'type' => $item->type,
                         'user' => $order->user->name ?? 'Unknown',
