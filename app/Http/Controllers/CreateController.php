@@ -140,10 +140,10 @@ class CreateController extends Controller
                 'mobile' => ['required', 'string'],
             ]);
 
-            if (strlen($request->mobile) === 15) {
-                // Remove 2nd and 3rd characters
-                $request->mobile = substr($request->mobile, 0, 1) . substr($request->mobile, 3);
-            }
+            // if (strlen($request->mobile) === 15) {
+            //     // Remove 2nd and 3rd characters
+            //     $request->mobile = substr($request->mobile, 0, 1) . substr($request->mobile, 3);
+            // }
 
             $otpRecord = User::select('otp', 'expires_at')
                 ->where('mobile', $request->mobile)
