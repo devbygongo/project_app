@@ -44,7 +44,7 @@ class CreateController extends Controller
     {
         $request->validate([
             // 'email' => 'required|unique:users,email',
-            'mobile' => ['required', 'string', 'size:13', 'unique:users'],
+            'mobile' => ['required', 'string', 'unique:users'],
             'name' => 'required',
             'password' => 'required',
             // 'role' => 'required',
