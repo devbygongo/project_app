@@ -44,7 +44,7 @@ class CreateController extends Controller
     {
         $request->validate([
             // 'email' => 'required|unique:users,email',
-            'mobile' => ['required', 'string', 'unique:users'],
+            'mobile' => ['required', 'string', 'size:13', 'unique:users'],
             'name' => 'required',
             'password' => 'required',
             // 'role' => 'required',
@@ -137,16 +137,18 @@ class CreateController extends Controller
     {
         if ($otp) {
             $request->validate([
-                'mobile' => ['required', 'string'],
+                'mobile' => ['required', 'string', 'size:15'],
             ]);
 
-            // if (strlen($request->mobile) === 15) {
-            //     // Remove 2nd and 3rd characters
-            //     $request->mobile = substr($request->mobile, 0, 1) . substr($request->mobile, 3);
-            // }
+            $mobile = $request->mobile;
+
+            if (strlen($mobile) === 15) {
+                // Remove 2nd and 3rd characters
+                $mobile = substr($mobile, 0, 1) . substr($mobile, 3);
+            }
 
             $otpRecord = User::select('otp', 'expires_at')
-                ->where('mobile', $request->mobile)
+                ->where('mobile', $mobile)
                 ->first();
 
             if ($otpRecord) {
@@ -166,7 +168,7 @@ class CreateController extends Controller
                 } else {
 
                     // Retrieve the user
-                    $user = User::where('mobile', $request->mobile)->first();
+                    $user = User::where('mobile', $mobile)->first();
 
                     // Check if user is verified
                     if ($user->is_verified == '0') {                        
@@ -215,7 +217,7 @@ class CreateController extends Controller
                     }
 
                     // Remove OTP record after successful validation
-                    User::where('mobile', $request->mobile)->update(['otp' => null, 'expires_at' => null]);
+                    User::where('mobile', $mobile)->update(['otp' => null, 'expires_at' => null]);
                     
 
                     // Generate a Sanctum token
@@ -251,7 +253,7 @@ class CreateController extends Controller
                 'password' => 'required',
             ]);
 
-            if (Auth::attempt(['mobile' => $request->mobile, 'password' => $request->password])) {
+            if (Auth::attempt(['mobile' => $mobile, 'password' => $request->password])) {
                 $user = Auth::user();
 
                 // Check if user is verified
