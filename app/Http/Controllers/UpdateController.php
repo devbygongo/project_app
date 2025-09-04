@@ -156,10 +156,16 @@ class UpdateController extends Controller
     public function generate_otp(Request $request)
     {
         $request->validate([
-            'mobile' => ['required', 'string', 'size:13'],
+            'mobile' => ['required', 'string'],
         ]);
 
         $mobile = $request->input('mobile');
+
+        if (strlen($mobile) === 15) {
+            // Remove 2nd and 3rd characters
+            $mobile = substr($mobile, 0, 1) . substr($mobile, 3);
+        }
+
 
         $get_user = User::select('id')
             ->where('mobile', $mobile)

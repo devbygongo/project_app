@@ -137,7 +137,7 @@ class CreateController extends Controller
     {
         if ($otp) {
             $request->validate([
-                'mobile' => ['required', 'string', 'size:13'],
+                'mobile' => ['required', 'string'],
             ]);
 
             $otpRecord = User::select('otp', 'expires_at')
