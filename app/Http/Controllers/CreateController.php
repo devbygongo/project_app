@@ -137,7 +137,7 @@ class CreateController extends Controller
     {
         if ($otp) {
             $request->validate([
-                'mobile' => ['required', 'string', 'size:15'],
+                'mobile' => ['required', 'string'],
             ]);
 
             $mobile = $request->mobile;
