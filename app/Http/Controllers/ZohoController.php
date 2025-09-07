@@ -197,9 +197,14 @@ class ZohoController extends Controller
     }
 
 
-    public function getEstimate()
+    public function getEstimate(Request $request)
     {
-        $estimateId = 786484000002801002;
+        $estimateId = $request->input('estimateId'); // ✅ Accept estimateId from request
+
+        if (!$estimateId) {
+            return response()->json(['error' => 'estimateId is required'], 422);
+        }
+
         $accessToken = $this->getAccessToken();  // Get the access token
 
         if (!$accessToken) {
@@ -214,18 +219,17 @@ class ZohoController extends Controller
             ->get(env('ZOHO_API_BASE_URL') . '/books/v3/estimates/' . $estimateId);
 
         if ($response->successful()) {
-            // Return the estimate data
             return response()->json([
                 'message' => 'Estimate fetched successfully',
                 'data' => $response->json()
             ], 200);
         }
 
-        // Handle failure response
         return response()->json([
             'error' => 'Failed to fetch estimate',
             'details' => $response->json()
         ], 400);
     }
+
 
 }

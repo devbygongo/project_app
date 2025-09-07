@@ -34,7 +34,7 @@ use App\Http\Controllers\ZohoController;
  Route::get('/update_type/{platform}', [ViewController::class, 'getLatestUpdate']);
 
  Route::get('/zoho/estimate', [ZohoController::class, 'createEstimate']);
- Route::get('/tax_rates', [ZohoController::class, 'getEstimate']);
+ Route::get('/estimates/{estimateId}', [ZohoController::class, 'getEstimate']);
 
 
     
