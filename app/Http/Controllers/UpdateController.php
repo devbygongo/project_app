@@ -732,242 +732,577 @@ class UpdateController extends Controller
     //     }
     // }
 
+    // public function edit_order(Request $request, $id)
+    // {
+    //     $get_user = Auth::user();
+
+    //     // Log the raw request
+    //     LogsModel::create([
+    //         'function'   => 'edit_order',
+    //         'request'    => json_encode([
+    //             'params'  => $request->all(),
+    //             'order_id'=> $id,
+    //             'user_id' => Auth::id()
+    //         ]),
+    //         'created_at' => now(),
+    //     ]);
+
+    //     die();
+
+    //     if (is_numeric($request->input('order_id'))) {
+    //         $internalId = (int) $request->input('order_id');
+    //         $dbOrder = OrderModel::select('order_id')->where('id', $internalId)->first();
+        
+    //         if ($dbOrder) {
+    //             $request->merge([
+    //                 'order_id' => $dbOrder->order_id
+    //             ]);
+    //         } else {
+    //             return response()->json(['message' => 'Order ID not found for numeric input.'], 404);
+    //         }
+    //     }
+        
+    //     $request->validate([
+    //         'order_id' => 'required|string',
+    //         'order_type' => 'required|string',
+    //         'user_id' => 'required|integer',
+    //         'amount' => 'required|numeric',
+    //         'items' => 'required|array',
+    //         'items.*.product_code' => 'required|string',
+    //         'items.*.product_name' => 'required|string',
+    //         'items.*.quantity' => 'required|integer',
+    //         'items.*.rate' => 'required|numeric',
+    //         'items.*.total' => 'required|numeric',
+    //         'items.*.remarks' => 'nullable|string',
+    //         'items.*.markedForDeletion' => 'nullable|boolean',
+    //         'items.*.removalReason' => 'nullable|string',
+    //         'items.*.orig_quantity' => 'nullable|integer',
+    //         'cancel_order_id' => 'nullable|string',
+    //         'edit_type' => 'nullable|in:edit,merge,split',
+    //     ]);
+
+    //     $editType = strtolower($request->input('edit_type', 'edit'));
+    //     $cancelOrderIds = array_filter(array_map('trim', explode(',', $request->input('cancel_order_id'))));
+    //     $order = OrderModel::find($id);
+
+    //     if (!$order) {
+    //         return response()->json(['message' => 'Order not found!'], 404);
+    //     }
+
+    //     if ($order->user_id !== $request->input('user_id')) {
+    //         return response()->json(['message' => 'Unauthorized action.'], 403);
+    //     }
+
+    //     $is_merged = false;
+    //     $merged_orders = '';
+    //     $is_split = false;
+    //     $old_order_id = '';
+    //     $newOrder = null;
+
+    //     DB::beginTransaction();
+
+    //     try {
+    //         if ($editType === 'merge' && !empty($cancelOrderIds)) {
+    //             foreach ($cancelOrderIds as $cancelId) {
+    //                 $cancelOrder = OrderModel::find($cancelId);
+    //                 if ($cancelOrder) {
+    //                     $cancelOrder->status = "cancelled";
+    //                     $cancelOrder->save();
+    //                     $merged_orders .= ($merged_orders ? ', ' : '') . $cancelOrder->order_id;
+    //                     $is_merged = true;
+    //                 } else {
+    //                     Log::warning("Cancel Order ID {$cancelId} not found");
+    //                 }
+    //             }
+    //         }
+
+    //         if ($editType === 'split') {
+
+    //             Log::info('Split operation started', ['order_id' => $order->id]);
+
+    //             $splitItems = [];
+    //             $keepItems = [];
+    //             $splitTotal = 0;
+    //             $keepTotal = 0;
+
+    //             foreach ($request->items as $item) {
+    //                 Log::debug('Processing item', [
+    //                     'product_code' => $item['product_code'],
+    //                     'orig_quantity' => $item['orig_quantity'] ?? null,
+    //                     'quantity' => $item['quantity'],
+    //                     'markedForDeletion' => $item['markedForDeletion'] ?? false
+    //                 ]);
+
+    //                 $moveQty = ($item['markedForDeletion'] ?? false)
+    //                     ? $item['orig_quantity']
+    //                     : max(0, ($item['orig_quantity'] ?? 0) - $item['quantity']);
+
+    //                 if ($moveQty > 0) {
+    //                     $splitItems[] = array_merge($item, ['quantity' => $moveQty, 'total' => $moveQty * $item['rate']]);
+    //                     $splitTotal += ($moveQty * $item['rate']);
+    //                 }
+
+    //                 $keptQty = $item['quantity'];
+    //                 if ($keptQty > 0 && !($item['markedForDeletion'] ?? false)) {
+    //                     $keepItems[] = array_merge($item, ['quantity' => $keptQty, 'total' => $keptQty * $item['rate']]);
+    //                     $keepTotal += ($keptQty * $item['rate']);
+    //                 }
+    //             }
+
+    //             if (count($splitItems) > 0) {
+    //                 $baseOrderId = $order->order_id;
+
+    //                 if (preg_match('/^(.*?)(SPL(\d+)?)?$/', $baseOrderId, $matches)) {
+    //                     $base = $matches[1];
+    //                     $suffix = isset($matches[3]) ? intval($matches[3]) + 1 : 2;
+    //                     $newOrderCode = $base . 'SPL' . $suffix;
+    //                 } else {
+    //                     $newOrderCode = $baseOrderId . 'SPL2';
+    //                 }
+
+    //                 Log::info('Creating new split order', ['base_order_id' => $order->order_id]);
+
+    //                 $newOrder = OrderModel::create([
+    //                     'user_id' => $order->user_id,
+    //                     'order_id' => $newOrderCode,
+    //                     'order_date' => Carbon::now(),
+    //                     'amount' => $splitTotal,
+    //                     'type' => $order->type,
+    //                 ]);
+
+    //                 foreach ($splitItems as $item) {
+    //                     Log::debug('Creating item in split order', ['product_code' => $item['product_code'], 'quantity' => $item['quantity']]);
+
+    //                     OrderItemsModel::create([
+    //                         'order_id' => $newOrder->id,
+    //                         'product_code' => $item['product_code'],
+    //                         'product_name' => $item['product_name'],
+    //                         'rate' => $item['rate'],
+    //                         'quantity' => $item['quantity'],
+    //                         'total' => $item['total'],
+    //                         'type' => strtolower($request->input('order_type')),
+    //                         'remarks' => $item['remarks'] ?? '',
+    //                         'size' => $item['size'] ?? null,
+    //                     ]);
+    //                 }
+
+    //                 $is_split = true;
+    //                 $old_order_id = $order->order_id;
+
+    //                 Log::info('Updating original order amount', ['keep_total' => $keepTotal]);
+
+    //                 $order->update(['amount' => $keepTotal]);
+    //                 $request->merge(['items' => $keepItems]);
+    //             }
+    //         }
+
+    //         OrderItemsModel::where('order_id', $id)->delete();
+    //         $calculatedAmount = 0;
+
+    //         foreach ($request->items as $item) {
+    //             if (($item['markedForDeletion'] ?? false) && $editType !== 'split') {
+    //                 if (($item['removalReason'] ?? '') === 'Not in stock') {
+    //                     (new WishlistController)->saveToWishlist($order->user_id, $item);
+    //                 }
+    //                 continue;
+    //             }
+
+    //             OrderItemsModel::create([
+    //                 'order_id' => $id,
+    //                 'product_code' => $item['product_code'],
+    //                 'product_name' => $item['product_name'],
+    //                 'quantity' => $item['quantity'],
+    //                 'rate' => $item['rate'],
+    //                 'total' => $item['total'],
+    //                 'type' => strtolower($request->input('order_type')),
+    //                 'remarks' => $item['remarks'] ?? '',
+    //                 'size' => $item['size'] ?? null,
+    //             ]);
+
+    //             $calculatedAmount += $item['total'];
+    //         }
+
+    //         $order->amount = $calculatedAmount;
+    //         $order->save();
+
+    //         $invoiceController = new InvoiceController();
+    //         $invoiceController->generateorderInvoice($order->id, [
+    //             'is_edited' => true,
+    //             'is_merged' => $is_merged,
+    //             'merged_orders' => $merged_orders,
+    //             'is_split' => false,
+    //             'old_order_id' => ''
+    //         ]);
+    //         $invoiceController->generatePackingSlip($order->id, true);
+
+    //         if ($is_split && $newOrder) {
+    //             $invoiceController->generateorderInvoice($newOrder->id, [
+    //                 'is_edited' => true,
+    //                 'is_split' => true,
+    //                 'old_order_id' => $old_order_id,
+    //             ]);
+    //             $invoiceController->generatePackingSlip($newOrder->id, true);
+    //         }
+
+    //         DB::commit();
+
+    //         return response()->json([
+    //             'message' => 'Order updated successfully!',
+    //             'order' => $order->fresh('order_items'),
+    //             'new_order' => $newOrder ?? null,
+    //         ]);
+
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+
+    //         Log::error('Failed to edit order', [
+    //             'order_id' => $id,
+    //             'user_id' => $get_user->id ?? null,
+    //             'error' => $e->getMessage(),
+    //             'trace' => $e->getTraceAsString()
+    //         ]);
+
+    //         return response()->json([
+    //             'message' => 'Failed to update order.',
+    //             'error' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
+    /**
+     * Dated : 07-09-2025
+     * Edit/Merge/Split an order.
+     * The request body is DIRECT (no "params" wrapper).
+     *
+     * Expected top-level fields (examples from your message):
+     * - order_id: string|int (external code like "SS/ORG/560/25-26" OR numeric internal id; numeric will be resolved to code)
+     * - order_type: "Gst" | ...
+     * - user_id: int (owner of the order)
+     * - amount: number (client-side calc; server will recalc)
+     * - items: array<item>
+     * - cancel_order_id: string CSV of INTERNAL ids (only for merge), e.g. "2010,2011"
+     * - edit_type: "edit" | "merge" | "split"
+     *
+     * Item:
+     * - product_code (req), product_name (req), rate (req), quantity (req), total (req), type (req)
+     * - orig_quantity (recommended/required for merge/split math)
+     * - markedForDeletion (bool), removalReason (string|null)
+     * - markedForSplit (bool)
+     * - size, remarks, product_image, specialInstruction, useGstPrice (optional passthrough)
+     */
     public function edit_order(Request $request, $id)
     {
-        $get_user = Auth::user();
+        $authUserId = Auth::id();
+        $payload    = $request->all(); // <<-- DIRECT (no "params")
 
-        // Log the raw request
+        // 0) Forensics log (raw)
         LogsModel::create([
             'function'   => 'edit_order',
             'request'    => json_encode([
-                'params'  => $request->all(),
-                'order_id'=> $id,
-                'user_id' => Auth::id()
+                'params'   => $payload,
+                'order_id' => $id,
+                'user_id'  => $authUserId,
             ]),
             'created_at' => now(),
         ]);
 
-        die();
-
-        if (is_numeric($request->input('order_id'))) {
-            $internalId = (int) $request->input('order_id');
-            $dbOrder = OrderModel::select('order_id')->where('id', $internalId)->first();
-        
-            if ($dbOrder) {
-                $request->merge([
-                    'order_id' => $dbOrder->order_id
-                ]);
-            } else {
+        // 1) Resolve numeric order_id (client may send internal id)
+        if (isset($payload['order_id']) && is_numeric($payload['order_id'])) {
+            $internalId = (int) $payload['order_id'];
+            $row = OrderModel::select('order_id')->where('id', $internalId)->first();
+            if (!$row) {
                 return response()->json(['message' => 'Order ID not found for numeric input.'], 404);
             }
+            $payload['order_id'] = $row->order_id;
         }
-        
-        $request->validate([
-            'order_id' => 'required|string',
-            'order_type' => 'required|string',
-            'user_id' => 'required|integer',
-            'amount' => 'required|numeric',
-            'items' => 'required|array',
-            'items.*.product_code' => 'required|string',
-            'items.*.product_name' => 'required|string',
-            'items.*.quantity' => 'required|integer',
-            'items.*.rate' => 'required|numeric',
-            'items.*.total' => 'required|numeric',
-            'items.*.remarks' => 'nullable|string',
+
+        // 2) Validate request
+        $validator = \Validator::make($payload, [
+            'order_id'              => 'required',
+            'order_type'            => 'required|string',
+            'user_id'               => 'required|integer',
+            'amount'                => 'required|numeric',
+            'items'                 => 'required|array|min:0',
+            'items.*.product_code'  => 'required|string',
+            'items.*.product_name'  => 'required|string',
+            'items.*.quantity'      => 'required|integer|min:0',
+            'items.*.rate'          => 'required|numeric|min:0',
+            'items.*.total'         => 'required|numeric|min:0',
+            'items.*.remarks'       => 'nullable|string',
+            'items.*.size'          => 'nullable|string',
             'items.*.markedForDeletion' => 'nullable|boolean',
-            'items.*.removalReason' => 'nullable|string',
-            'items.*.orig_quantity' => 'nullable|integer',
-            'cancel_order_id' => 'nullable|string',
-            'edit_type' => 'nullable|in:edit,merge,split',
+            'items.*.markedForSplit'    => 'nullable|boolean',
+            'items.*.removalReason'     => 'nullable|string',
+            'items.*.orig_quantity'     => 'nullable|integer|min:0',
+            'cancel_order_id'       => 'nullable|string',
+            'edit_type'             => 'nullable|in:edit,merge,split',
         ]);
 
-        $editType = strtolower($request->input('edit_type', 'edit'));
-        $cancelOrderIds = array_filter(array_map('trim', explode(',', $request->input('cancel_order_id'))));
-        $order = OrderModel::find($id);
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed.',
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
 
+        // 3) Load target order by INTERNAL id from route
+        /** @var OrderModel|null $order */
+        $order = OrderModel::find($id);
         if (!$order) {
             return response()->json(['message' => 'Order not found!'], 404);
         }
-
-        if ($order->user_id !== $request->input('user_id')) {
+        if ((int)$payload['user_id'] !== (int)$order->user_id) {
             return response()->json(['message' => 'Unauthorized action.'], 403);
         }
 
-        $is_merged = false;
-        $merged_orders = '';
-        $is_split = false;
-        $old_order_id = '';
-        $newOrder = null;
+        $editType       = strtolower($payload['edit_type'] ?? 'edit');
+        $orderTypeLower = strtolower($payload['order_type']);
+
+        // Parse cancel list (MERGE only) — expects INTERNAL ids comma-separated
+        $cancelIds = [];
+        if ($editType === 'merge' && !empty($payload['cancel_order_id'])) {
+            $cancelIds = array_filter(array_map('trim', explode(',', $payload['cancel_order_id'])));
+        }
+
+        $isMerged         = false;
+        $mergedOrderCodes = '';
+        $createdSplit     = false;
+        $splitFromCode    = '';
+        $newSplitOrder    = null;
+
+        // Helper: Next SPL code: base + SPL2/SPL3...
+        $nextSplitCode = function (string $baseOrderCode): string {
+            if (preg_match('/^(.*?)(SPL(\d+)?)$/', $baseOrderCode, $m)) {
+                $base   = $m[1];
+                $suffix = isset($m[3]) ? ((int)$m[3] + 1) : 2;
+                return $base . 'SPL' . $suffix;
+            }
+            return $baseOrderCode . 'SPL2';
+        };
+
+        // Target collections
+        $keepItems      = []; // Items that remain in CURRENT order
+        $splitItems     = []; // Items moved to NEW split order (if any)
+        $newTotalKeep   = 0.0;
+        $newTotalSplit  = 0.0;
 
         DB::beginTransaction();
-
         try {
-            if ($editType === 'merge' && !empty($cancelOrderIds)) {
-                foreach ($cancelOrderIds as $cancelId) {
-                    $cancelOrder = OrderModel::find($cancelId);
-                    if ($cancelOrder) {
-                        $cancelOrder->status = "cancelled";
-                        $cancelOrder->save();
-                        $merged_orders .= ($merged_orders ? ', ' : '') . $cancelOrder->order_id;
-                        $is_merged = true;
-                    } else {
-                        Log::warning("Cancel Order ID {$cancelId} not found");
+            /**
+             * 4A) MERGE: cancel other orders (INTERNAL ids)
+             */
+            if ($editType === 'merge' && !empty($cancelIds)) {
+                foreach ($cancelIds as $cancelInternalId) {
+                    /** @var OrderModel|null $cancelOrder */
+                    $cancelOrder = OrderModel::find($cancelInternalId);
+                    if (!$cancelOrder) {
+                        Log::warning("Merge: cancel target not found", ['id' => $cancelInternalId]);
+                        continue;
                     }
+                    $cancelOrder->status = 'cancelled';
+                    $cancelOrder->save();
+
+                    $mergedOrderCodes .= ($mergedOrderCodes ? ', ' : '') . $cancelOrder->order_id;
+                    $isMerged = true;
                 }
             }
 
-            if ($editType === 'split') {
+            /**
+             * 4B) Build "keep" vs "split" sets based on rules
+             *
+             * Rules summary:
+             *  - EDIT:
+             *      * if markedForDeletion = true → remove from CURRENT (optionally wishlist if "Not in stock")
+             *      * else keep with its new quantity
+             *
+             *  - MERGE:
+             *      * markedForSplit = true → move (orig - quantity) to SPL order.
+             *          - if orig == quantity → remove from CURRENT
+             *          - else keep CURRENT with 'quantity' and split the delta
+             *      * markedForDeletion = true → remove delta (orig - quantity); if orig == quantity → remove item fully
+             *          - we simply keep the 'quantity' in CURRENT. If this leaves 0, it's effectively removed.
+             *          - if removalReason == "Not in stock" → save to wishlist
+             *      * else → keep as-is (with new quantity)
+             *
+             *  - SPLIT:
+             *      * Only split via markedForSplit
+             *      * markedForSplit = true → move (orig - quantity) to SPL order
+             *          - if orig == quantity → remove from CURRENT
+             *          - else keep CURRENT with 'quantity'
+             *      * markedForDeletion is ignored in split scenario (by your note)
+             */
+            foreach ($payload['items'] as $item) {
+                $orig = isset($item['orig_quantity']) ? (int)$item['orig_quantity'] : (int)$item['quantity'];
+                $qty  = (int)$item['quantity'];
+                $rate = (float)$item['rate'];
 
-                Log::info('Split operation started', ['order_id' => $order->id]);
+                $markedDel   = (bool)($item['markedForDeletion'] ?? false);
+                $markedSplit = (bool)($item['markedForSplit']   ?? false);
 
-                $splitItems = [];
-                $keepItems = [];
-                $splitTotal = 0;
-                $keepTotal = 0;
+                $keepQty  = 0;
+                $moveQty  = 0;
 
-                foreach ($request->items as $item) {
-                    Log::debug('Processing item', [
-                        'product_code' => $item['product_code'],
-                        'orig_quantity' => $item['orig_quantity'] ?? null,
-                        'quantity' => $item['quantity'],
-                        'markedForDeletion' => $item['markedForDeletion'] ?? false
-                    ]);
-
-                    $moveQty = ($item['markedForDeletion'] ?? false)
-                        ? $item['orig_quantity']
-                        : max(0, ($item['orig_quantity'] ?? 0) - $item['quantity']);
-
-                    if ($moveQty > 0) {
-                        $splitItems[] = array_merge($item, ['quantity' => $moveQty, 'total' => $moveQty * $item['rate']]);
-                        $splitTotal += ($moveQty * $item['rate']);
+                if ($editType === 'edit') {
+                    if ($markedDel) {
+                        if (($item['removalReason'] ?? '') === 'Not in stock') {
+                            // move to wishlist (uses your existing controller)
+                            (new WishlistController)->saveToWishlist($order->user_id, $item);
+                        }
+                        // do not keep
+                        $keepQty = 0;
+                    } else {
+                        $keepQty = max(0, $qty);
                     }
-
-                    $keptQty = $item['quantity'];
-                    if ($keptQty > 0 && !($item['markedForDeletion'] ?? false)) {
-                        $keepItems[] = array_merge($item, ['quantity' => $keptQty, 'total' => $keptQty * $item['rate']]);
-                        $keepTotal += ($keptQty * $item['rate']);
+                }
+                elseif ($editType === 'merge') {
+                    if ($markedSplit) {
+                        $moveQty = max(0, $orig - $qty);
+                        // if fully moved (orig == qty), we remove from current
+                        $keepQty = ($orig === $qty) ? 0 : max(0, $qty);
+                    } elseif ($markedDel) {
+                        // remove delta (orig - qty). Keep the 'qty' as remaining in current.
+                        if (($item['removalReason'] ?? '') === 'Not in stock') {
+                            (new WishlistController)->saveToWishlist($order->user_id, $item);
+                        }
+                        $keepQty = max(0, $qty);
+                        $moveQty = 0; // deletion, not split
+                    } else {
+                        $keepQty = max(0, $qty);
+                    }
+                }
+                else { // split
+                    if ($markedSplit) {
+                        $moveQty = max(0, $orig - $qty);
+                        $keepQty = ($orig === $qty) ? 0 : max(0, $qty);
+                    } else {
+                        // In split mode, only markedForSplit causes movement.
+                        $keepQty = max(0, $qty);
                     }
                 }
 
-                if (count($splitItems) > 0) {
-                    $baseOrderId = $order->order_id;
+                // Add kept part
+                if ($keepQty > 0) {
+                    $keepItem = $item;
+                    $keepItem['quantity'] = $keepQty;
+                    $keepItem['total']    = $keepQty * $rate;
+                    $keepItems[] = $keepItem;
+                    $newTotalKeep += $keepItem['total'];
+                }
 
-                    if (preg_match('/^(.*?)(SPL(\d+)?)?$/', $baseOrderId, $matches)) {
-                        $base = $matches[1];
-                        $suffix = isset($matches[3]) ? intval($matches[3]) + 1 : 2;
-                        $newOrderCode = $base . 'SPL' . $suffix;
-                    } else {
-                        $newOrderCode = $baseOrderId . 'SPL2';
-                    }
-
-                    Log::info('Creating new split order', ['base_order_id' => $order->order_id]);
-
-                    $newOrder = OrderModel::create([
-                        'user_id' => $order->user_id,
-                        'order_id' => $newOrderCode,
-                        'order_date' => Carbon::now(),
-                        'amount' => $splitTotal,
-                        'type' => $order->type,
-                    ]);
-
-                    foreach ($splitItems as $item) {
-                        Log::debug('Creating item in split order', ['product_code' => $item['product_code'], 'quantity' => $item['quantity']]);
-
-                        OrderItemsModel::create([
-                            'order_id' => $newOrder->id,
-                            'product_code' => $item['product_code'],
-                            'product_name' => $item['product_name'],
-                            'rate' => $item['rate'],
-                            'quantity' => $item['quantity'],
-                            'total' => $item['total'],
-                            'type' => strtolower($request->input('order_type')),
-                            'remarks' => $item['remarks'] ?? '',
-                            'size' => $item['size'] ?? null,
-                        ]);
-                    }
-
-                    $is_split = true;
-                    $old_order_id = $order->order_id;
-
-                    Log::info('Updating original order amount', ['keep_total' => $keepTotal]);
-
-                    $order->update(['amount' => $keepTotal]);
-                    $request->merge(['items' => $keepItems]);
+                // Add split part
+                if ($moveQty > 0) {
+                    $splitItem = $item;
+                    $splitItem['quantity'] = $moveQty;
+                    $splitItem['total']    = $moveQty * $rate;
+                    $splitItems[] = $splitItem;
+                    $newTotalSplit += $splitItem['total'];
                 }
             }
 
-            OrderItemsModel::where('order_id', $id)->delete();
-            $calculatedAmount = 0;
+            /**
+             * 4C) Upsert current order items: replace all with the "keep" set
+             */
+            OrderItemsModel::where('order_id', $order->id)->delete();
 
-            foreach ($request->items as $item) {
-                if (($item['markedForDeletion'] ?? false) && $editType !== 'split') {
-                    if (($item['removalReason'] ?? '') === 'Not in stock') {
-                        (new WishlistController)->saveToWishlist($order->user_id, $item);
-                    }
-                    continue;
-                }
-
+            foreach ($keepItems as $ki) {
                 OrderItemsModel::create([
-                    'order_id' => $id,
-                    'product_code' => $item['product_code'],
-                    'product_name' => $item['product_name'],
-                    'quantity' => $item['quantity'],
-                    'rate' => $item['rate'],
-                    'total' => $item['total'],
-                    'type' => strtolower($request->input('order_type')),
-                    'remarks' => $item['remarks'] ?? '',
-                    'size' => $item['size'] ?? null,
+                    'order_id'      => $order->id,
+                    'product_code'  => $ki['product_code'],
+                    'product_name'  => $ki['product_name'],
+                    'quantity'      => (int)$ki['quantity'],
+                    'rate'          => (float)$ki['rate'],
+                    'total'         => (float)$ki['total'],
+                    'type'          => $orderTypeLower,
+                    'remarks'       => $ki['remarks'] ?? '',
+                    'size'          => $ki['size'] ?? null,
                 ]);
-
-                $calculatedAmount += $item['total'];
             }
 
-            $order->amount = $calculatedAmount;
+            $order->amount = $newTotalKeep;
             $order->save();
 
-            $invoiceController = new InvoiceController();
-            $invoiceController->generateorderInvoice($order->id, [
-                'is_edited' => true,
-                'is_merged' => $is_merged,
-                'merged_orders' => $merged_orders,
-                'is_split' => false,
-                'old_order_id' => ''
-            ]);
-            $invoiceController->generatePackingSlip($order->id, true);
+            /**
+             * 4D) Create a SPL order if we have any split items (both MERGE & SPLIT modes)
+             */
+            if (!empty($splitItems)) {
+                $baseCode      = $order->order_id;
+                $newOrderCode  = $nextSplitCode($baseCode);
+                $splitFromCode = $baseCode;
 
-            if ($is_split && $newOrder) {
-                $invoiceController->generateorderInvoice($newOrder->id, [
-                    'is_edited' => true,
-                    'is_split' => true,
-                    'old_order_id' => $old_order_id,
+                $newSplitOrder = OrderModel::create([
+                    'user_id'   => $order->user_id,
+                    'order_id'  => $newOrderCode,
+                    'order_date'=> Carbon::now(),
+                    'amount'    => $newTotalSplit,
+                    'type'      => $order->type, // keep type aligned
                 ]);
-                $invoiceController->generatePackingSlip($newOrder->id, true);
+
+                foreach ($splitItems as $si) {
+                    OrderItemsModel::create([
+                        'order_id'      => $newSplitOrder->id,
+                        'product_code'  => $si['product_code'],
+                        'product_name'  => $si['product_name'],
+                        'quantity'      => (int)$si['quantity'],
+                        'rate'          => (float)$si['rate'],
+                        'total'         => (float)$si['total'],
+                        'type'          => $orderTypeLower,
+                        'remarks'       => $si['remarks'] ?? '',
+                        'size'          => $si['size'] ?? null,
+                    ]);
+                }
+
+                $createdSplit = true;
+            }
+
+            /**
+             * 4E) Documents: invoice + packing slip
+             */
+            $invoiceCtrl = new InvoiceController();
+
+            // For current order
+            $invoiceCtrl->generateorderInvoice($order->id, [
+                'is_edited'      => true,
+                'is_merged'      => $isMerged,
+                'merged_orders'  => $mergedOrderCodes,
+                'is_split'       => false,
+                'old_order_id'   => '',
+            ]);
+            $invoiceCtrl->generatePackingSlip($order->id, true);
+
+            // For new split order (if created)
+            if ($createdSplit && $newSplitOrder) {
+                $invoiceCtrl->generateorderInvoice($newSplitOrder->id, [
+                    'is_edited'    => true,
+                    'is_split'     => true,
+                    'old_order_id' => $splitFromCode,
+                ]);
+                $invoiceCtrl->generatePackingSlip($newSplitOrder->id, true);
             }
 
             DB::commit();
 
             return response()->json([
-                'message' => 'Order updated successfully!',
-                'order' => $order->fresh('order_items'),
-                'new_order' => $newOrder ?? null,
+                'message'   => 'Order updated successfully!',
+                'order'     => $order->fresh('order_items'),
+                'new_order' => $newSplitOrder ?? null,
             ]);
-
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
 
             Log::error('Failed to edit order', [
                 'order_id' => $id,
-                'user_id' => $get_user->id ?? null,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'user_id'  => $authUserId,
+                'error'    => $e->getMessage(),
+                'trace'    => $e->getTraceAsString(),
             ]);
 
             return response()->json([
                 'message' => 'Failed to update order.',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
+
 
     public function complete_order(Request $request, $id)
     {
