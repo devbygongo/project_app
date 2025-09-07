@@ -998,6 +998,57 @@ class UpdateController extends Controller
         return $root . 'SPL' . ($max + 1);
     }
 
+    /**
+     * Consolidate duplicate items:
+     * Merge rows that share product_code + rate + size + type (+ optional flags),
+     * sum quantities, recompute totals, and merge unique remarks.
+     */
+    private function consolidateLineItems(array $items): array
+    {
+        $bucket = [];
+
+        foreach ($items as $it) {
+            $code = (string)($it['product_code'] ?? '');
+            $rate = (float)($it['rate'] ?? 0);
+            $size = array_key_exists('size', $it) ? (string)$it['size'] : null;
+            $type = strtolower((string)($it['type'] ?? ''));
+
+            // You can extend the key if you also want to keep useGstPrice separate:
+            // $useGst = (bool)($it['useGstPrice'] ?? false);
+            // $key = implode('|', [$code, $rate, $size ?? '', $type, (int)$useGst]);
+
+            $key = implode('|', [$code, $rate, $size ?? '', $type]);
+
+            if (!isset($bucket[$key])) {
+                // initialize
+                $bucket[$key] = $it;
+                $bucket[$key]['quantity'] = (int)($it['quantity'] ?? 0);
+                $bucket[$key]['total']    = round($bucket[$key]['quantity'] * $rate, 2);
+                // normalize remarks holder
+                $bucket[$key]['remarks']  = trim((string)($it['remarks'] ?? ''));
+            } else {
+                // accumulate
+                $bucket[$key]['quantity'] += (int)($it['quantity'] ?? 0);
+                $bucket[$key]['total']     = round($bucket[$key]['quantity'] * $rate, 2);
+
+                // merge unique remarks (keep short and clean)
+                $curr = trim((string)($it['remarks'] ?? ''));
+                if ($curr !== '') {
+                    $existing = $bucket[$key]['remarks'];
+                    if ($existing === '') {
+                        $bucket[$key]['remarks'] = $curr;
+                    } elseif (stripos($existing, $curr) === false) {
+                        $bucket[$key]['remarks'] = $existing.' | '.$curr;
+                    }
+                }
+            }
+        }
+
+        // Return as list
+        return array_values($bucket);
+    }
+
+
 
     /**
      * Dated : 07-09-2025
@@ -1228,6 +1279,14 @@ class UpdateController extends Controller
                     $newTotalSplit += $splitItem['total'];
                 }
             }
+
+            // --- consolidate duplicate lines ---
+            $keepItems  = $this->consolidateLineItems($keepItems);
+            $splitItems = $this->consolidateLineItems($splitItems);
+
+            // --- recompute order totals from consolidated items ---
+            $newTotalKeep  = array_sum(array_column($keepItems, 'total'));
+            $newTotalSplit = array_sum(array_column($splitItems, 'total'));
 
             /**
              * 4C) Upsert current order items: replace all with the "keep" set
