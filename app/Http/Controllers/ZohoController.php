@@ -236,24 +236,7 @@ class ZohoController extends Controller
 
         $user = User::find($order->user_id);
 
-        $orgCheck = Http::withToken($accessToken)->get(env('ZOHO_API_BASE_URL').'/books/v3/organizations');
-        if (!$orgCheck->successful() || !collect($orgCheck->json('organizations') ?? [])->pluck('organization_id')->contains('60012918151')) {
-            return response()->json([
-                'error' => 'Auth not linked to organization',
-                'message' => 'The current token is not authorized for organization 60012918151. Re-authorize with the correct Zoho account/scopes.'
-            ], 403);
-        }
-
-        $readCheck = Http::withToken($accessToken)
-        ->withHeaders(['X-com-zoho-books-organizationid' => '60012918151'])
-        ->get(env('ZOHO_API_BASE_URL').'/books/v3/invoices', ['per_page'=>1]);
-
-        if ($readCheck->status() == 401 || $readCheck->status() == 403) {
-            return response()->json([
-                'error' => 'Insufficient scopes or role',
-                'message' => 'Add ZohoBooks.invoices.READ/CREATE (or .ALL) and ensure your Zoho user role can create invoices, then re-authorize to obtain a new refresh token.'
-            ], 403);
-        }
+        
 
 
         // --- CONFIG ---
@@ -276,6 +259,25 @@ class ZohoController extends Controller
         $accessToken = $this->getAccessToken();
         if (!$accessToken) {
             return response()->json(['error' => 'Unable to retrieve access token'], 400);
+        }
+
+        $orgCheck = Http::withToken($accessToken)->get(env('ZOHO_API_BASE_URL').'/books/v3/organizations');
+        if (!$orgCheck->successful() || !collect($orgCheck->json('organizations') ?? [])->pluck('organization_id')->contains('60012918151')) {
+            return response()->json([
+                'error' => 'Auth not linked to organization',
+                'message' => 'The current token is not authorized for organization 60012918151. Re-authorize with the correct Zoho account/scopes.'
+            ], 403);
+        }
+
+        $readCheck = Http::withToken($accessToken)
+        ->withHeaders(['X-com-zoho-books-organizationid' => '60012918151'])
+        ->get(env('ZOHO_API_BASE_URL').'/books/v3/invoices', ['per_page'=>1]);
+
+        if ($readCheck->status() == 401 || $readCheck->status() == 403) {
+            return response()->json([
+                'error' => 'Insufficient scopes or role',
+                'message' => 'Add ZohoBooks.invoices.READ/CREATE (or .ALL) and ensure your Zoho user role can create invoices, then re-authorize to obtain a new refresh token.'
+            ], 403);
         }
 
         // ✅ Require customer_id (no fallback)
