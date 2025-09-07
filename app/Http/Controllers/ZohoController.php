@@ -77,123 +77,106 @@ class ZohoController extends Controller
 
     public function zoho_quote(Request $request)
     {
-        $get_user = Auth::user();  // Get the authenticated user
-
-        // Validate the incoming request to ensure order_id is provided
         $request->validate([
             'order_id' => 'required',
         ]);
 
-        // Fetch the order using the order_id passed in the request
-        $order = OrderModel::with('order_items.product')  // Eager load order items and product details
+        $order = OrderModel::with('order_items.product')
             ->where('id', $request->input('order_id'))
             ->first();
-
-        $user_id = $order->user_id;
-
-        $user = User::find($user_id);
 
         if (!$order) {
             return response()->json(['message' => 'Order not found!'], 404);
         }
 
-        // Tax rate for GST18 (18%)
-        $taxRate = 0.18;  // Example: 18% tax (GST18)
+        $user = User::find($order->user_id);
 
-        // Calculate the tax-exclusive total and tax amount if the order total is inclusive of tax
-        $taxExclusiveAmount = $order->amount / (1 + $taxRate);  // Exclude tax
-        $taxAmount = $order->amount - $taxExclusiveAmount;  // Calculate the tax amount
+        // --- CONFIG ---
+        $organizationId  = '60012918151';
+        $orgStateName    = env('ORG_STATE_NAME', 'Telangana'); // your org state name
 
-        $taxIdMap = [
+        // Tax IDs for intra (CGST/SGST) and inter (IGST)
+        $cgstSgstTaxIdMap = [
             5  => '786484000000013205',
             12 => '786484000000013213',
             18 => '786484000000013221',
             28 => '786484000000013229',
         ];
-        
+        $igstTaxIdMap = [
+            5  => '786484000000013199',
+            12 => '786484000000013207',
+            18 => '786484000000013215',
+            28 => '786484000000013223',
+        ];
+
+        // Decide intra vs inter by comparing user state
+        $custState = strtolower(trim($user->state ?? ''));
+        $orgState  = strtolower($orgStateName);
+        $isInter   = ($custState && $custState !== $orgState);
+
+        $taxIdMap  = $isInter ? $igstTaxIdMap : $cgstSgstTaxIdMap;
+
+        // --- Build line items ---
         $lineItems = [];
-        
+        $supported = [5, 12, 18, 28];
+
         foreach ($order->order_items as $item) {
-            // ----- 1) Resolve product tax rate (%), default to 18 if null/missing -----
-            // Prefer $product->gst; fall back to $product->tax; default 18
-            $product = $item->product; // already eager-loaded
-            $rawPct  = null;
-        
-            if ($product) {
-                // If your table uses one of these columns, adjust as needed
-                $rawPct = $product->tax ?? $product->tax ?? null;
-            }
-        
-            // Normalize to an integer percent we support (5/12/18/28), default 18
-            $supported = [5, 12, 18, 28];
+            $product = $item->product;
+            $rawPct  = $product->gst ?? $product->tax ?? null;
+
             $pct = (int) round((float) $rawPct);
-            if (!in_array($pct, $supported, true)) {
-                $pct = 18;
-            }
-        
-            $taxRate = $pct / 100.0;                          // e.g. 0.18
-            $taxId   = $taxIdMap[$pct];                       // pick correct Zoho tax_id
-        
-            // ----- 2) Convert inclusive rates/totals to exclusive (your current logic) -----
-            // If your stored $item->rate and $item->total are inclusive, remove tax per line:
-            $taxExclusiveRate  = (float) $item->rate  / (1 + $taxRate);
-            $taxExclusiveTotal = (float) $item->total / (1 + $taxRate);
-        
-            // ----- 3) Build line item -----
+            if (!in_array($pct, $supported, true)) { $pct = 18; }
+
+            $pctRate = $pct / 100.0;
+
+            // Convert inclusive → exclusive
+            $exclusiveRate  = (float) $item->rate  / (1 + $pctRate);
+            $exclusiveTotal = (float) $item->total / (1 + $pctRate);
+
             $lineItems[] = [
-                "name"         => $item->product_name . ' - ' . $item->product_code,
+                "name"         => trim(($item->product_name ?? '') . ' - ' . ($item->product_code ?? '')),
                 "description"  => $item->remarks ?? "",
                 "quantity"     => (float) $item->quantity,
-                "rate"         => round($taxExclusiveRate, 2),   // exclusive rate
-                "amount"       => round($taxExclusiveTotal, 2),  // exclusive amount (optional; Zoho can compute)
-                "tax_id"       => $taxId,                        // mapped per tax rate
-                "hsn_or_sac"   => optional($product)->hsn,       // HSN from product
+                "rate"         => round($exclusiveRate, 2),
+                "amount"       => round($exclusiveTotal, 2),
+                "tax_id"       => $taxIdMap[$pct] ?? null,
+                "hsn_or_sac"   => optional($product)->hsn,
                 "product_type" => "goods",
             ];
         }
 
-        $customer_id = $user->zoho_customer_id;  // Assuming the user has a zoho_customer_id field
-        if($customer_id == '' || $customer_id == null){
-            $customer_id = '786484000000198301';
-        }
+        $customer_id = $user->zoho_customer_id ?: '786484000000198301';
 
-        // Now create the estimate (quote) data for Zoho Books
         $estimateData = [
-            "customer_id" => $customer_id,  // Assuming the user_id is the customer_id in Zoho Books
-            "date" => now()->format('Y-m-d'),
-            "reference_number" => $order->order_id,  // Reference number for the estimate
-            "line_items" => $lineItems,
-            "total" => $taxExclusiveAmount,  // Total amount excluding tax
-            "status" => "draft",  // Status can be 'draft' or 'sent'
-            "tax" => [
-                "name" => "GST",  // Replace with your actual tax name (e.g., GST, VAT, etc.)
-                "percentage" => $taxRate * 100,  // Tax rate (as a percentage)
-                "amount" => $taxAmount,  // Tax amount to be applied
-            ],
+            "customer_id"      => $customer_id,
+            "date"             => now()->format('Y-m-d'),
+            "reference_number" => $order->order_id,
+            "line_items"       => $lineItems,
+            "status"           => "draft",
+            // optional: pass place_of_supply so Zoho UI shows inter/intra correctly
+            "place_of_supply"  => $isInter ? strtoupper(substr($custState,0,2)) : strtoupper(substr($orgState,0,2)),
         ];
 
-        // Get access token and the organization ID
         $accessToken = $this->getAccessToken();
-
         if (!$accessToken) {
             return response()->json(['error' => 'Unable to retrieve access token'], 400);
         }
 
-        $organizationId = '60012918151';  // Replace with your actual organization ID
-
-        // Send the request to Zoho Books to create the estimate (quote)
         $response = Http::withToken($accessToken)
             ->withHeaders(['X-com-zoho-books-organizationid' => $organizationId])
             ->post(env('ZOHO_API_BASE_URL') . '/books/v3/estimates', $estimateData);
 
         if ($response->successful()) {
             return response()->json([
-                'message' => "Order : " . $order->order_id . " has been successfully pushed as a quote to Zoho.",
-                'data' => $response->json()
+                'message' => "Order : {$order->order_id} pushed to Zoho as quote.",
+                'data'    => $response->json()
             ], 200);
         }
 
-        return response()->json(['error' => 'Failed to create estimate', 'details' => $response->json()], 400);
+        return response()->json([
+            'error'   => 'Failed to create estimate',
+            'details' => $response->json()
+        ], 400);
     }
 
 
