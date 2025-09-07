@@ -155,7 +155,7 @@ class ZohoController extends Controller
             return response()->json([
                 'error'   => 'Duplicate estimate',
                 'message' => 'This order has already been punched to Zoho. Kindly delete the estimate on Zoho to re-punch this order.',
-            ], 409);
+            ], 400);
         }
         // === /DUPLICATE CHECK ===
 
