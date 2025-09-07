@@ -197,23 +197,22 @@ class ZohoController extends Controller
     }
 
 
-    public function getEstimate(Request $request)
+    public function getEstimate(string $estimateId, Request $request)
     {
-        $estimateId = $request->input('estimateId'); // ✅ Accept estimateId from request
+        // If you also want to allow ?estimateId=... as a fallback:
+        $estimateId = $estimateId ?: $request->query('estimateId');
 
         if (!$estimateId) {
             return response()->json(['error' => 'estimateId is required'], 422);
         }
 
-        $accessToken = $this->getAccessToken();  // Get the access token
-
+        $accessToken = $this->getAccessToken();
         if (!$accessToken) {
             return response()->json(['error' => 'Unable to retrieve access token'], 400);
         }
 
-        $organizationId = '60012918151';  // Replace with your actual organization ID
+        $organizationId = '60012918151'; // your org id
 
-        // Send the GET request to Zoho Books API to fetch the estimate details
         $response = Http::withToken($accessToken)
             ->withHeaders(['X-com-zoho-books-organizationid' => $organizationId])
             ->get(env('ZOHO_API_BASE_URL') . '/books/v3/estimates/' . $estimateId);
@@ -221,13 +220,13 @@ class ZohoController extends Controller
         if ($response->successful()) {
             return response()->json([
                 'message' => 'Estimate fetched successfully',
-                'data' => $response->json()
+                'data' => $response->json(),
             ], 200);
         }
 
         return response()->json([
-            'error' => 'Failed to fetch estimate',
-            'details' => $response->json()
+            'error'   => 'Failed to fetch estimate',
+            'details' => $response->json(),
         ], 400);
     }
 
