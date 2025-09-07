@@ -736,7 +736,18 @@ class UpdateController extends Controller
     {
         $get_user = Auth::user();
 
-        Log::info('Split order request payload', $request->all());
+        // Log the raw request
+        LogsModel::create([
+            'function'   => 'edit_order',
+            'request'    => json_encode([
+                'params'  => $request->all(),
+                'order_id'=> $id,
+                'user_id' => Auth::id()
+            ]),
+            'created_at' => now(),
+        ]);
+
+        die();
 
         if (is_numeric($request->input('order_id'))) {
             $internalId = (int) $request->input('order_id');
@@ -978,7 +989,6 @@ class UpdateController extends Controller
         }
     }
 
-
     public function complete_order(Request $request, $id)
     {
         // Validate incoming request data
@@ -1012,39 +1022,6 @@ class UpdateController extends Controller
             'order' => $order
         ], 200);
     }
-
-    // public function complete_order_stock(Request $request, $id)
-    // {
-
-    //     // Find the order by its ID
-    //     $order = OrderModel::find($id);
-
-    //     if (!$order) {
-    //         return response()->json([
-    //             'message' => 'Order not found!'
-    //         ], 404);
-    //     }
-
-    //     // ✅ Save request details into t_request_json
-    //     LogsModel::create([
-    //         'function'   => 'complete_order_stock',
-    //         'request'    => json_encode([
-    //             'params' => $request->all(),   // Request data
-    //             'order_id' => $id,             // Explicit order id
-    //             'user_id' => Auth::id()        // Who triggered it (optional, if Auth is used)
-    //         ]),
-    //         'created_at' => now(),
-    //     ]);
-
-    //     // Update the status of the order to 'completed'
-    //     // $order->status = 'completed';
-    //     // $order->save();
-
-    //     return response()->json([
-    //         'message' => 'Order status updated to completed successfully!',
-    //         'order' => $order
-    //     ], 200);
-    // }
 
     public function complete_order_stock(Request $request, $id)
     {
@@ -1225,8 +1202,6 @@ class UpdateController extends Controller
             ], 500);
         }
     }
-
-
 
     public function cancel_order(Request $request, $id)
     {
