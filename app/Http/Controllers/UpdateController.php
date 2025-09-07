@@ -747,6 +747,8 @@ class UpdateController extends Controller
             'created_at' => now(),
         ]);
 
+        die();
+
         if (is_numeric($request->input('order_id'))) {
             $internalId = (int) $request->input('order_id');
             $dbOrder = OrderModel::select('order_id')->where('id', $internalId)->first();
