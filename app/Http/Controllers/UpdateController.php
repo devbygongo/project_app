@@ -970,6 +970,36 @@ class UpdateController extends Controller
     // }
 
     /**
+     * Generate the next split order code.
+     * - Root is the base order code with any trailing SPL# removed.
+     * - Scans DB for siblings: {root}SPL\d+
+     * - Returns {root}SPL{nextNumber}, starting from 2.
+     */
+    private function nextSplitCode(string $baseOrderCode): string
+    {
+        // 1) Normalize to a root without SPL#
+        $root = preg_replace('/SPL\d+$/', '', $baseOrderCode);
+
+        // 2) Get all existing siblings like {root}SPL%
+        $existing = OrderModel::where('order_id', 'like', $root.'SPL%')
+            ->pluck('order_id')
+            ->all();
+
+        // 3) Find max existing SPL number (default 1 → next becomes 2)
+        $max = 1;
+        $pattern = '/^'.preg_quote($root, '/').'SPL(\d+)$/';
+        foreach ($existing as $code) {
+            if (preg_match($pattern, $code, $m)) {
+                $n = (int) $m[1];
+                if ($n > $max) $max = $n;
+            }
+        }
+
+        return $root . 'SPL' . ($max + 1);
+    }
+
+
+    /**
      * Dated : 07-09-2025
      * Edit/Merge/Split an order.
      * The request body is DIRECT (no "params" wrapper).
@@ -1070,15 +1100,15 @@ class UpdateController extends Controller
         $splitFromCode    = '';
         $newSplitOrder    = null;
 
-        // Helper: Next SPL code: base + SPL2/SPL3...
-        $nextSplitCode = function (string $baseOrderCode): string {
-            if (preg_match('/^(.*?)(SPL(\d+)?)$/', $baseOrderCode, $m)) {
-                $base   = $m[1];
-                $suffix = isset($m[3]) ? ((int)$m[3] + 1) : 2;
-                return $base . 'SPL' . $suffix;
-            }
-            return $baseOrderCode . 'SPL2';
-        };
+        // // Helper: Next SPL code: base + SPL2/SPL3...
+        // $nextSplitCode = function (string $baseOrderCode): string {
+        //     if (preg_match('/^(.*?)(SPL(\d+)?)$/', $baseOrderCode, $m)) {
+        //         $base   = $m[1];
+        //         $suffix = isset($m[3]) ? ((int)$m[3] + 1) : 2;
+        //         return $base . 'SPL' . $suffix;
+        //     }
+        //     return $baseOrderCode . 'SPL2';
+        // };
 
         // Target collections
         $keepItems      = []; // Items that remain in CURRENT order
@@ -1226,7 +1256,7 @@ class UpdateController extends Controller
              */
             if (!empty($splitItems)) {
                 $baseCode      = $order->order_id;
-                $newOrderCode  = $nextSplitCode($baseCode);
+                $newOrderCode  = $this->nextSplitCode($baseCode);
                 $splitFromCode = $baseCode;
 
                 $newSplitOrder = OrderModel::create([
