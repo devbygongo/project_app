@@ -20,7 +20,7 @@ class ZohoController extends Controller
             'client_secret' => env('ZOHO_CLIENT_SECRET'),
             'refresh_token' => env('ZOHO_REFRESH_TOKEN'),
             'grant_type' => 'refresh_token',
-            'scope' => 'ZohoBooks.estimates.ALL',
+            'scope' => env('ZOHO_SCOPES'),
         ]);
 
         if ($response->successful()) {
