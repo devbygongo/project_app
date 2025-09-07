@@ -44,7 +44,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
 
     Route::post('/zoho_quote', [ZohoController::class, 'zoho_quote']);
 
-    Route::post('/zoho_sales', [CreateController::class, 'zoho_sales']);
+    Route::post('/zoho_sales', [ZohoController::class, 'zoho_sales']);
     
     Route::post('/generate-stock-report', [StockController::class, 'generateStockReport']);
     

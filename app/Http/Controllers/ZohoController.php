@@ -77,6 +77,7 @@ class ZohoController extends Controller
 
     public function zoho_quote(Request $request)
     {
+        
         $request->validate([
             'order_id' => 'required',
         ]);
@@ -219,6 +220,136 @@ class ZohoController extends Controller
         ], 400);
     }
 
+    public function zoho_sales(Request $request)
+    {
+        $request->validate([
+            'order_id' => 'required',
+        ]);
+
+        $order = OrderModel::with('order_items.product')
+            ->where('id', $request->input('order_id'))
+            ->first();
+
+        if (!$order) {
+            return response()->json(['message' => 'Order not found!'], 404);
+        }
+
+        $user = User::find($order->user_id);
+
+        // --- CONFIG ---
+        $organizationId = '60012918151';
+        $orgStateName   = env('ORG_STATE_NAME', 'Telangana');
+
+        $cgstSgstTaxIdMap = [
+            5  => '786484000000013205',
+            12 => '786484000000013213',
+            18 => '786484000000013221',
+            28 => '786484000000013229',
+        ];
+        $igstTaxIdMap = [
+            5  => '786484000000013199',
+            12 => '786484000000013207',
+            18 => '786484000000013215',
+            28 => '786484000000013223',
+        ];
+
+        $accessToken = $this->getAccessToken();
+        if (!$accessToken) {
+            return response()->json(['error' => 'Unable to retrieve access token'], 400);
+        }
+
+        // ✅ Require customer_id (no fallback)
+        $customer_id = $user->zoho_customer_id ?? null;
+        if (!$customer_id) {
+            return response()->json([
+                'error'   => 'Missing Zoho customer',
+                'message' => "This user does not have a Zoho customer_id mapped. Please create/link the customer in Zoho before punching the invoice."
+            ], 422);
+        }
+
+        // === DUPLICATE CHECK ===
+        $dupExists = false;
+        $searchResp = Http::withToken($accessToken)
+            ->withHeaders(['X-com-zoho-books-organizationid' => $organizationId])
+            ->get(env('ZOHO_API_BASE_URL') . '/books/v3/invoices', [
+                'search_text' => (string) $order->order_id,
+                'customer_id' => $customer_id,
+                'page'        => 1,
+                'per_page'    => 200,
+            ]);
+        if ($searchResp->successful()) {
+            $hits = $searchResp->json('invoices') ?? [];
+            foreach ($hits as $hit) {
+                if (($hit['reference_number'] ?? null) === $order->order_id) {
+                    $dupExists = true; break;
+                }
+            }
+        }
+        if ($dupExists) {
+            return response()->json([
+                'error'   => 'Duplicate invoice',
+                'message' => 'This order has already been punched to Zoho as an invoice. Kindly delete the invoice on Zoho to re-punch this order.',
+            ], 409);
+        }
+        // === /DUPLICATE CHECK ===
+
+        // --- intra vs inter ---
+        $custState = strtolower(trim($user->state ?? ''));
+        $orgState  = strtolower($orgStateName);
+        $isInter   = ($custState && $custState !== $orgState);
+        $taxIdMap  = $isInter ? $igstTaxIdMap : $cgstSgstTaxIdMap;
+
+        // --- Line items ---
+        $supported = [5, 12, 18, 28];
+        $lineItems = [];
+
+        foreach ($order->order_items as $item) {
+            $product = $item->product;
+            $rawPct  = $product->gst ?? $product->tax ?? null;
+
+            $pct = (int) round((float) $rawPct);
+            if (!in_array($pct, $supported, true)) { $pct = 18; }
+
+            $pctRate = $pct / 100.0;
+            $exclusiveRate  = (float) $item->rate  / (1 + $pctRate);
+            $exclusiveTotal = (float) $item->total / (1 + $pctRate);
+
+            $lineItems[] = [
+                "name"         => trim(($item->product_name ?? '') . ' - ' . ($item->product_code ?? '')),
+                "description"  => $item->remarks ?? "",
+                "quantity"     => (float) $item->quantity,
+                "rate"         => round($exclusiveRate, 2),
+                "amount"       => round($exclusiveTotal, 2),
+                "tax_id"       => $taxIdMap[$pct] ?? null,
+                "hsn_or_sac"   => optional($product)->hsn,
+                "product_type" => "goods",
+            ];
+        }
+
+        $invoiceData = [
+            "customer_id"      => $customer_id,
+            "date"             => now()->format('Y-m-d'),
+            "reference_number" => $order->order_id,
+            "line_items"       => $lineItems,
+            "status"           => "draft",
+        ];
+
+        $response = Http::withToken($accessToken)
+            ->withHeaders(['X-com-zoho-books-organizationid' => $organizationId])
+            ->post(env('ZOHO_API_BASE_URL') . '/books/v3/invoices', $invoiceData);
+
+        if ($response->successful()) {
+            return response()->json([
+                'message' => "Order : {$order->order_id} has been successfully pushed as an invoice to Zoho.",
+                'data'    => $response->json(),
+            ], 200);
+        }
+
+        return response()->json([
+            'error'   => 'Failed to create invoice',
+            'details' => $response->json(),
+        ], 400);
+    }
 
 
     public function getEstimate(string $estimateId, Request $request)
