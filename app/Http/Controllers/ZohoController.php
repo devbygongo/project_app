@@ -84,8 +84,6 @@ class ZohoController extends Controller
             'order_id' => 'required',
         ]);
 
-        // Log::info('Zoho Quote Request', ['user_id' => $get_user->id, 'order_id' => $request->input('id')]);
-
         // Fetch the order using the order_id passed in the request
         $order = OrderModel::with('order_items.product')  // Eager load order items and product details
             ->where('id', $request->input('order_id'))
@@ -105,28 +103,6 @@ class ZohoController extends Controller
         // Calculate the tax-exclusive total and tax amount if the order total is inclusive of tax
         $taxExclusiveAmount = $order->amount / (1 + $taxRate);  // Exclude tax
         $taxAmount = $order->amount - $taxExclusiveAmount;  // Calculate the tax amount
-
-        // Tax ID for GST18 (replace with your actual tax_id for GST18)
-        // $taxId = '786484000000013221';  // GST18 tax ID
-
-        // // Prepare the line items for the Zoho quote
-        // $lineItems = [];
-
-        // foreach ($order->order_items as $item) {
-        //     // Calculate tax-exclusive rate for each item
-        //     $taxExclusiveRate = $item->rate / (1 + $taxRate);  // Exclude tax from rate
-        //     $taxExclusiveAmountForItem = $item->total / (1 + $taxRate);  // Exclude tax from total
-
-        //     $lineItems[] = [
-        //         "name" => $item->product_name.' - '.$item->product_code,  // Using product name
-        //         "description" => $item->remarks ?? "",  // Optional description
-        //         "quantity" => $item->quantity,
-        //         "rate" => round($taxExclusiveRate, 2),  // Tax-exclusive rate
-        //         "amount" => $taxExclusiveAmountForItem,  // Tax-exclusive amount
-        //         "tax_id" => $taxId,  // Pass the correct tax_id for GST18
-        //         "hsn_or_sac"   => optional($item->product)->hsn,
-        //     ];
-        // }
 
         $taxIdMap = [
             5  => '786484000000013205',
@@ -251,12 +227,5 @@ class ZohoController extends Controller
             'details' => $response->json()
         ], 400);
     }
-
-
-
-
-
-
-
 
 }
