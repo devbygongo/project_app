@@ -93,30 +93,79 @@ class ZohoController extends Controller
 
         // --- CONFIG ---
         $organizationId  = '60012918151';
-        $orgStateName    = env('ORG_STATE_NAME', 'Telangana'); // your org state name
+        $orgStateName    = env('ORG_STATE_NAME', 'Telangana');
 
-        // Tax IDs for intra (CGST/SGST) and inter (IGST)
-        $cgstSgstTaxIdMap = [
-            5  => '786484000000013205',
-            12 => '786484000000013213',
-            18 => '786484000000013221',
-            28 => '786484000000013229',
-        ];
-        $igstTaxIdMap = [
-            5  => '786484000000013199',
-            12 => '786484000000013207',
-            18 => '786484000000013215',
-            28 => '786484000000013223',
-        ];
+        $cgstSgstTaxIdMap = [ 5=>'786484000000013205', 12=>'786484000000013213', 18=>'786484000000013221', 28=>'786484000000013229' ];
+        $igstTaxIdMap     = [ 5=>'786484000000013199', 12=>'786484000000013207', 18=>'786484000000013215', 28=>'786484000000013223' ];
 
-        // Decide intra vs inter by comparing user state
+        $accessToken = $this->getAccessToken();
+        if (!$accessToken) {
+            return response()->json(['error' => 'Unable to retrieve access token'], 400);
+        }
+
+        $customer_id = $user->zoho_customer_id ?: '786484000000198301';
+
+        // === DUPLICATE CHECK: block if an estimate already exists with same reference_number ===
+        // Try using search_text first (broad), then fall back to direct filter.
+        $dupExists = false;
+
+        // 1) Broad search via search_text (then exact-match locally)
+        $searchResp = Http::withToken($accessToken)
+            ->withHeaders(['X-com-zoho-books-organizationid' => $organizationId])
+            ->get(env('ZOHO_API_BASE_URL') . '/books/v3/estimates', [
+                'search_text'  => (string) $order->order_id,
+                'customer_id'  => $customer_id,   // optional: narrows search
+                'page'         => 1,
+                'per_page'     => 200,
+            ]);
+
+        if ($searchResp->successful()) {
+            $hits = $searchResp->json('estimates') ?? [];
+            foreach ($hits as $hit) {
+                if (isset($hit['reference_number']) && $hit['reference_number'] === $order->order_id) {
+                    $dupExists = true;
+                    break;
+                }
+            }
+        }
+
+        // 2) If still not found, try a direct equality filter (some orgs support this param)
+        if (!$dupExists) {
+            $eqResp = Http::withToken($accessToken)
+                ->withHeaders(['X-com-zoho-books-organizationid' => $organizationId])
+                ->get(env('ZOHO_API_BASE_URL') . '/books/v3/estimates', [
+                    'reference_number' => (string) $order->order_id,
+                    'customer_id'      => $customer_id,
+                    'page'             => 1,
+                    'per_page'         => 50,
+                ]);
+
+            if ($eqResp->successful()) {
+                $hits = $eqResp->json('estimates') ?? [];
+                foreach ($hits as $hit) {
+                    if (isset($hit['reference_number']) && $hit['reference_number'] === $order->order_id) {
+                        $dupExists = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if ($dupExists) {
+            return response()->json([
+                'error'   => 'Duplicate estimate',
+                'message' => 'This order has already been punched to Zoho. Kindly delete the estimate on Zoho to re-punch this order.',
+            ], 409);
+        }
+        // === /DUPLICATE CHECK ===
+
+        // --- intra vs inter from user's saved state ---
         $custState = strtolower(trim($user->state ?? ''));
         $orgState  = strtolower($orgStateName);
         $isInter   = ($custState && $custState !== $orgState);
-
         $taxIdMap  = $isInter ? $igstTaxIdMap : $cgstSgstTaxIdMap;
 
-        // --- Build line items ---
+        // --- Build line items (exclusive) ---
         $lineItems = [];
         $supported = [5, 12, 18, 28];
 
@@ -128,8 +177,6 @@ class ZohoController extends Controller
             if (!in_array($pct, $supported, true)) { $pct = 18; }
 
             $pctRate = $pct / 100.0;
-
-            // Convert inclusive → exclusive
             $exclusiveRate  = (float) $item->rate  / (1 + $pctRate);
             $exclusiveTotal = (float) $item->total / (1 + $pctRate);
 
@@ -145,22 +192,15 @@ class ZohoController extends Controller
             ];
         }
 
-        $customer_id = $user->zoho_customer_id ?: '786484000000198301';
-
         $estimateData = [
             "customer_id"      => $customer_id,
             "date"             => now()->format('Y-m-d'),
             "reference_number" => $order->order_id,
             "line_items"       => $lineItems,
             "status"           => "draft",
-            // optional: pass place_of_supply so Zoho UI shows inter/intra correctly
-            "place_of_supply"  => $isInter ? strtoupper(substr($custState,0,2)) : strtoupper(substr($orgState,0,2)),
+            // Optionally set place_of_supply if you maintain a code map; otherwise omit
+            // "place_of_supply"  => $isInter ? 'AD' : 'TS',
         ];
-
-        $accessToken = $this->getAccessToken();
-        if (!$accessToken) {
-            return response()->json(['error' => 'Unable to retrieve access token'], 400);
-        }
 
         $response = Http::withToken($accessToken)
             ->withHeaders(['X-com-zoho-books-organizationid' => $organizationId])
@@ -168,7 +208,7 @@ class ZohoController extends Controller
 
         if ($response->successful()) {
             return response()->json([
-                'message' => "Order : {$order->order_id} pushed to Zoho as quote.",
+                'message' => "Order : {$order->order_id} has been successfully pushed as a quote to Zoho.",
                 'data'    => $response->json()
             ], 200);
         }
@@ -178,6 +218,7 @@ class ZohoController extends Controller
             'details' => $response->json()
         ], 400);
     }
+
 
 
     public function getEstimate(string $estimateId, Request $request)
