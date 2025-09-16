@@ -16,6 +16,10 @@ use App\Models\StockOrdersModel;
 
 use App\Models\StockOrderItemsModel;
 
+use App\Models\SpecialRateModel;
+
+use App\Models\JobCardModel;
+
 class DeleteController extends Controller
 {
     //Delete Cart 
@@ -150,6 +154,38 @@ class DeleteController extends Controller
             return response()->json([
                 'message' => 'An error occurred while deleting the stock order.',
                 'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    
+    /**
+     * DELETE
+     */
+    public function deleteSpecialRates($id)
+    {
+        try {
+            $special = SpecialRateModel::find($id);
+            if (!$special) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Special rate record not found.'
+                ], 404);
+            }
+
+            $special->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Special rate deleted successfully.'
+            ], 200);
+
+        } catch (\Throwable $e) {
+            Log::error('SpecialRate Delete Error: '.$e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while deleting special rate.',
+                'error'   => $e->getMessage()
             ], 500);
         }
     }

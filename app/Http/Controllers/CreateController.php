@@ -3,40 +3,27 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
 use App\Models\ProductModel;
-
 use App\Models\User;
-
 use App\Models\OrderModel;
-
 use App\Models\OrderItemsModel;
-
 use App\Models\CartModel;
-
 use App\Models\CounterModel;
-
 use App\Models\InvoiceModel;
-
 use App\Models\InvoiceItemsModel;
-
 use App\Models\StockCartModel;
-
 use App\Models\StockOrdersModel;
-
 use App\Models\StockOrderItemsModel;
-
-use Illuminate\Support\Facades\Auth;
-
-use Hash;
-
-use Carbon\Carbon;
-
+use App\Models\SpecialRateModel;
+use App\Models\JobCardModel;
 use App\Http\Controllers\InvoiceController;
-
 use App\Http\Controllers\InvoiceControllerZP;
-
+use Illuminate\Support\Facades\Auth;
 use App\Utils\sendWhatsAppUtility;
+use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
+use Exception;
+use Hash;
 
 class CreateController extends Controller
 {
@@ -1118,6 +1105,42 @@ class CreateController extends Controller
             return response()->json([
                 'message' => 'An error occurred while creating the stock order.',
                 'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    // special rate
+    public function createSpecialRate(Request $request)
+    {
+        try {
+            // Validate input
+            $validated = $request->validate([
+                'user_id'      => 'required|integer|exists:t_users,hasidhed_id',
+                'product_code' => 'required|integer|exists:t_products,hasidhed_id',
+                'rate'         => 'required|numeric|min:0',
+            ]);
+
+            // Create or update special rate (avoid duplicates)
+            $specialRate = SpecialRateModel::create([
+                    'user_id'      => $validated['user_id'],
+                    'product_code' => $validated['product_code'],
+                    'rate' => $validated['rate'],
+                ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Special rate saved successfully.',
+                'data'    => $specialRate
+            ], 201);
+
+        } catch (Exception $e) {
+            // Log the error
+            Log::error('SpecialRate Error: '.$e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while saving special rate.',
+                'error'   => $e->getMessage()
             ], 500);
         }
     }

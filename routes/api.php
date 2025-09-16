@@ -164,6 +164,20 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
     Route::post('/stock_product', [ViewController::class, 'product_stock_details']);
 
     Route::get('/generate_stock_order_invoice/{orderId}', [InvoiceControllerZP::class, 'generatestockorderInvoice']);
+
+    Route::prefix('special_rate')->group(function () {
+        Route::post('/create', [CreateController::class, 'createSpecialRate']);
+        Route::get('/{id?}', [ViewController::class, 'fetchSpecialRate']);
+        Route::post('/update/{id?}', [UpdateController::class, 'updateSpecialRate']);
+        Route::delete('/delete/{id?}', [DeleteController::class, 'deleteSpecialRate']);
+    });
+
+    Route::prefix('job_card')->group(function () {
+        Route::post('/create', [CreateController::class, 'add']);
+        Route::get('/{id?}', [ViewController::class, 'view']);
+        Route::post('/update/{id?}', [UpdateController::class, 'edit']);
+        Route::delete('/delete/{id?}', [DeleteController::class, 'delete']);
+    });
 });
 
 Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user'])->group(function () {

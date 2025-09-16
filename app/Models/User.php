@@ -83,4 +83,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(InvoiceModel::class, 'user_id', 'id'); // Reference user_id column in invoices table
     }
+
+    public function specialRates()
+    {
+        return $this->hasMany(SpecialRateModel::class, 'user_id', 'id');
+    }
 }

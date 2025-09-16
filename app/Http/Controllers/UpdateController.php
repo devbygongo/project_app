@@ -24,6 +24,10 @@ use App\Models\StockOrderItemsModel;
 
 use App\Models\LogsModel;
 
+use App\Models\SpecialRateModel;
+
+use App\Models\JobCardModel;
+
 use App\Http\Controllers\InvoiceController;
 
 use App\Http\Controllers\WishlistController;
@@ -1800,6 +1804,140 @@ class UpdateController extends Controller
             return response()->json([
                 'message' => 'An error occurred while updating the stock order.',
                 'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+        /**
+     * UPDATE (column-wise)
+     * Only updates fields that are present in the request.
+     * Validates that user_id/product_code exist if provided.
+     * Enforces uniqueness of (user_id, product_code).
+     */
+    public function updateSpecialRate(Request $request, $id)
+    {
+        try {
+            // Find record
+            $special = SpecialRateModel::with(['user:id,name,mobile,city,type'])->find($id);
+            if (!$special) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Special rate record not found.'
+                ], 404);
+            }
+
+            // Column-wise validation rules (all optional)
+            $validated = $request->validate([
+                'user_id'      => 'sometimes|integer',
+                'product_code' => 'sometimes|string',
+                'rate'         => 'sometimes|numeric|min:0',
+            ]);
+
+            // Build an update payload (only provided keys)
+            $payload = [];
+
+            // If user_id provided, ensure user exists
+            if ($request->has('user_id')) {
+                $user = User::find($validated['user_id'] ?? null);
+                if (!$user) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Invalid user_id provided.'
+                    ], 400);
+                }
+                $payload['user_id'] = (int)$validated['user_id'];
+            }
+
+            // If product_code provided, ensure product exists
+            if ($request->has('product_code')) {
+                $product = ProductModel::where('product_code', $validated['product_code'] ?? '')->first();
+                if (!$product) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Invalid product_code provided.'
+                    ], 400);
+                }
+                $payload['product_code'] = (string)$validated['product_code'];
+            }
+
+            // If rate provided
+            if ($request->has('rate')) {
+                $payload['rate'] = (float)$validated['rate'];
+            }
+
+            // If nothing to update
+            if (empty($payload)) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'No changes provided.',
+                    'data'    => $special
+                ], 200);
+            }
+
+            // Pre-check composite uniqueness (user_id, product_code)
+            $userId       = $payload['user_id']      ?? $special->user_id;
+            $productCode  = $payload['product_code'] ?? $special->product_code;
+
+            $duplicate = SpecialRateModel::where('user_id', $userId)
+                ->where('product_code', $productCode)
+                ->where('id', '!=', $special->id)
+                ->exists();
+
+            if ($duplicate) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'A special rate for this user and product_code already exists.',
+                ], 409);
+            }
+
+            // Update
+            $special->fill($payload)->save();
+
+            // Eager refresh (with user block for response shape)
+            $special->load('user:id,name,mobile,city,type');
+
+            // Response (matches your earlier shape when fetching single record)
+            $resp = [
+                'user_id' => (string)($special->user->id ?? $special->user_id),
+                'name'    => (string)($special->user->name ?? ''),
+                'mobile'  => (string)($special->user->mobile ?? ''),
+                'city'    => (string)($special->user->city ?? ''),
+                'type'    => (string)($special->user->type ?? ''),
+                'special_rate' => [[
+                    'id'            => (string)$special->id,
+                    'product_code'  => (string)$special->product_code,
+                    'rate'          => (string)$special->rate,
+                    'original_rate' => '0',
+                ]],
+            ];
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Special rate updated successfully.',
+                'data'    => $resp,
+            ], 200);
+
+        } catch (QueryException $qe) {
+            // Handle DB-level unique key errors gracefully
+            Log::error('SpecialRate Update DB Error: '.$qe->getMessage());
+            if ((int)$qe->getCode() === 23000) { // integrity constraint violation
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Duplicate entry for (user_id, product_code).',
+                    'error'   => $qe->getMessage()
+                ], 409);
+            }
+            return response()->json([
+                'success' => false,
+                'message' => 'Database error while updating special rate.',
+                'error'   => $qe->getMessage()
+            ], 500);
+        } catch (\Throwable $e) {
+            Log::error('SpecialRate Update Error: '.$e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while updating special rate.',
+                'error'   => $e->getMessage()
             ], 500);
         }
     }

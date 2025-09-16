@@ -32,6 +32,10 @@ use App\Models\StockOrderItemsModel;
 
 use App\Models\GodownModel;
 
+use App\Models\SpecialRateModel;
+
+use App\Models\JobCardModel;
+
 use Carbon\Carbon;
 
 class ViewController extends Controller
@@ -1989,6 +1993,69 @@ class ViewController extends Controller
         }
     }
 
+    public function fetchSpecialRate($id = null)
+    {
+        try {
+            $query = SpecialRateModel::with(['user:id,name,mobile,city,type'])
+                ->select('id', 'user_id', 'product_code', 'rate')
+                ->orderBy('id', 'desc');
+
+            if ($id) {
+                $query->where('id', $id);
+            }
+
+            $rates = $query->get();
+
+            if ($rates->isEmpty()) {
+                return response()->json([
+                    'success' => true,
+                    'data'    => [],
+                ], 200);
+            }
+
+            // Group by user
+            $grouped = $rates->groupBy('user_id')->map(function ($items, $userId) {
+                $user = $items->first()->user;
+                return [
+                    'user_id' => (string)($user->id ?? $userId),
+                    'name'    => (string)($user->name ?? ''),
+                    'mobile'  => (string)($user->mobile ?? ''),
+                    'city'    => (string)($user->city ?? ''),
+                    'type'    => (string)($user->type ?? ''),
+                    'special_rate' => $items->map(function ($r) {
+                        return [
+                            'id'            => (string)$r->id,
+                            'product_code'  => (string)$r->product_code,
+                            'rate'          => (string)$r->rate,
+                            'original_rate' => '0',
+                        ];
+                    })->values(),
+                ];
+            })->values();
+
+            // If single id was passed, unwrap to a single object
+            if ($id) {
+                return response()->json([
+                    'success' => true,
+                    'data'    => $grouped->first(),
+                ], 200);
+            }
+
+            // Otherwise return array of users
+            return response()->json([
+                'success' => true,
+                'data'    => $grouped,
+            ], 200);
+
+        } catch (\Exception $e) {
+            \Log::error('Fetch Special Rates Error: '.$e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while fetching special rates.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
 
     // return blade file
     
