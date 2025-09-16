@@ -327,7 +327,7 @@ class ZohoController extends Controller
 
         foreach ($order->order_items as $item) {
             $product = $item->product;
-            $rawPct  = $product->gst ?? $product->tax ?? null;
+            $rawPct  = $product->tax;
 
             $pct = (int) round((float) $rawPct);
             if (!in_array($pct, $supported, true)) { $pct = 18; }
