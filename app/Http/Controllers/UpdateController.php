@@ -1850,7 +1850,7 @@ class UpdateController extends Controller
 
             // If product_code provided, ensure product exists
             if ($request->has('product_code')) {
-                $product = ProductModel::where('product_code', $validated['product_code'] ?? '')->first();
+                $product = ProductModel::where('id', $validated['product_code'] ?? '')->first();
                 if (!$product) {
                     return response()->json([
                         'success' => false,
