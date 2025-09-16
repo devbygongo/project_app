@@ -1115,7 +1115,7 @@ class CreateController extends Controller
         try {
             // Validate input
             $validated = $request->validate([
-                'user_id'      => 'required|integer|exists:t_users,hasidhed_id',
+                'user_id'      => 'required|integer|exists:users,hasidhed_id',
                 'product_code' => 'required|integer|exists:t_products,hasidhed_id',
                 'rate'         => 'required|numeric|min:0',
             ]);
