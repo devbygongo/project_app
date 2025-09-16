@@ -162,7 +162,7 @@ class DeleteController extends Controller
     /**
      * DELETE
      */
-    public function deleteSpecialRates($id)
+    public function deleteSpecialRate($id)
     {
         try {
             $special = SpecialRateModel::find($id);
@@ -189,5 +189,4 @@ class DeleteController extends Controller
             ], 500);
         }
     }
-
 }
