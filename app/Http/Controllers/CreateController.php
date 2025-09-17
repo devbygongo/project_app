@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Utils\sendWhatsAppUtility;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Exception;
 use Hash;
