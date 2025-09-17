@@ -1147,6 +1147,7 @@ class CreateController extends Controller
         }
     }
 
+    // job card
     public function createJobCard(Request $request)
     {
         $validated = $request->validate([
