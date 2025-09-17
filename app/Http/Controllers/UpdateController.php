@@ -7,41 +7,24 @@ use Illuminate\Http\Request;
 use App\Models\User;
 
 use App\Models\CartModel;
-
 use App\Models\CounterModel;
-
 use App\Models\OrderModel;
-
 use App\Models\ProductModel;
-
 use App\Models\OrderItemsModel;
-
 use App\Models\StockCartModel;
-
 use App\Models\StockOrdersModel;
-
 use App\Models\StockOrderItemsModel;
-
 use App\Models\LogsModel;
-
+use Illuminate\Validation\Rule;
 use App\Models\SpecialRateModel;
-
 use App\Models\JobCardModel;
-
 use App\Http\Controllers\InvoiceController;
-
 use App\Http\Controllers\WishlistController;
-
 use App\Utils\sendWhatsAppUtility;
-
 use Carbon\Carbon;
-
 use Illuminate\Support\Facades\Auth;
-
 use Laravel\Sanctum\PersonalAccessToken;
-
 use Illuminate\Support\Facades\DB;
-
 use Illuminate\Support\Facades\Log;
 
 
