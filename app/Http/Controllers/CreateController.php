@@ -1163,7 +1163,7 @@ class CreateController extends Controller
             $jobCard = DB::transaction(function () use ($validated) {
                 $name   = 'ACE';
                 $padLen = 3;     // 001, 002, ...
-                $prefix = 'ACE'; // default if counter prefix is null
+                $prefix = 'job_cart'; // default if counter prefix is null
 
                 // Lock row to prevent duplicates in concurrent requests
                 $counter = CounterModel::where('name', $name)->lockForUpdate()->first();
