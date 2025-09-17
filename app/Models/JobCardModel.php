@@ -13,12 +13,12 @@ class JobCardModel extends Model
 
     protected $fillable = [
         'client_name',
-        'job_id',
+        'job_id',               // auto-generated in store()
         'mobile',
         'warranty',
         'serial_no',
         'model_no',
         'problem_description',
-        'assigned_to',
+        'assigned_to',               // varchar, nullable
     ];
 }

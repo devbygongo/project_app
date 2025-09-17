@@ -1145,4 +1145,76 @@ class CreateController extends Controller
         }
     }
 
+    public function createJobCard(Request $request)
+    {
+        $validated = $request->validate([
+            'client_name'         => ['required', 'string', 'max:191'],
+            'mobile'              => ['required', 'string', 'max:20'],
+            'warranty'            => ['required', Rule::in(['in_warranty', 'outside_warranty'])],
+            'serial_no'           => ['nullable', 'string', 'max:100'],
+            'model_no'            => ['nullable', 'string', 'max:100'],
+            'problem_description' => ['nullable', 'string'],
+            'assigned_to'         => ['nullable', 'string', 'max:191'],
+        ]);
+
+        try {
+            $jobCard = DB::transaction(function () use ($validated) {
+                $name   = 'ACE';
+                $padLen = 3;     // 001, 002, ...
+                $prefix = 'ACE'; // default if counter prefix is null
+
+                // Lock row to prevent duplicates in concurrent requests
+                $counter = CounterModel::where('name', $name)->lockForUpdate()->first();
+
+                // If not present, create starting at 1 (FIRST VALUE = 1)
+                if (!$counter) {
+                    $counter = CounterModel::create([
+                        'name'    => $name,
+                        'prefix'  => $prefix,
+                        'counter' => 1,    // start at 1
+                        'postfix' => '/25-26',
+                    ]);
+                }
+
+                // Use the CURRENT value for this job, then increment
+                $currentNumber = (int) $counter->counter;              // e.g., 1 for the first
+                $serial        = str_pad((string)$currentNumber, $padLen, '0', STR_PAD_LEFT);
+                $usePrefix     = $counter->prefix ?: $prefix;
+                $usePostfix    = $counter->postfix ? ('-' . $counter->postfix) : '';
+                $jobId         = $usePrefix . '-' . $serial . $usePostfix; // e.g., ACE-001
+
+                // Create the job card
+                $jobCard = JobCardModel::create([
+                    'client_name'         => $validated['client_name'],
+                    'job_id'              => $jobId,
+                    'mobile'              => $validated['mobile'],
+                    'warranty'            => $validated['warranty'],
+                    'serial_no'           => $validated['serial_no']           ?? null,
+                    'model_no'            => $validated['model_no']            ?? null,
+                    'problem_description' => $validated['problem_description'] ?? null,
+                    'assigned_to'         => $validated['assigned_to']         ?? null,
+                ]);
+
+                // Increment AFTER using it
+                $counter->counter = $currentNumber + 1;
+                $counter->save();
+
+                return $jobCard;
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Job card created successfully.',
+                'data'    => $jobCard,
+            ], 201);
+
+        } catch (\Throwable $e) {
+            \Log::error('JobCard create failed: '.$e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create job card.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

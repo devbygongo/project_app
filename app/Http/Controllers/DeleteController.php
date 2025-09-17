@@ -189,4 +189,35 @@ class DeleteController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * DELETE by id.
+     */
+    public function deleteJobCard($id)
+    {
+        try {
+            $job = JobCardModel::find($id);
+            if (!$job) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Job card not found.',
+                ], 404);
+            }
+
+            $job->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Job card deleted successfully.',
+            ], 200);
+
+        } catch (\Throwable $e) {
+            Log::error('JobCard delete error: '.$e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while deleting job card.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

@@ -1941,4 +1941,76 @@ class UpdateController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * UPDATE (column-wise).
+     * Only updates fields that are present in the request.
+     * Disallows changing job_id (since it’s generated).
+     */
+    public function updateJobCard(Request $request, $id)
+    {
+        try {
+            $job = JobCardModel::find($id);
+            if (!$job) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Job card not found.',
+                ], 404);
+            }
+
+            // Validate only provided fields
+            $validated = $request->validate([
+                'client_name'         => ['required', 'string', 'max:191'],
+                'mobile'              => ['required', 'string', 'max:20'],
+                'warranty'            => ['required', Rule::in(['in_warranty','outside_warranty'])],
+                'serial_no'           => ['sometimes', 'nullable', 'string', 'max:100'],
+                'model_no'            => ['sometimes', 'nullable', 'string', 'max:100'],
+                'problem_description' => ['sometimes', 'nullable', 'string'],
+                'assigned_to'         => ['sometimes', 'nullable', 'string', 'max:191'], // varchar
+                // 'job_id' is intentionally NOT allowed here
+            ]);
+
+            // Build payload column-wise
+            $payload = [];
+            foreach (['client_name','mobile','warranty','serial_no','model_no','problem_description','assigned_to'] as $col) {
+                if ($request->has($col)) {
+                    $payload[$col] = $validated[$col] ?? null;
+                }
+            }
+
+            if (empty($payload)) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'No changes provided.',
+                    'data'    => $job,
+                ], 200);
+            }
+
+            $job->fill($payload)->save();
+
+            // Fresh copy for response
+            $job->refresh();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Job card updated successfully.',
+                'data'    => $job,
+            ], 200);
+
+        } catch (QueryException $qe) {
+            Log::error('JobCard update DB error: '.$qe->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Database error while updating job card.',
+                'error'   => $qe->getMessage(),
+            ], 500);
+        } catch (\Throwable $e) {
+            Log::error('JobCard update error: '.$e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while updating job card.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

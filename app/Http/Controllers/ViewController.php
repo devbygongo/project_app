@@ -2057,6 +2057,70 @@ class ViewController extends Controller
         }
     }
 
+    /**
+     * FETCH: all or by id (route param).
+     * GET /job-cards           -> all
+     * GET /job-cards/{id}      -> single
+     */
+    public function fetchJobCard($id = null)
+    {
+        try {
+            if ($id) {
+                $job = JobCardModel::select(
+                    'id',
+                    'client_name',
+                    'job_id',
+                    'mobile',
+                    'warranty',
+                    'serial_no',
+                    'model_no',
+                    'problem_description',
+                    'assigned_to',
+                )->find($id);
+
+                if (!$job) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Job card not found.',
+                    ], 404);
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'data'    => $job,
+                ], 200);
+            }
+
+            // All
+            $jobs = JobCardModel::select(
+                'id',
+                'client_name',
+                'job_id',
+                'mobile',
+                'warranty',
+                'serial_no',
+                'model_no',
+                'problem_description',
+                'assigned_to',
+            )
+            ->orderBy('id', 'desc')
+            ->get();
+
+            return response()->json([
+                'success' => true,
+                'data'    => $jobs,
+            ], 200);
+
+        } catch (\Throwable $e) {
+            Log::error('JobCard fetch error: '.$e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while fetching job cards.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     // return blade file
     
     public function login_view()

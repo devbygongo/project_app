@@ -173,10 +173,10 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
     });
 
     Route::prefix('job_card')->group(function () {
-        Route::post('/create', [CreateController::class, 'add']);
-        Route::get('/{id?}', [ViewController::class, 'view']);
-        Route::post('/update/{id?}', [UpdateController::class, 'edit']);
-        Route::delete('/delete/{id?}', [DeleteController::class, 'delete']);
+        Route::post('/create', [CreateController::class, 'createJobCard']);
+        Route::get('/{id?}', [ViewController::class, 'fetchJobCard']);
+        Route::post('/update/{id?}', [UpdateController::class, 'updateJobCard']);
+        Route::delete('/delete/{id?}', [DeleteController::class, 'deleteJobCard']);
     });
 });
 
