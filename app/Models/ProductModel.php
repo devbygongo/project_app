@@ -33,6 +33,7 @@ class ProductModel extends Model
         'special_gst',
         'outstation_basic',
         'outstation_gst',
+        'aakhambati_gst',
         // 'mark_up',
         'guest_price',
         're_order_level',

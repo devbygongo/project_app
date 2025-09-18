@@ -1015,6 +1015,7 @@ class ViewController extends Controller
             ['value' => 'special', 'name' => 'Special'],
             ['value' => 'outstation', 'name' => 'Outstation'],
             ['value' => 'zeroprice', 'name' => 'Zero Price'],
+            ['value' => 'aakhambati', 'name' => 'AA Khambati Price'],
         ];
     
         return $processed_rec_user->isEmpty()

@@ -57,6 +57,7 @@ class CsvImportController extends Controller
             $gstPrice_prduct_special = $record_csv['Special GST Price'] !== '' ? $record_csv['Special GST Price'] : 0;
             $basicPrice_product_outstation = $record_csv['Outstation Basic Price'] !== '' ? $record_csv['Outstation Basic Price'] : 0;
             $gstPrice_prduct_outstation = $record_csv['Outstation GST Price'] !== '' ? $record_csv['Outstation GST Price'] : 0;
+            $aakhambati_gst_outstation = $record_csv['AA Khambati Price'] !== '' ? $record_csv['AA Khambati Price'] : 0;
             $guest_price = $record_csv['Guest Price'] !== '' ? $record_csv['Guest Price'] : 0;
             $re_order_level = $record_csv['RE ORDER LEVEL'] !== '' ? $record_csv['RE ORDER LEVEL'] : 0;
             $filename = $record_csv['Product Code'];
@@ -118,6 +119,7 @@ class CsvImportController extends Controller
                     'special_gst' => $gstPrice_prduct_special,     // Ensure this is a valid number
                     'outstation_basic' => $basicPrice_product_outstation,     // Ensure this is a valid number
                     'outstation_gst' => $gstPrice_prduct_outstation,     // Ensure this is a valid number
+                    'aakhambati_gst' => $aakhambati_gst_outstation,     // Ensure this is a valid number
                     'guest_price' => $guest_price,     // Ensure this is a valid number
                     're_order_level' => $re_order_level,     // Ensure this is a valid number
                     'out_of_stock' => $record_csv['Out of Stock'] === 'TRUE' ? 1 : 0,
