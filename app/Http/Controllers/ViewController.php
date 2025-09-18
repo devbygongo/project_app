@@ -248,7 +248,20 @@ class ViewController extends Controller
                 'out_of_stock',
                 'yet_to_launch'
 			);
-		}  else if ($user_type && $user_type->type == 'outstation') {
+		}  else if ($user_type && $user_type->type == 'aakhambati') {
+			// If user type is 'special', select special columns but alias them as 'basic' and 'gst'
+			$query = ProductModel::select(
+				'product_code', 
+				'product_name', 
+				'category', 
+				'sub_category', 
+				'product_image', 
+				DB::raw('0 as basic'), 
+				DB::raw('aakhambati_gst as gst'),
+                'out_of_stock',
+                'yet_to_launch'
+			);
+		} else if ($user_type && $user_type->type == 'outstation') {
             // If user type is 'special', select special columns but alias them as 'basic' and 'gst'
             $query = ProductModel::select(
 				'product_code', 
@@ -430,6 +443,22 @@ class ViewController extends Controller
                 'video_link'
 			);
 		}
+        else if ($user_type && $user_type->type == 'aakhambati') {
+            $query = ProductModel::select(
+				'product_code', 
+				'product_name', 
+				'category', 
+				'sub_category', 
+				'product_image', 
+                'extra_images',
+                'size',
+				DB::raw('0 as basic'), 
+				DB::raw('aakhambati_gst as gst'),
+                'out_of_stock',
+                'yet_to_launch',
+                'video_link'
+			);
+		} 
         else if ($user_type && $user_type->type == 'guest') {
 
 
@@ -627,7 +656,12 @@ class ViewController extends Controller
                 DB::raw('special_basic as basic'), 
                 DB::raw('special_gst as gst')
             );
-        } elseif ($user_type && $user_type->type == 'guest') {
+        } elseif ($user_type && $user_type->type == 'aakhambati') {
+            $productQuery->addSelect(
+                DB::raw('0 as basic'), 
+                DB::raw('aakhambati_gst as gst')
+            );
+		} elseif ($user_type && $user_type->type == 'guest') {
             $productQuery->addSelect(
                 DB::raw('guest_price as basic'), 
                 DB::raw('0 as gst')
@@ -704,7 +738,12 @@ class ViewController extends Controller
                 DB::raw('special_basic as basic'), 
                 DB::raw('special_gst as gst')
             );
-        } elseif ($user_type && $user_type->type == 'outstation') {
+        } elseif ($user_type && $user_type->type == 'aakhambati') {
+            $productQuery->addSelect(
+                DB::raw('0 as basic'), 
+                DB::raw('aakhambati_gst as gst')
+            );
+		} elseif ($user_type && $user_type->type == 'outstation') {
             $productQuery->addSelect(
                 DB::raw('outstation_basic as basic'), 
                 DB::raw('outstation_gst as gst')
@@ -1282,6 +1321,9 @@ class ViewController extends Controller
             if ($user_type && $user_type->type == 'special') {
                 $basic_column = DB::raw('special_basic as basic');
                 $gst_column = DB::raw('special_gst as gst');
+            } elseif ($user_type && $user_type->type == 'aakhambati') {
+                $basic_column = DB::raw('0 as basic');
+                $gst_column = DB::raw('aakhambati_gst as gst');
             } elseif ($user_type && $user_type->type == 'outstation') {
                 $basic_column = DB::raw('outstation_basic as basic');
                 $gst_column = DB::raw('outstation_gst as gst');
@@ -1323,7 +1365,10 @@ class ViewController extends Controller
             if ($user_type && $user_type->type == 'special') {
                 $basic_column = DB::raw('special_basic as basic');
                 $gst_column = DB::raw('special_gst as gst');
-            } elseif ($user_type && $user_type->type == 'outstation') {
+            } elseif ($user_type && $user_type->type == 'aakhambati') {
+                $basic_column = DB::raw('0 as basic');
+                $gst_column = DB::raw('aakhambati_gst as gst');
+            }elseif ($user_type && $user_type->type == 'outstation') {
                 $basic_column = DB::raw('outstation_basic as basic');
                 $gst_column = DB::raw('outstation_gst as gst');
             } elseif ($user_type && $user_type->type == 'zeroprice') {
