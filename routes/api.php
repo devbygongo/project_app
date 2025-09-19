@@ -180,7 +180,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
     });
 
     Route::post('/reports/top_selling_products', [ReportController::class, 'topSellingProducts']);
-    Route::post('/broadcast/pamplet', [ReportController::class, 'generate_pamplet_pdf']);
+    Route::get('/broadcast/pamplet/{user_id}', [ReportController::class, 'generate_pamplet_pdf']);
 });
 
 Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user'])->group(function () {
