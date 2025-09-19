@@ -280,7 +280,7 @@ class ReportController extends Controller
             ->get();
 
         // 5. Generate HTML for PDF
-        $html = view('pdf.pamplet', compact('items'))->render();
+        $html = view('pamplet', compact('items'))->render();
 
         // 6. Generate PDF
         $mpdf = new Mpdf(['format' => 'A4']);
