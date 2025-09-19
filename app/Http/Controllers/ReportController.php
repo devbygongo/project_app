@@ -11,6 +11,7 @@ use Mpdf\Mpdf;
 use Illuminate\Support\Facades\File;
 use App\Utils\sendWhatsAppUtility;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
@@ -199,7 +200,7 @@ class ReportController extends Controller
             ->where('t_orders.status', 'completed')
             ->groupBy('t_order_items.product_code', 't_products.product_name', 't_products.category')
             ->orderByDesc('qty_sold') // top selling first
-            ->limit(1); // <-- Only top 1 product
+            ->limit(100); // <-- Only top 1 product
 
         // Filter by category
         if ($categoryId) {
@@ -235,6 +236,62 @@ class ReportController extends Controller
         return response()->json([
             'success' => true,
             'data' => $topSelling
+        ]);
+    }
+
+    public function generate_pamplet_pdf($user_id)
+    {
+        // 1. Calculate date 3 months back
+        $dateFrom = Carbon::now()->subMonths(3)->startOfDay();
+        $dateTo   = Carbon::now()->endOfDay();
+
+        // 2. Get orders for user in last 3 months with completed status
+        $orders = OrderModel::where('user_id', $user_id)
+            ->where('status', 'completed')
+            ->whereBetween('order_date', [$dateFrom, $dateTo])
+            ->pluck('id');
+
+        if ($orders->isEmpty()) {
+            return response()->json(['success' => false, 'message' => 'No completed orders in last 3 months.']);
+        }
+
+        // 3. Category-wise sum(qty * rate)
+        $topCategories = OrderItemsModel::select('t_products.category', DB::raw('SUM(t_order_items.quantity * t_order_items.rate) as category_total'))
+            ->join('t_products', 't_order_items.product_code', '=', 't_products.product_code')
+            ->whereIn('t_order_items.order_id', $orders)
+            ->groupBy('t_products.category')
+            ->orderByDesc('category_total')
+            ->limit(3)
+            ->pluck('category')
+            ->toArray();
+
+        if (empty($topCategories)) {
+            return response()->json(['success' => false, 'message' => 'No category sales found.']);
+        }
+
+        // 4. Fetch all products from top 3 categories in these orders
+        $items = OrderItemsModel::with('product')
+            ->whereIn('order_id', $orders)
+            ->whereIn('product_code', function($q) use ($topCategories) {
+                $q->select('product_code')
+                ->from('t_products')
+                ->whereIn('category', $topCategories);
+            })
+            ->get();
+
+        // 5. Generate HTML for PDF
+        $html = view('pdf.pamplet', compact('items'))->render();
+
+        // 6. Generate PDF
+        $mpdf = new Mpdf(['format' => 'A4']);
+        $mpdf->WriteHTML($html);
+        $pdfFileName = 'pamplet_' . $user_id . '_' . time() . '.pdf';
+        $pdfPath = storage_path('app/public/uploads/' . $pdfFileName);
+        $mpdf->Output($pdfPath, \Mpdf\Output\Destination::FILE);
+
+        return response()->json([
+            'success' => true,
+            'pdf_url' => asset('storage/uploads/' . $pdfFileName)
         ]);
     }
 }
