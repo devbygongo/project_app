@@ -178,6 +178,8 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
         Route::post('/update/{id?}', [UpdateController::class, 'updateJobCard']);
         Route::delete('/delete/{id?}', [DeleteController::class, 'deleteJobCard']);
     });
+
+    Route::post('/reports/top_selling_products', [ReportController::class, 'topSellingProducts']);
 });
 
 Route::prefix('user')->middleware(['auth:sanctum', GetUserRole::class . ':user'])->group(function () {

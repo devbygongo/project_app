@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\OrderModel;
+use App\Models\OrderItemsModel;
+use App\Models\ProductModel;
 use App\Models\User;
 use Mpdf\Mpdf;
 use Illuminate\Support\Facades\File;
@@ -166,5 +168,72 @@ class ReportController extends Controller
         }
 
         return response()->json(['success' => 'Pending order report generated and sent successfully!', 'file_url' => $fileUrl], 200);
+    }
+
+    public function topSellingProducts(Request $request)
+    {
+        $request->validate([
+            'category_id' => 'nullable|integer|exists:t_category,id',
+            'user_id'     => 'nullable|integer|exists:users,id',
+            'date_from'   => 'nullable|date',
+            'date_to'     => 'nullable|date',
+            'search'      => 'nullable|string'
+        ]);
+
+        $categoryId = $request->category_id;
+        $userId     = $request->user_id;
+        $dateFrom   = $request->date_from;
+        $dateTo     = $request->date_to;
+        $search     = $request->search;
+
+        $query = OrderItemsModel::query()
+            ->select(
+                't_order_items.product_code',
+                't_products.product_name as name',
+                't_products.category',
+                \DB::raw('SUM(t_order_items.quantity) as qty_sold'),
+                \DB::raw('SUM(t_order_items.total) as total_amount')
+            )
+            ->join('t_orders', 't_order_items.order_id', '=', 't_orders.id')
+            ->join('t_products', 't_order_items.product_code', '=', 't_products.product_code')
+            ->where('t_orders.status', 'completed')
+            ->groupBy('t_order_items.product_code', 't_products.product_name', 't_products.category')
+            ->orderByDesc('qty_sold'); // top selling first
+
+        // Filter by category
+        if ($categoryId) {
+            $query->where('t_products.category', function($q) use ($categoryId) {
+                $q->select('name')->from('t_category')->where('id', $categoryId)->limit(1);
+            });
+        }
+
+        // Filter by user
+        if ($userId) {
+            $query->where('t_orders.user_id', $userId);
+        }
+
+        // Filter by date range
+        if ($dateFrom && $dateTo) {
+            $query->whereBetween('t_orders.order_date', [$dateFrom, $dateTo]);
+        } elseif ($dateFrom) {
+            $query->where('t_orders.order_date', '>=', $dateFrom);
+        } elseif ($dateTo) {
+            $query->where('t_orders.order_date', '<=', $dateTo);
+        }
+
+        // Search by product code or name
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('t_products.product_code', 'like', "%$search%")
+                ->orWhere('t_products.product_name', 'like', "%$search%");
+            });
+        }
+
+        $topSelling = $query->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $topSelling
+        ]);
     }
 }
