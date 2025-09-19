@@ -198,7 +198,8 @@ class ReportController extends Controller
             ->join('t_products', 't_order_items.product_code', '=', 't_products.product_code')
             ->where('t_orders.status', 'completed')
             ->groupBy('t_order_items.product_code', 't_products.product_name', 't_products.category')
-            ->orderByDesc('qty_sold'); // top selling first
+            ->orderByDesc('qty_sold') // top selling first
+            ->limit(1); // <-- Only top 1 product
 
         // Filter by category
         if ($categoryId) {
