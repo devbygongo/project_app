@@ -21,7 +21,7 @@
 <body>
 
 <div class="header">
-    <img src="{{ asset('storage/uploads/logo.png') }}" alt="Company Logo">
+    <img src="{{ asset('storage/uploads/s1.jpg') }}" alt="Company Logo">
 </div>
 
 <div class="title">Top Selling Products - Last 3 Months</div>
@@ -60,7 +60,7 @@
             <td class="center">{{ $sn++ }}</td>
             <td class="center">
                 @php
-                    $imagePath = storage_path('app/public/uploads/' . $item->product_code . '.jpg');
+                    $imagePath = storage_path('app/public/uploads/products_pdf/' . $item->product_code . '.jpg');
                 @endphp
                 @if(file_exists($imagePath))
                     <img src="{{ $imagePath }}" alt="Product Image" class="product-image">
