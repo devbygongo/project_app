@@ -279,8 +279,11 @@ class ReportController extends Controller
             })
             ->get();
 
+         // Fetch user details
+        $user = User::findOrFail($user_id);
+
         // 5. Generate HTML for PDF
-        $html = view('pamplet', compact('items'))->render();
+        $html = view('pamplet', compact('items', 'user'))->render();
 
         // 6. Generate PDF
         $mpdf = new Mpdf(['format' => 'A4']);
