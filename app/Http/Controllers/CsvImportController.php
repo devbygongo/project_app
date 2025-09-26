@@ -226,7 +226,6 @@ class CsvImportController extends Controller
                     'gstin' => $record_user['GSTIN'],
                     'state' => $record_user['State'],
                     'country' => $record_user['Country'],
-                    'type' => $markup_user, // Ensure this is a valid number
                     'purchase_limit' => isset($record_user['Purchase Limit']) ? $record_user['Purchase Limit'] : '0',  // Default to '0' if blank,
                     'zoho_customer_id' => $record_user['Zoho Customer ID'],
                 ]);
