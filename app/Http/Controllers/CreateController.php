@@ -124,12 +124,13 @@ class CreateController extends Controller
 
     public function login(Request $request, $otp = null)
     {
+        $mobile = $request->mobile;
         if ($otp) {
             $request->validate([
                 'mobile' => ['required', 'string'],
             ]);
 
-            $mobile = $request->mobile;
+            
 
             if (strlen($mobile) === 15) {
                 // Remove 2nd and 3rd characters
