@@ -707,7 +707,9 @@ class CreateController extends Controller
                         $order->pdf = $generate_order_invoice->generateorderInvoice($create_order_basic->id, [
                             'is_edited' => false
                         ]);
-                        $order->packing_slip = $generate_order_invoice->generatePackingSlip($create_order_basic->id);
+                        if (!$isQuotationUser) {
+                            $order->packing_slip = $generate_order_invoice->generatePackingSlip($create_order_basic->id);
+                        }
                     }
                     // Check if the current order is of type 'gst' and has an id
                     elseif ($order->type === 'gst') {
@@ -715,7 +717,9 @@ class CreateController extends Controller
                         $order->pdf = $generate_order_invoice->generateorderInvoice($create_order_gst->id, [
                             'is_edited' => false
                         ]);
-                        $order->packing_slip = $generate_order_invoice->generatePackingSlip($create_order_gst->id);
+                        if (!$isQuotationUser) {
+                            $order->packing_slip = $generate_order_invoice->generatePackingSlip($create_order_gst->id);
+                        }
                     }
 
                     unset($order->updated_at, $order->created_at, $order->id);
