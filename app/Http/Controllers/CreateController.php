@@ -488,6 +488,10 @@ class CreateController extends Controller
                             'remarks' => $product->remarks,
                         ]);
                     }
+
+                    if ($create_order != null) {
+                        CounterModel::where('name', $counterName)->increment('counter');
+                    }  
                 }
 
                 // if ($create_order != null) {
@@ -497,9 +501,7 @@ class CreateController extends Controller
                 //     ]);
                 // }
 
-                if ($create_order != null) {
-                    CounterModel::where('name', $counterName)->increment('counter');
-                }                
+                              
 
                 $data = [];
 
