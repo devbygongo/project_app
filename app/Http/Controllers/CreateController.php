@@ -450,7 +450,7 @@ class CreateController extends Controller
             if ($get_counter) 
             {
                 $get_order_id = $get_counter[0]->prefix.$get_counter[0]->counter.$get_counter[0]->postfix;
-        
+                $create_order = null;
                 // for `basic` product
                 if ((count($get_product)) > 0) 
                 {
@@ -489,9 +489,7 @@ class CreateController extends Controller
                         ]);
                     }
 
-                    if ($create_order != null) {
-                        CounterModel::where('name', $counterName)->increment('counter');
-                    }  
+                     
                 }
 
                 // if ($create_order != null) {
@@ -501,7 +499,9 @@ class CreateController extends Controller
                 //     ]);
                 // }
 
-                              
+                if ($create_order != null) {
+                    CounterModel::where('name', $counterName)->increment('counter');
+                }            
 
                 $data = [];
 
