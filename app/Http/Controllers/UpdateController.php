@@ -1477,14 +1477,13 @@ class UpdateController extends Controller
                 if (!$clientUser) {
                     // Ensure username uniqueness if you use username-based login
                     $proposedUsername = $mobile;
-                    if (User::where('username', $proposedUsername)->exists()) {
+                    if (User::where('mobile', $proposedUsername)->exists()) {
                         $proposedUsername = $mobile . '_' . str()->random(4);
                     }
 
                     $clientUser = User::create([
                         'name'     => $name,
                         'mobile'   => $mobile,
-                        'username' => $proposedUsername,          // if username login is used
                         'password' => Hash::make(str()->random(12)), // random password (can be reset later)
                         'role'     => 'user',
                     ]);
@@ -1562,7 +1561,6 @@ class UpdateController extends Controller
                     'id'       => $clientUser->id,
                     'name'     => $clientUser->name,
                     'mobile'   => $clientUser->mobile,
-                    'username' => $clientUser->username ?? null,
                 ],
                 'new_order' => [
                     'id'       => $newOrder->id,
