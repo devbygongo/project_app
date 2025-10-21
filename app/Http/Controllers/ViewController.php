@@ -1844,7 +1844,7 @@ class ViewController extends Controller
                         if ($linkedOrder) {
                             $linkedOrderId = $linkedOrder->order_id ?? 'N/A';
                             $linkedOrderUser = $linkedOrder->user->name ?? 'Unknown';
-                            $godownName .= "\n ({$linkedOrderUser})";
+                            $godownName .= "\n</br> ({$linkedOrderUser})";
                         }
                     }
 
