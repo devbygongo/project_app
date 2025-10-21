@@ -721,6 +721,13 @@ class InvoiceController extends Controller
                     ->where('id', $get_user)
                     ->first();
 		
+        // --- Special handling for Quotation user (id: 226) ---
+        if ($order->user_id == 226) {
+            // Override user name and mobile with order's stored values
+            $user->name   = $order->name ?? $user->name;
+            $user->mobile = $order->mobile ?? $user->mobile;
+        }
+
 
         $order_items = OrderItemsModel::with('product:product_code')
                                     ->select('product_code', 'product_name', 'rate', 'quantity', 'total', 'remarks', 'size')
