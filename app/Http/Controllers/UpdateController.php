@@ -1486,6 +1486,7 @@ class UpdateController extends Controller
                         'mobile'   => $mobile,
                         'password' => Hash::make(str()->random(12)), // random password (can be reset later)
                         'role'     => 'user',
+                        'is_verified'     => 1,
                     ]);
                 } else {
                     // Optionally update name if missing/mismatched
