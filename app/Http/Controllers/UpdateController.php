@@ -1512,7 +1512,7 @@ class UpdateController extends Controller
                     'amount'     => $quote->amount,
                     'type'       => $quote->type === 'gst' ? 'gst' : 'basic',
                     'remarks'    => trim(($quote->remarks ? $quote->remarks . ' | ' : '') . 'Converted from quotation: ' . $quote->order_id),
-                    'status'     => 'placed',   // your default live status
+                    'status'     => 'pending',   // your default live status
                     // carry forward person-of-contact to the order if columns exist
                     'name'       => $name,
                     'mobile'     => $mobile,
