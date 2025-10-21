@@ -26,7 +26,8 @@ use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\PersonalAccessToken;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Hash;
 
 class UpdateController extends Controller
 {
@@ -1380,39 +1381,210 @@ class UpdateController extends Controller
     }
 
 
+    // public function complete_order(Request $request, $id)
+    // {
+    //     // Validate incoming request data
+    //     $request->validate([
+    //         'order_id' => 'required|string',
+    //         'user_id' => 'required|integer'
+    //     ]);
+
+    //     // Find the order by its ID
+    //     $order = OrderModel::find($id);
+
+    //     if (!$order) {
+    //         return response()->json([
+    //             'message' => 'Order not found!'
+    //         ], 404);
+    //     }
+
+    //     // Check if the order belongs to the provided user_id
+    //     if ($order->user_id !== $request->input('user_id')) {
+    //         return response()->json([
+    //             'message' => 'Unauthorized action. This order does not belong to the specified user.'
+    //         ], 403);
+    //     }
+
+    //     // Update the status of the order to 'completed'
+    //     $order->status = 'completed';
+    //     $order->save();
+
+    //     return response()->json([
+    //         'message' => 'Order status updated to completed successfully!',
+    //         'order' => $order
+    //     ], 200);
+    // }
+
+   
     public function complete_order(Request $request, $id)
     {
-        // Validate incoming request data
+        // Base validation (unchanged + conditional for 226 below)
         $request->validate([
-            'order_id' => 'required|string',
-            'user_id' => 'required|integer'
+            'order_id' => 'required|string',   // human order id of the QUOTE (e.g., SS/ORB/81/24-25)
+            'user_id'  => 'required|integer',  // who owns the quote (226 for quotation user)
         ]);
 
-        // Find the order by its ID
-        $order = OrderModel::find($id);
-
-        if (!$order) {
-            return response()->json([
-                'message' => 'Order not found!'
-            ], 404);
+        $quote = OrderModel::find($id);
+        if (!$quote) {
+            return response()->json(['message' => 'Order not found!'], 404);
         }
 
-        // Check if the order belongs to the provided user_id
-        if ($order->user_id !== $request->input('user_id')) {
+        // Ensure the quote belongs to the provided user
+        if ($quote->user_id !== (int) $request->input('user_id')) {
             return response()->json([
                 'message' => 'Unauthorized action. This order does not belong to the specified user.'
             ], 403);
         }
 
-        // Update the status of the order to 'completed'
-        $order->status = 'completed';
-        $order->save();
+        // (Optional but recommended) sanity: make sure the provided order_id matches the quote we found
+        if ($request->input('order_id') !== $quote->order_id) {
+            return response()->json(['message' => 'Provided order_id does not match the quote.'], 422);
+        }
+
+        // === SPECIAL FLOW for Quotation user (id: 226) ===
+        if ((int) $request->input('user_id') === 226) {
+
+            // Require name & mobile for 226
+            $request->validate([
+                'name'   => 'required|string|max:191',
+                'mobile' => 'required|string|max:25',
+            ]);
+
+            // Normalize mobile lightly (keep your preferred format; this adds +91 if 10 digits)
+            $name   = trim((string) $request->input('name'));
+            $mobile = preg_replace('/\s+/', '', (string) $request->input('mobile'));
+            if (preg_match('/^\d{10}$/', $mobile)) {
+                $mobile = '+91' . $mobile;
+            }
+
+            // Load quote items; cannot convert empty quote
+            $quoteItems = OrderItemsModel::where('order_id', $quote->id)->get();
+            if ($quoteItems->isEmpty()) {
+                return response()->json([
+                    'message' => 'Quotation has no items to convert.'
+                ], 422);
+            }
+
+            // Choose counter for the **new live order** (NOT the quotation counter)
+            $newOrderCounterName = ($quote->type === 'gst') ? 'order_gst' : 'order_basic';
+
+            [$clientUser, $newOrder] = DB::transaction(function () use ($name, $mobile, $quote, $quoteItems, $newOrderCounterName) {
+
+                // 1) Find or create a **client user** by mobile
+                /** @var \App\Models\User|null $clientUser */
+                $clientUser = User::where('mobile', $mobile)->first();
+
+                if (!$clientUser) {
+                    // Ensure username uniqueness if you use username-based login
+                    $proposedUsername = $mobile;
+                    if (User::where('username', $proposedUsername)->exists()) {
+                        $proposedUsername = $mobile . '_' . str()->random(4);
+                    }
+
+                    $clientUser = User::create([
+                        'name'     => $name,
+                        'mobile'   => $mobile,
+                        'username' => $proposedUsername,          // if username login is used
+                        'password' => Hash::make(str()->random(12)), // random password (can be reset later)
+                        'role'     => 'user',
+                    ]);
+                } else {
+                    // Optionally update name if missing/mismatched
+                    if (!$clientUser->name || $clientUser->name !== $name) {
+                        $clientUser->name = $name;
+                        $clientUser->save();
+                    }
+                }
+
+                // 2) Reserve a new order_id by locking the counter
+                /** @var \App\Models\CounterModel $counter */
+                $counter = CounterModel::where('name', $newOrderCounterName)->lockForUpdate()->first();
+                if (!$counter) {
+                    throw new \RuntimeException("Counter '{$newOrderCounterName}' not found.");
+                }
+                $newOrderHumanId = $counter->prefix . $counter->counter . $counter->postfix;
+
+                // 3) Create the **new live order** under the client user
+                /** @var \App\Models\OrderModel $newOrder */
+                $newOrder = OrderModel::create([
+                    'user_id'    => $clientUser->id,
+                    'order_id'   => $newOrderHumanId,
+                    'order_date' => Carbon::now(),
+                    'amount'     => $quote->amount,
+                    'type'       => $quote->type === 'gst' ? 'gst' : 'basic',
+                    'remarks'    => trim(($quote->remarks ? $quote->remarks . ' | ' : '') . 'Converted from quotation: ' . $quote->order_id),
+                    'status'     => 'placed',   // your default live status
+                    // carry forward person-of-contact to the order if columns exist
+                    'name'       => $name,
+                    'mobile'     => $mobile,
+                ]);
+
+                // 4) Copy items from quote → new order
+                $bulk = [];
+                foreach ($quoteItems as $item) {
+                    $bulk[] = [
+                        'order_id'     => $newOrder->id,
+                        'product_code' => $item->product_code,
+                        'product_name' => $item->product_name,
+                        'rate'         => $item->rate,
+                        'quantity'     => $item->quantity,
+                        'total'        => $item->total,
+                        'size'         => $item->size,
+                        'type'         => $item->type,
+                        'remarks'      => $item->remarks,
+                        'created_at'   => now(),
+                        'updated_at'   => now(),
+                    ];
+                }
+                OrderItemsModel::insert($bulk);
+
+                // 5) Increment counter (atomic within transaction)
+                $counter->increment('counter');
+
+                // 6) Mark the original quote as completed
+                $quote->status = 'completed';
+                $quote->save();
+
+                return [$clientUser, $newOrder];
+            });
+
+            // Optional: trigger invoice for the new order here, if desired
+            // app(\App\Http\Controllers\InvoiceController::class)->generateorderInvoice($newOrder->id, ['is_edited' => false]);
+
+            return response()->json([
+                'message' => 'Quotation completed: client user created/linked and new order placed.',
+                'quotation' => [
+                    'id'       => $quote->id,
+                    'order_id' => $quote->order_id,
+                    'status'   => $quote->status,
+                ],
+                'client_user' => [
+                    'id'       => $clientUser->id,
+                    'name'     => $clientUser->name,
+                    'mobile'   => $clientUser->mobile,
+                    'username' => $clientUser->username ?? null,
+                ],
+                'new_order' => [
+                    'id'       => $newOrder->id,
+                    'order_id' => $newOrder->order_id,
+                    'type'     => $newOrder->type,
+                    'amount'   => $newOrder->amount,
+                    'status'   => $newOrder->status,
+                ],
+            ], 200);
+        }
+
+        // === DEFAULT BASE FLOW (unchanged for non-226) ===
+        $quote->status = 'completed';
+        $quote->save();
 
         return response()->json([
             'message' => 'Order status updated to completed successfully!',
-            'order' => $order
+            'order'   => $quote
         ], 200);
     }
+
+
 
     public function complete_order_stock(Request $request, $id)
     {
