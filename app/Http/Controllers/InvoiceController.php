@@ -551,7 +551,7 @@ class InvoiceController extends Controller
         $is_split = $options['is_split'] ?? false;
         $old_order_id = $options['old_order_id'] ?? '';
 
-        $order = OrderModel::select('user_id','order_id', 'amount', 'order_date','type', 'remarks')
+        $order = OrderModel::select('user_id','name','mobile','order_id', 'amount', 'order_date','type', 'remarks')
                             ->where('id', $orderId)
                             ->first();
 
