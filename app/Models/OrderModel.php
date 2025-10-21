@@ -13,6 +13,8 @@ class OrderModel extends Model
     protected $fillable = [
         // 'client_id',
         'user_id',
+        'name',
+        'mobile',
         'order_id',
         'order_date',
         'amount',

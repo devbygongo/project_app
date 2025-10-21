@@ -386,6 +386,20 @@ class CreateController extends Controller
             $userId = $request->input('user_id');
         }
 
+        // --- ADD: Special handling for Quotation user (id: 226) ---
+        $isQuotationUser = ($userId == 226);
+
+        // For Quotation user, name & mobile are compulsory
+        if ($isQuotationUser) {
+            $request->validate([
+                'name'   => 'required|string|max:191',
+                'mobile' => 'required|string|max:20', // keep string to allow +91, spaces, etc.
+            ]);
+        }
+
+        $customerName   = $isQuotationUser ? $request->input('name')   : null;
+        $customerMobile = $isQuotationUser ? $request->input('mobile') : null;
+
         $current_user = User::select('type', 'purchase_lock')->where('id', $userId)->first();
         $user_type = $current_user->type;
 
@@ -426,7 +440,12 @@ class CreateController extends Controller
                                         ->where('user_id', $userId)
                                         ->get();
 
-            $get_counter = CounterModel::select('prefix', 'counter', 'postfix')->where('name', 'order_zeroprice')->get();
+            // $get_counter = CounterModel::select('prefix', 'counter', 'postfix')->where('name', 'order_zeroprice')->get();
+            $counterName = $isQuotationUser ? 'quotation' : 'order_zeroprice';
+            $get_counter = CounterModel::select('prefix', 'counter', 'postfix')
+                ->where('name', $counterName)
+                ->get();
+
 
             if ($get_counter) 
             {
@@ -448,6 +467,9 @@ class CreateController extends Controller
                         'amount' => $amount_total,
                         'type' => 'basic',
                         'remarks' => $request->input('remarks'),
+                        // NEW fields for Quotation user
+                        'name'       => $customerName,
+                        'mobile'     => $customerMobile,
                     ]);
                     //order_table_id
 
@@ -468,12 +490,16 @@ class CreateController extends Controller
                     }
                 }
 
+                // if ($create_order != null) {
+                //     $update_cart = CounterModel::where('name', 'order_zeroprice')
+                //     ->update([
+                //         'counter' => (($get_counter[0]->counter)+1),
+                //     ]);
+                // }
+
                 if ($create_order != null) {
-                    $update_cart = CounterModel::where('name', 'order_zeroprice')
-                    ->update([
-                        'counter' => (($get_counter[0]->counter)+1),
-                    ]);
-                }
+                    CounterModel::where('name', $counterName)->increment('counter');
+                }                
 
                 $data = [];
 
@@ -522,7 +548,11 @@ class CreateController extends Controller
                                         ->where('type', 'basic')
                                         ->get();
 
-            $get_counter_basic = CounterModel::select('prefix', 'counter', 'postfix')->where('name', 'order_basic')->get();
+            // $get_counter_basic = CounterModel::select('prefix', 'counter', 'postfix')->where('name', 'order_basic')->get();
+            $counterNameBasic = $isQuotationUser ? 'quotation' : 'order_basic';
+            $get_counter_basic = CounterModel::select('prefix', 'counter', 'postfix')
+                ->where('name', $counterNameBasic)
+                ->get();
 
             if ($get_counter_basic) 
             {
@@ -544,6 +574,9 @@ class CreateController extends Controller
                         'amount' => $basic_amount_total,
                         'type' => 'basic',
                         'remarks' => $request->input('remarks'),
+                        // NEW fields for Quotation user
+                        'name'       => $customerName,
+                        'mobile'     => $customerMobile,
                     ]);
                     //order_table_id
 
@@ -571,8 +604,13 @@ class CreateController extends Controller
                                         ->where('type', 'gst')
                                         ->get();
 
-            $get_counter_gst = CounterModel::select('prefix', 'counter', 'postfix')->where('name', 'order_gst')->get();
+            // $get_counter_gst = CounterModel::select('prefix', 'counter', 'postfix')->where('name', 'order_gst')->get();
+            $counterNameGst = $isQuotationUser ? 'quotation' : 'order_gst';
+            $get_counter_gst = CounterModel::select('prefix', 'counter', 'postfix')
+                ->where('name', $counterNameGst)
+                ->get();
 
+                
             if ($get_counter_gst) 
             {
                 $get_order_id = $get_counter_gst[0]->prefix.$get_counter_gst[0]->counter.$get_counter_gst[0]->postfix;
@@ -592,6 +630,9 @@ class CreateController extends Controller
                         'amount' => $gst_amount_total,
                         'type' => 'gst',
                         'remarks' => $request->input('remarks'),
+                        // NEW fields for Quotation user
+                        'name'       => $customerName,
+                        'mobile'     => $customerMobile,
                     ]);
 
                     //order_table_id
@@ -613,20 +654,28 @@ class CreateController extends Controller
                 }
             }
 
+            // if ($create_order_basic != null) {
+            //     $update_cart = CounterModel::where('name', 'order_basic')
+            //     ->update([
+            //         'counter' => (($get_counter_basic[0]->counter)+1),
+            //     ]);
+            // }
             if ($create_order_basic != null) {
-                $update_cart = CounterModel::where('name', 'order_basic')
-                ->update([
-                    'counter' => (($get_counter_basic[0]->counter)+1),
-                ]);
+                CounterModel::where('name', $counterNameBasic)->increment('counter');
             }
+            
 
-            if($create_order_gst != null)
-            {
-                $update_cart = CounterModel::where('name', 'order_gst')
-                                            ->update([
-                                            'counter' => (($get_counter_gst[0]->counter)+1),
-                ]);
+            // if($create_order_gst != null)
+            // {
+            //     $update_cart = CounterModel::where('name', 'order_gst')
+            //                                 ->update([
+            //                                 'counter' => (($get_counter_gst[0]->counter)+1),
+            //     ]);
+            // }
+            if ($create_order_gst != null) {
+                CounterModel::where('name', $counterNameGst)->increment('counter');
             }
+            
 
             $data = [];
 
