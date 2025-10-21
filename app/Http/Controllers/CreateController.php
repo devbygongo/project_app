@@ -520,7 +520,7 @@ class CreateController extends Controller
                     foreach ($data as &$order) {
                         // Unset unwanted fields
     
-                        $order->pdf = $generate_order_zp->new_generateorderInvoiceZP($create_order->id);
+                        $order->pdf = $generate_order_zp->generateorderInvoiceZP($create_order->id);
                         unset($order->updated_at, $order->created_at, $order->id);
     
                     }
