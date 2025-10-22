@@ -104,7 +104,7 @@ class CreateController extends Controller
                 // Check if the response has an error or was successful
                 if (isset($responseArray['error'])) 
                 {
-                    echo "Failed to send message to Whatsapp!";
+                    //echo "Failed to send message to Whatsapp!";
                 } 
                 
             }
