@@ -10,6 +10,7 @@ use App\Models\OrderItemsModel;
 use App\Models\InvoiceModel;
 use App\Models\InvoiceItemsModel;
 use App\Models\CategoryModel;
+use App\Models\ProductModel;
 use Mpdf\Mpdf;
 // use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Facades\Auth;
