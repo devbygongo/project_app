@@ -1130,7 +1130,7 @@ class InvoiceController extends Controller
         }
 
         // Map price type to the corresponding column
-        $price_column = 'outstation';
+        $price_column = 'outstation_gst';
 
         // Build the query
         $query = ProductModel::select('product_name','product_code', 'brand', DB::raw("$price_column as price"), 'product_image')
