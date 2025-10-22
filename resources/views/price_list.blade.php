@@ -89,7 +89,7 @@
 					<td class="center-text">{{ $index + 1 }}</td>
 					<td class="center-text"><img width="80px" src="{{ public_path($item->product_image)}}" alt="{{ $item->print_name }}"></td>
 					<td class="center-text">{{ $item->product_code }}</td>
-					<td class="center-text">{{ $item->print_name }}</td>
+					<td class="center-text">{{ $item->product_name }}</td>
 					<td class="center-text">{{ $item->price }}</td>
 				</tr>
             @endforeach

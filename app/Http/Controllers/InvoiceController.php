@@ -1096,114 +1096,144 @@ class InvoiceController extends Controller
 
     public function price_list(Request $request)
     {
-        // Accept parameters
-        $category = $request->input('category');
-        $search_text = $request->input('search_text');
-        $type = $request->input('type');
+        // Inputs
+        $categoryParam = trim((string) $request->input('category', '')); // e.g., "3,7,12"
+        $search_text   = $request->input('search_text');
+        $type          = $request->input('type');
 
-        // Fetch the category model using the provided ID
-        $categoryArr = CategoryModel::find($category);
-        $category_id = '';
+        // Resolve category names from comma-separated IDs (also supports names if provided)
+        $categoryNames = collect();
+        if ($categoryParam !== '') {
+            $tokens = collect(explode(',', $categoryParam))
+                ->map(fn ($v) => trim($v))
+                ->filter();
 
-        if ($categoryArr) {
-            // Dynamically determine the category_id based on the logic
-            $category_id = $categoryArr->category_id;
-            // Proceed with $category_id
-        } 
+            $ids   = $tokens->filter(fn ($v) => ctype_digit($v))->map(fn ($v) => (int) $v)->values();
+            $names = $tokens->filter(fn ($v) => !ctype_digit($v))->values(); // if caller passed names
 
-        // Get the authenticated user
-        $get_user = Auth::User();
+            if ($ids->isNotEmpty()) {
+                $categoryNames = $categoryNames->merge(
+                    CategoryModel::whereIn('id', $ids)->pluck('name')
+                );
+            }
+            if ($names->isNotEmpty()) {
+                // Normalize to the canonical names that exist in categories table
+                $categoryNames = $categoryNames->merge(
+                    CategoryModel::whereIn('name', $names)->pluck('name')
+                );
+            }
 
-        // Determine price type and user name based on role
-        if ($get_user->role == 'user') {
-            $user_price = $get_user->price_type;
+            $categoryNames = $categoryNames->unique()->values();
+
+            // If user asked for categories but none resolved → no results
+            if ($categoryNames->isEmpty()) {
+                return response()->json(['message' => 'No products found.'], 200);
+            }
+        }
+
+        // Auth user
+        $get_user = Auth::user();
+
+        // Determine display name (kept same logic)
+        if ($get_user && $get_user->role === 'user') {
             $user_name = $get_user->name;
         } else {
             $request->validate([
                 'id' => 'required|integer|exists:users,id'
             ]);
-
-            $id = $request->input('id');
-            $get_user_price = User::select('name')->where('id', $id)->first();
-
-            $user_name = $get_user_price->name;
+            $id        = (int) $request->input('id');
+            $user_name = User::where('id', $id)->value('name');
         }
 
-        // Map price type to the corresponding column
+        // Price column (kept as your original default)
         $price_column = 'outstation_gst';
 
-        // Build the query
-        $query = ProductModel::select('product_name','product_code', 'brand', DB::raw("$price_column as price"), 'product_image')
-        ->where('product_image', '!=', '')->orderBy('id');
+        // Base query
+        $query = ProductModel::select(
+                'product_name',
+                'product_code',
+                'brand',
+                DB::raw("$price_column as price"),
+                'product_image'
+            )
+            ->whereNotNull('product_image')
+            ->where('product_image', '!=', '')
+            ->orderBy('id');
 
-
-        if ($category) {
-            $query->where('category', $category_id);
+        // Category filter (by names, since products.category holds the name)
+        if ($categoryNames->isNotEmpty()) {
+            $query->whereIn('category', $categoryNames->all());
         }
 
-        if ($search_text) {
-            $searchWords = preg_split('/[\s\.\-]+/', strtolower($search_text)); // Split by space, dot, dash
-
+        // Search filter
+        if (!empty($search_text)) {
+            $searchWords = preg_split('/[\s\.\-]+/', mb_strtolower($search_text)) ?: [];
             $query->where(function ($q) use ($searchWords) {
                 foreach ($searchWords as $word) {
                     $q->where(function ($subQ) use ($word) {
-                        $subQ->orWhereRaw("LOWER(product_name) LIKE ?", ["%$word%"])
-                            ->orWhereRaw("LOWER(product_code) LIKE ?", ["%$word%"]);
+                        $subQ->orWhereRaw('LOWER(product_name) LIKE ?', ["%{$word}%"])
+                            ->orWhereRaw('LOWER(product_code) LIKE ?', ["%{$word}%"]);
                     });
                 }
             });
         }
 
-
-        // Limit the results to 200
+        // Fetch (cap results)
         $get_product_details = $query->take(1000)->get();
-		//dd($get_product_details[0]->product_image);
 
         if ($get_product_details->isEmpty()) {
             return response()->json(['message' => 'No products found.'], 200);
         }
 
-        if($get_user->role == 'user') {
-            // Generate HTML content for the PDF
+        // Choose view (with/without price)
+        if ($get_user && $get_user->role === 'user') {
             $html = view('price_list_user', compact('get_product_details', 'user_name'))->render();
-        }else{
-            if($type === 'without_price')
-            {
+        } else {
+            if ($type === 'without_price') {
                 $html = view('price_list_user', compact('get_product_details', 'user_name'))->render();
             } else {
                 $html = view('price_list', compact('get_product_details', 'user_name'))->render();
             }
         }
 
-        // Create an instance of Mpdf
-        $mpdf = new Mpdf();
+        // Generate PDF
+        $mpdf = new \Mpdf\Mpdf();
+        $mpdf->WriteHTML($html);
 
-        // Write the HTML content to the PDF
-        $mpdf->writeHTML($html);
-
-        // Define the file path and name
+        // Storage pathing
         $publicPath = 'uploads/price_list/';
-        $timestamp = now()->format('Ymd_His'); // Generate a timestamp
-        $fileName = 'price_list_' . $timestamp . '.pdf'; // Append timestamp to the file name
-        if($categoryArr){
-            $fileName = $categoryArr->name . '.pdf';
-        }
-        if($search_text != ''){
-            $fileName = $search_text . '.pdf';
-        }
-        $filePath = storage_path('app/public/' . $publicPath . $fileName);
+        $timestamp  = now()->format('Ymd_His');
 
-        // Create the directory if it doesn't exist
-        if (!File::isDirectory($storage_path = storage_path('app/public/' . $publicPath))) {
-            File::makeDirectory($storage_path, 0755, true);
+        // Build filename:
+        // - If search text present → use that
+        // - Else if categories present → join their names (limit length)
+        // - Else default timestamped
+        $fileName = "price_list_{$timestamp}.pdf";
+
+        if (!empty($search_text)) {
+            $fileName = preg_replace('/[^\w\-]+/u', '_', trim($search_text)) . '.pdf';
+        } elseif ($categoryNames->isNotEmpty()) {
+            $joined = $categoryNames->take(5)->implode('_'); // avoid extremely long file names
+            if ($categoryNames->count() > 5) {
+                $joined .= '_more';
+            }
+            $fileName = preg_replace('/[^\w\-]+/u', '_', $joined) . '.pdf';
         }
 
-        // Save the PDF to the file system
+        $dirPath  = storage_path('app/public/' . $publicPath);
+        $filePath = $dirPath . $fileName;
+
+        if (!\Illuminate\Support\Facades\File::isDirectory($dirPath)) {
+            \Illuminate\Support\Facades\File::makeDirectory($dirPath, 0755, true);
+        }
+
+        // Save PDF
         $mpdf->Output($filePath, 'F');
 
-        // Generate the file URL
+        // Public URL
         $fileUrl = asset('storage/' . $publicPath . $fileName);
 
         return $fileUrl;
     }
+
 }
