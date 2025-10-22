@@ -1091,4 +1091,117 @@ class InvoiceController extends Controller
 
         return $fileUrl;
     }
+
+    public function price_list(Request $request)
+    {
+        // Accept parameters
+        $category = $request->input('category');
+        $search_text = $request->input('search_text');
+        $type = $request->input('type');
+
+        // Fetch the category model using the provided ID
+        $categoryArr = CategoryModel::find($category);
+        $category_id = '';
+
+        if ($categoryArr) {
+            // Dynamically determine the category_id based on the logic
+            $category_id = $categoryArr->category_id;
+            // Proceed with $category_id
+        } 
+
+        // Get the authenticated user
+        $get_user = Auth::User();
+
+        // Determine price type and user name based on role
+        if ($get_user->role == 'user') {
+            $user_price = $get_user->price_type;
+            $user_name = $get_user->name;
+        } else {
+            $request->validate([
+                'id' => 'required|integer|exists:users,id'
+            ]);
+
+            $id = $request->input('id');
+            $get_user_price = User::select('name')->where('id', $id)->first();
+
+            $user_name = $get_user_price->name;
+        }
+
+        // Map price type to the corresponding column
+        $price_column = 'outstation';
+
+        // Build the query
+        $query = ProductModel::select('product_name','product_code', 'brand', DB::raw("$price_column as price"), 'product_image')
+        ->where('product_image', '!=', '')->orderBy('sn');
+
+
+        if ($category) {
+            $query->where('category', $category_id);
+        }
+
+        if ($search_text) {
+            $searchWords = preg_split('/[\s\.\-]+/', strtolower($search_text)); // Split by space, dot, dash
+
+            $query->where(function ($q) use ($searchWords) {
+                foreach ($searchWords as $word) {
+                    $q->where(function ($subQ) use ($word) {
+                        $subQ->orWhereRaw("LOWER(product_name) LIKE ?", ["%$word%"])
+                            ->orWhereRaw("LOWER(product_code) LIKE ?", ["%$word%"]);
+                    });
+                }
+            });
+        }
+
+
+        // Limit the results to 200
+        $get_product_details = $query->take(1000)->get();
+		//dd($get_product_details[0]->product_image);
+
+        if ($get_product_details->isEmpty()) {
+            return response()->json(['message' => 'No products found.'], 200);
+        }
+
+        if($get_user->role == 'user') {
+            // Generate HTML content for the PDF
+            $html = view('price_list_user', compact('get_product_details', 'user_name'))->render();
+        }else{
+            if($type === 'without_price')
+            {
+                $html = view('price_list_user', compact('get_product_details', 'user_name'))->render();
+            } else {
+                $html = view('price_list', compact('get_product_details', 'user_name'))->render();
+            }
+        }
+
+        // Create an instance of Mpdf
+        $mpdf = new Mpdf();
+
+        // Write the HTML content to the PDF
+        $mpdf->writeHTML($html);
+
+        // Define the file path and name
+        $publicPath = 'uploads/price_list/';
+        $timestamp = now()->format('Ymd_His'); // Generate a timestamp
+        $fileName = 'price_list_' . $timestamp . '.pdf'; // Append timestamp to the file name
+        if($categoryArr){
+            $fileName = $categoryArr->name . '.pdf';
+        }
+        if($search_text != ''){
+            $fileName = $search_text . '.pdf';
+        }
+        $filePath = storage_path('app/public/' . $publicPath . $fileName);
+
+        // Create the directory if it doesn't exist
+        if (!File::isDirectory($storage_path = storage_path('app/public/' . $publicPath))) {
+            File::makeDirectory($storage_path, 0755, true);
+        }
+
+        // Save the PDF to the file system
+        $mpdf->Output($filePath, 'F');
+
+        // Generate the file URL
+        $fileUrl = asset('storage/' . $publicPath . $fileName);
+
+        return $fileUrl;
+    }
 }

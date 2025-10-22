@@ -165,6 +165,8 @@ Route::prefix('admin')->middleware(['auth:sanctum', GetUserRole::class . ':admin
 
     Route::get('/generate_stock_order_invoice/{orderId}', [InvoiceControllerZP::class, 'generatestockorderInvoice']);
 
+    Route::post('/pricelist', [InvoiceController::class, 'price_list']);
+    
     Route::prefix('special_rate')->group(function () {
         Route::post('/create', [CreateController::class, 'createSpecialRate']);
         Route::get('/{id?}', [ViewController::class, 'fetchSpecialRate']);
