@@ -1134,7 +1134,7 @@ class InvoiceController extends Controller
 
         // Build the query
         $query = ProductModel::select('product_name','product_code', 'brand', DB::raw("$price_column as price"), 'product_image')
-        ->where('product_image', '!=', '')->orderBy('sn');
+        ->where('product_image', '!=', '')->orderBy('id');
 
 
         if ($category) {
