@@ -500,8 +500,12 @@ class ViewController extends Controller
 
         // Apply filters
         if ($search) {
-            $query->where('product_name', 'like', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->where('product_name', 'like', "%{$search}%")
+                  ->orWhere('product_code', 'like', "%{$search}%");
+            });
         }
+        
         if ($category) {
             $query->where('category', $category);
         }
