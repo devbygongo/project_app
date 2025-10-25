@@ -1844,6 +1844,7 @@ class ViewController extends Controller
                         if ($linkedOrder) {
                             $linkedOrderId = $linkedOrder->order_id ?? 'N/A';
                             $linkedOrderUser = $linkedOrder->user->name ?? 'Unknown';
+                            $clientName = $linkedOrder->user->name ?? 'Unknown'; // Assuming client name is in the 'client' relation
                             $godownName .= "\n({$linkedOrderUser})";
                         }
                     }
@@ -1856,6 +1857,8 @@ class ViewController extends Controller
                         'quantity' => $item->quantity,
                         'type' => $item->type,
                         'user' => $order->user->name ?? 'Unknown',
+                        'order_no' => $linkedOrderId, // Add order number
+                        'client_name' => $clientName, // Add client name
                     ];
                 });
             });
