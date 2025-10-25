@@ -2134,13 +2134,13 @@ class ViewController extends Controller
         try {
             // If no user_id provided, fetch all users' special rates
             if ($id === null) {
-                $rates = SpecialRateModel::with(['user:id,name,mobile,city,type', 'stockProduct:id,product_code,name'])
+                $rates = SpecialRateModel::with(['user:id,name,mobile,city,type'])
                     ->select('id', 'user_id', 'product_code', 'rate')
                     ->orderBy('id', 'desc')
                     ->get();
             } else {
                 // Fetch special rates for the given user_id
-                $rates = SpecialRateModel::with(['user:id,name,mobile,city,type', 'stockProduct:id,product_code,name'])
+                $rates = SpecialRateModel::with(['user:id,name,mobile,city,type'])
                     ->select('id', 'user_id', 'product_code', 'rate')
                     ->where('user_id', $id)
                     ->orderBy('id', 'desc')
@@ -2166,10 +2166,13 @@ class ViewController extends Controller
                     'city'    => (string)($user->city ?? ''),
                     'type'    => (string)($user->type ?? ''),
                     'special_rate' => $userRates->map(function ($r) {
+                        // Fetch product details by product_code
+                        $product = ProductModel::where('product_code', $r->product_code)->first();
+
                         return [
                             'id'            => (string)$r->id,
                             'product_code'  => (string)$r->product_code,
-                            'product_name'  => (string)($r->stockProduct->name ?? 'Unknown'), // Fetch product name
+                            'product_name'  => (string)($product->product_name ?? 'Unknown'), // Fetch product name
                             'rate'          => (string)$r->rate,
                             'original_rate' => '0',
                         ];
@@ -2191,6 +2194,7 @@ class ViewController extends Controller
             ], 500);
         }
     }
+
 
 
 
