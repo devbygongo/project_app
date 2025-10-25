@@ -2132,22 +2132,22 @@ class ViewController extends Controller
     public function fetchSpecialRate($id = null)
     {
         try {
-            // If no user_id provided -> return empty array
+            // If no user_id provided, fetch all users' special rates
             if ($id === null) {
-                return response()->json([
-                    'success' => true,
-                    'data'    => [],
-                ], 200);
+                $rates = SpecialRateModel::with(['user:id,name,mobile,city,type'])
+                    ->select('id', 'user_id', 'product_code', 'rate')
+                    ->orderBy('id', 'desc')
+                    ->get();
+            } else {
+                // Fetch special rates for the given user_id
+                $rates = SpecialRateModel::with(['user:id,name,mobile,city,type'])
+                    ->select('id', 'user_id', 'product_code', 'rate')
+                    ->where('user_id', $id)
+                    ->orderBy('id', 'desc')
+                    ->get();
             }
 
-            // Fetch all special rates for this user_id
-            $rates = SpecialRateModel::with(['user:id,name,mobile,city,type'])
-                ->select('id', 'user_id', 'product_code', 'rate')
-                ->where('user_id', $id)
-                ->orderBy('id', 'desc')
-                ->get();
-
-            // If no rows for this user_id -> return empty array
+            // If no rates are found, return an empty array
             if ($rates->isEmpty()) {
                 return response()->json([
                     'success' => true,
@@ -2155,24 +2155,26 @@ class ViewController extends Controller
                 ], 200);
             }
 
-            // Build single user block
-            $user = $rates->first()->user; // eager loaded
+            // Build the user block
+            $payload = $rates->groupBy('user_id')->map(function ($userRates) {
+                $user = $userRates->first()->user; // eager load the user details
 
-            $payload = [
-                'user_id' => (string)($user->id ?? $id),
-                'name'    => (string)($user->name ?? ''),
-                'mobile'  => (string)($user->mobile ?? ''),
-                'city'    => (string)($user->city ?? ''),
-                'type'    => (string)($user->type ?? ''),
-                'special_rate' => $rates->map(function ($r) {
-                    return [
-                        'id'            => (string)$r->id,
-                        'product_code'  => (string)$r->product_code,
-                        'rate'          => (string)$r->rate,
-                        'original_rate' => '0',
-                    ];
-                })->values(),
-            ];
+                return [
+                    'user_id' => (string)($user->id ?? ''),
+                    'name'    => (string)($user->name ?? ''),
+                    'mobile'  => (string)($user->mobile ?? ''),
+                    'city'    => (string)($user->city ?? ''),
+                    'type'    => (string)($user->type ?? ''),
+                    'special_rate' => $userRates->map(function ($r) {
+                        return [
+                            'id'            => (string)$r->id,
+                            'product_code'  => (string)$r->product_code,
+                            'rate'          => (string)$r->rate,
+                            'original_rate' => '0',
+                        ];
+                    })->values(),
+                ];
+            })->values();
 
             return response()->json([
                 'success' => true,
@@ -2188,6 +2190,7 @@ class ViewController extends Controller
             ], 500);
         }
     }
+
 
     /**
      * FETCH: all or by id (route param).
