@@ -2193,9 +2193,9 @@ class ViewController extends Controller
                         $original_rate = 0;
 
                         if ($user_type == 'special') {
-                            $original_rate = $product->special_basic ?? 0;
+                            $original_rate = $product->special_gst ?? 0;
                         } elseif ($user_type == 'outstation') {
-                            $original_rate = $product->outstation_basic ?? 0;
+                            $original_rate = $product->outstation_gst ?? 0;
                         } elseif ($user_type == 'zeroprice') {
                             $original_rate = 0;
                         } elseif ($user_type == 'guest') {
@@ -2204,7 +2204,7 @@ class ViewController extends Controller
                             $original_rate = $product->aakhambati_gst ?? 0;
                         } else {
                             // Default for other users (if needed)
-                            $original_rate = $product->basic ?? 0;
+                            $original_rate = $product->gst ?? 0;
                         }
 
                         return [
