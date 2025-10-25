@@ -2171,8 +2171,12 @@ class ViewController extends Controller
                 ], 200);
             }
 
+            // Get user type for calculating the original rate
+            $user = $rates->first()->user; // Assuming user info is already loaded
+            $user_type = $user->type;
+
             // Build the user block
-            $payload = $rates->groupBy('user_id')->map(function ($userRates) {
+            $payload = $rates->groupBy('user_id')->map(function ($userRates) use ($user_type) {
                 $user = $userRates->first()->user; // eager load the user details
 
                 return [
@@ -2181,16 +2185,34 @@ class ViewController extends Controller
                     'mobile'  => (string)($user->mobile ?? ''),
                     'city'    => (string)($user->city ?? ''),
                     'type'    => (string)($user->type ?? ''),
-                    'special_rate' => $userRates->map(function ($r) {
+                    'special_rate' => $userRates->map(function ($r) use ($user_type) {
                         // Fetch product details by product_code
                         $product = ProductModel::where('product_code', $r->product_code)->first();
+
+                        // Set the original rate based on user type
+                        $original_rate = 0;
+
+                        if ($user_type == 'special') {
+                            $original_rate = $product->special_basic ?? 0;
+                        } elseif ($user_type == 'outstation') {
+                            $original_rate = $product->outstation_basic ?? 0;
+                        } elseif ($user_type == 'zeroprice') {
+                            $original_rate = 0;
+                        } elseif ($user_type == 'guest') {
+                            $original_rate = $product->guest_price ?? 0;
+                        } elseif ($user_type == 'aakhambati') {
+                            $original_rate = $product->aakhambati_gst ?? 0;
+                        } else {
+                            // Default for other users (if needed)
+                            $original_rate = $product->basic ?? 0;
+                        }
 
                         return [
                             'id'            => (string)$r->id,
                             'product_code'  => (string)$r->product_code,
                             'product_name'  => (string)($product->product_name ?? 'Unknown'), // Fetch product name
                             'rate'          => (string)$r->rate,
-                            'original_rate' => '0',
+                            'original_rate' => (string)$original_rate,
                         ];
                     })->values(),
                 ];
@@ -2210,7 +2232,6 @@ class ViewController extends Controller
             ], 500);
         }
     }
-
 
 
 
