@@ -403,8 +403,8 @@ class CreateController extends Controller
         $current_user = User::select('type', 'purchase_lock')->where('id', $userId)->first();
         $user_type = $current_user->type;
 
-        if($userId == 181)
-        {
+        // if($userId == 181)
+        // {
             if($current_user->purchase_lock == 1)
             {
                 return response()->json([
@@ -431,7 +431,7 @@ class CreateController extends Controller
                     'data' => 'locked'
                 ], 200);
             }
-        }
+        // }
 
         if($user_type == 'zeroprice')
         {
