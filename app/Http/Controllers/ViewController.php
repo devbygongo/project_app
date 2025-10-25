@@ -518,7 +518,7 @@ class ViewController extends Controller
                                 ->get();
 
         // Process products for language and cart details
-        $processed_prd_lang_rec = $get_products->map(function ($prd_rec) use ($lang, $user_id) {
+        $processed_prd_lang_rec = $get_products->map(function ($prd_rec) use ($lang, $user_id, $dropdown) {
             
             // Set product name based on the selected language
             $product_name = $prd_rec->product_name;
