@@ -1836,6 +1836,12 @@ class ViewController extends Controller
                     // Default godown name
                     $godownName = $item->godown->name ?? 'Unknown';
 
+                    // Fetch linked order details (if exists)
+                    $linkedOrder = null;
+                    $linkedOrderId = null;
+                    $linkedOrderUser = null;
+                    $clientName = null;
+
                     // If linked order exists, fetch its details
                     if (!empty($order->t_order_id)) {
                         $linkedOrder = \App\Models\OrderModel::with('user')
