@@ -1962,6 +1962,7 @@ class UpdateController extends Controller
         }
     }
 
+
         /**
      * UPDATE (column-wise)
      * Only updates fields that are present in the request.
@@ -1980,41 +1981,15 @@ class UpdateController extends Controller
                 ], 404);
             }
 
-            // Column-wise validation rules (all optional)
+            // Column-wise validation rules (only rate is required)
             $validated = $request->validate([
-                'user_id'      => 'sometimes|integer',
-                'product_code' => 'sometimes|string',
-                'rate'         => 'sometimes|numeric|min:0',
+                'rate' => 'required|numeric|min:0',  // Ensure rate is provided and valid
             ]);
 
-            // Build an update payload (only provided keys)
+            // Only update rate if provided
             $payload = [];
 
-            // If user_id provided, ensure user exists
-            if ($request->has('user_id')) {
-                $user = User::find($validated['user_id'] ?? null);
-                if (!$user) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Invalid user_id provided.'
-                    ], 400);
-                }
-                $payload['user_id'] = (int)$validated['user_id'];
-            }
-
-            // If product_code provided, ensure product exists
-            if ($request->has('product_code')) {
-                $product = ProductModel::where('product_code', $validated['product_code'] ?? '')->first();
-                if (!$product) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Invalid product_code provided.'
-                    ], 400);
-                }
-                $payload['product_code'] = (string)$validated['product_code'];
-            }
-
-            // If rate provided
+            // If rate provided, update it
             if ($request->has('rate')) {
                 $payload['rate'] = (float)$validated['rate'];
             }
@@ -2028,29 +2003,13 @@ class UpdateController extends Controller
                 ], 200);
             }
 
-            // Pre-check composite uniqueness (user_id, product_code)
-            $userId       = $payload['user_id']      ?? $special->user_id;
-            $productCode  = $payload['product_code'] ?? $special->product_code;
-
-            $duplicate = SpecialRateModel::where('user_id', $userId)
-                ->where('product_code', $productCode)
-                ->where('id', '!=', $special->id)
-                ->exists();
-
-            if ($duplicate) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'A special rate for this user and product_code already exists.',
-                ], 409);
-            }
-
-            // Update
+            // Update the special rate record with the new rate
             $special->fill($payload)->save();
 
             // Eager refresh (with user block for response shape)
             $special->load('user:id,name,mobile,city,type');
 
-            // Response (matches your earlier shape when fetching single record)
+            // Prepare the response shape
             $resp = [
                 'user_id' => (string)($special->user->id ?? $special->user_id),
                 'name'    => (string)($special->user->name ?? ''),
@@ -2061,7 +2020,7 @@ class UpdateController extends Controller
                     'id'            => (string)$special->id,
                     'product_code'  => (string)$special->product_code,
                     'rate'          => (string)$special->rate,
-                    'original_rate' => '0',
+                    'original_rate' => '0', // Placeholder for original_rate
                 ]],
             ];
 
@@ -2095,6 +2054,7 @@ class UpdateController extends Controller
             ], 500);
         }
     }
+
 
     /**
      * UPDATE (column-wise).
