@@ -351,6 +351,8 @@ class ViewController extends Controller
         $category = $request->input('category', null);
         $subCategory = $request->input('sub_category', null);
 
+        $dropdown = $request->input('dropdown', false);
+
         $get_user = Auth::User();
 
         if ($get_user->role == 'user') {
@@ -555,27 +557,37 @@ class ViewController extends Controller
             ->exists();
 
             // Return processed product data
-            return [
-                // 'SKU' => $prd_rec->SKU,
-                'product_code' => $prd_rec->product_code,
-                'product_name' => $product_name,
-                'category' => $prd_rec->category,
-                'sub_category' => $prd_rec->sub_category,
-                'product_image' => $prd_rec->product_image,
-                'extra_images' => $prd_rec->extra_images,
-                'size' => $prd_rec->size,
-                'basic' => $prd_rec->basic,
-                'gst' => $prd_rec->gst,
-                'out_of_stock' => $prd_rec->out_of_stock,
-                'yet_to_launch' => $prd_rec->yet_to_launch,
-                'video_link' => $prd_rec->video_link ?? null,
-                'in_cart' => $cart_item ? true : false,
-                'has_spares' => $has_spares,
-                'cart_quantity' => $cart_item->quantity ?? null,
-                'cart_type' => $cart_item->type ?? null,
-                'cart_remarks' => $cart_item->remarks ?? null,
-                
-            ];
+            if($dropdown)
+            {
+                return [
+                    // 'SKU' => $prd_rec->SKU,
+                    'product_code' => $prd_rec->product_code,
+                    'product_name' => $product_name,
+                    'gst' => $prd_rec->gst,
+                ];
+            }else{
+                return [
+                    // 'SKU' => $prd_rec->SKU,
+                    'product_code' => $prd_rec->product_code,
+                    'product_name' => $product_name,
+                    'category' => $prd_rec->category,
+                    'sub_category' => $prd_rec->sub_category,
+                    'product_image' => $prd_rec->product_image,
+                    'extra_images' => $prd_rec->extra_images,
+                    'size' => $prd_rec->size,
+                    'basic' => $prd_rec->basic,
+                    'gst' => $prd_rec->gst,
+                    'out_of_stock' => $prd_rec->out_of_stock,
+                    'yet_to_launch' => $prd_rec->yet_to_launch,
+                    'video_link' => $prd_rec->video_link ?? null,
+                    'in_cart' => $cart_item ? true : false,
+                    'has_spares' => $has_spares,
+                    'cart_quantity' => $cart_item->quantity ?? null,
+                    'cart_type' => $cart_item->type ?? null,
+                    'cart_remarks' => $cart_item->remarks ?? null,
+                    
+                ];
+            }
         });
 
         $show_basic = false;
