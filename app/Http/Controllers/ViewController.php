@@ -521,8 +521,17 @@ class ViewController extends Controller
                                 ->take($limit)
                                 ->get();
 
+        // Collect product codes from the current page
+        $productCodes = $get_products->pluck('product_code')->all();
+
+        // Preload special rates for this user for these products (product_code => rate)
+        $specialRates = SpecialRateModel::where('user_id', $user_id)
+            ->whereIn('product_code', $productCodes)
+            ->pluck('rate', 'product_code');
+
+
         // Process products for language and cart details
-        $processed_prd_lang_rec = $get_products->map(function ($prd_rec) use ($lang, $user_id, $dropdown) {
+        $processed_prd_lang_rec = $get_products->map(function ($prd_rec) use ($lang, $user_id, $dropdown, $specialRates) {
             
             // Set product name based on the selected language
             $product_name = $prd_rec->product_name;
@@ -544,6 +553,12 @@ class ViewController extends Controller
                     $prd_rec->video_link = basename(parse_url($prd_rec->video_link, PHP_URL_PATH));
                 }
             }
+
+            // If a special rate exists for this product for this client, override GST with that rate
+            if (isset($specialRates[$prd_rec->product_code])) {
+                $prd_rec->gst = (float) $specialRates[$prd_rec->product_code];
+            }
+
 
             // Parse extra_images from the database column
             $prd_rec->extra_images = !empty($prd_rec->extra_images)
