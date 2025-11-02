@@ -1974,7 +1974,7 @@ class ViewController extends Controller
                         }
 
                         // 👉 If client_name is empty, fall back to stock order remarks
-                        if (empty($clientName)) {
+                        if (is_null($clientName) || trim($clientName) === '') {
                             $clientName = $order->remarks ?? 'Unknown';
                         }
 
