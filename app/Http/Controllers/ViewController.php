@@ -1827,185 +1827,185 @@ class ViewController extends Controller
     //     }
     // }
 
-    // public function product_stock_details(Request $request)
-    // {
-    //     $productCodes = $request->input('product_code') ? explode(',', $request->input('product_code')) : null;
-    //     $godownId = $request->input('godown_id');
-    //     $userId = $request->input('user_id');
-    //     $startDate = $request->input('start_date');
-    //     $endDate = $request->input('end_date');
-
-    //     // Default date range: last 3 months
-    //     $startDate = $startDate ?? now()->subMonths(3)->startOfDay();
-    //     $endDate = $endDate ?? now()->endOfDay();
-
-    //     try {
-    //         // Fetch stock orders with related models
-    //         $stockOrders = StockOrdersModel::with([
-    //             'user',
-    //             'items.godown',
-    //             'items.stock_product',
-    //         ])
-    //         ->when($userId, fn($q) => $q->where('user_id', $userId))
-    //         ->when($startDate && $endDate, fn($q) => $q->whereBetween('order_date', [$startDate, $endDate]))
-    //         ->get();
-
-    //         if ($stockOrders->isEmpty()) {
-    //             return response()->json([
-    //                 'message' => 'No stock orders found for the given criteria.',
-    //                 'data' => [],
-    //                 'status' => 'false',
-    //             ], 404);
-    //         }
-
-    //         $result = $stockOrders->flatMap(function ($order) use ($productCodes, $godownId) {
-    //             return $order->items->filter(function ($item) use ($productCodes, $godownId) {
-    //                 return (!$productCodes || in_array($item->product_code, $productCodes)) &&
-    //                     (!$godownId || $item->godown_id == $godownId);
-    //             })->map(function ($item) use ($order) {
-
-    //                 // Default godown name
-    //                 $godownName = $item->godown->name ?? 'Unknown';
-
-    //                 // Fetch linked order details (if exists)
-    //                 $linkedOrder = null;
-    //                 $linkedOrderId = null;
-    //                 $linkedOrderUser = null;
-    //                 $clientName = null;
-
-    //                 // If linked order exists, fetch its details
-    //                 if (!empty($order->t_order_id)) {
-    //                     $linkedOrder = \App\Models\OrderModel::with('user')
-    //                         ->find($order->t_order_id);
-
-    //                     if ($linkedOrder) {
-    //                         $linkedOrderId = $linkedOrder->order_id ?? 'N/A';
-    //                         $linkedOrderUser = $linkedOrder->user->name ?? 'Unknown';
-    //                         $clientName = $linkedOrder->user->name ?? 'Unknown'; // Assuming client name is in the 'client' relation
-    //                         $godownName .= "\n({$linkedOrderUser})";
-    //                     }
-    //                 }
-
-    //                 return [
-    //                     'date' => $order->created_at->format('Y-m-d'),
-    //                     'product_code' => $item->product_code,
-    //                     'product_name' => $item->product_name ?? 'Unknown',
-    //                     'godown_name' => $godownName,
-    //                     'quantity' => $item->quantity,
-    //                     'type' => $item->type,
-    //                     'user' => $order->user->name ?? 'Unknown',
-    //                     'order_no' => $linkedOrderId, // Add order number
-    //                     'client_name' => $clientName, // Add client name
-    //                 ];
-    //             });
-    //         });
-
-    //         $sortedResult = $result->sortByDesc('date')->values();
-
-    //         return response()->json([
-    //             'message' => 'Stock orders fetched successfully!',
-    //             'data' => $sortedResult,
-    //             'status' => 'true',
-    //         ], 200);
-
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'message' => 'An error occurred while fetching stock records.',
-    //             'error' => $e->getMessage(),
-    //         ], 500);
-    //     }
-    // }
-
     public function product_stock_details(Request $request)
     {
         $productCodes = $request->input('product_code') ? explode(',', $request->input('product_code')) : null;
-        $godownId    = $request->input('godown_id');
-        $userId      = $request->input('user_id');
-        $startDate   = $request->input('start_date');
-        $endDate     = $request->input('end_date');
+        $godownId = $request->input('godown_id');
+        $userId = $request->input('user_id');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
 
         // Default date range: last 3 months
         $startDate = $startDate ?? now()->subMonths(3)->startOfDay();
-        $endDate   = $endDate ?? now()->endOfDay();
+        $endDate = $endDate ?? now()->endOfDay();
 
         try {
+            // Fetch stock orders with related models
             $stockOrders = StockOrdersModel::with([
-                    'user',
-                    'items.godown',
-                    'items.stock_product',
-                ])
-                ->when($userId, fn ($q) => $q->where('user_id', $userId))
-                ->when($startDate && $endDate, fn ($q) => $q->whereBetween('order_date', [$startDate, $endDate]))
-                ->get();
+                'user',
+                'items.godown',
+                'items.stock_product',
+            ])
+            ->when($userId, fn($q) => $q->where('user_id', $userId))
+            ->when($startDate && $endDate, fn($q) => $q->whereBetween('order_date', [$startDate, $endDate]))
+            ->get();
 
             if ($stockOrders->isEmpty()) {
                 return response()->json([
                     'message' => 'No stock orders found for the given criteria.',
-                    'data'    => [],
-                    'status'  => 'false',
+                    'data' => [],
+                    'status' => 'false',
                 ], 404);
             }
 
             $result = $stockOrders->flatMap(function ($order) use ($productCodes, $godownId) {
-                return $order->items
-                    ->filter(function ($item) use ($productCodes, $godownId) {
-                        return (!$productCodes || in_array($item->product_code, $productCodes))
-                            && (!$godownId || $item->godown_id == $godownId);
-                    })
-                    ->map(function ($item) use ($order) {
-                        // Default godown name
-                        $godownName = $item->godown->name ?? 'Unknown';
+                return $order->items->filter(function ($item) use ($productCodes, $godownId) {
+                    return (!$productCodes || in_array($item->product_code, $productCodes)) &&
+                        (!$godownId || $item->godown_id == $godownId);
+                })->map(function ($item) use ($order) {
 
-                        // Linked order details (if any)
-                        $linkedOrder      = null;
-                        $linkedOrderId    = null;
-                        $linkedOrderUser  = null;
-                        $clientName       = null;
+                    // Default godown name
+                    $godownName = $item->godown->name ?? 'Unknown';
 
-                        if (!empty($order->t_order_id)) {
-                            $linkedOrder = \App\Models\OrderModel::with('user')->find($order->t_order_id);
+                    // Fetch linked order details (if exists)
+                    $linkedOrder = null;
+                    $linkedOrderId = null;
+                    $linkedOrderUser = null;
+                    $clientName = null;
 
-                            if ($linkedOrder) {
-                                $linkedOrderId   = $linkedOrder->order_id ?? 'N/A';
-                                $linkedOrderUser = $linkedOrder->user->name ?? 'Unknown';
-                                $clientName      = $linkedOrder->user->name ?? null; // may be null/empty
-                                $godownName     .= "\n({$linkedOrderUser})";
-                            }
+                    // If linked order exists, fetch its details
+                    if (!empty($order->t_order_id)) {
+                        $linkedOrder = \App\Models\OrderModel::with('user')
+                            ->find($order->t_order_id);
+
+                        if ($linkedOrder) {
+                            $linkedOrderId = $linkedOrder->order_id ?? 'N/A';
+                            $linkedOrderUser = $linkedOrder->user->name ?? 'Unknown';
+                            $clientName = $linkedOrder->user->name ?? 'Unknown'; // Assuming client name is in the 'client' relation
+                            $godownName .= "\n({$linkedOrderUser})";
                         }
+                    }
 
-                        // 👉 If client_name is empty, fall back to stock order remarks
-                        if (is_null($clientName) || trim($clientName) === '') {
-                            $clientName = $order->remarks ?? 'Unknown';
-                        }
-
-                        return [
-                            'date'         => $order->created_at?->format('Y-m-d') ?? ($order->order_date ? \Carbon\Carbon::parse($order->order_date)->format('Y-m-d') : null),
-                            'product_code' => $item->product_code,
-                            'product_name' => $item->product_name ?? 'Unknown',
-                            'godown_name'  => $godownName,
-                            'quantity'     => $item->quantity,
-                            'type'         => $item->type,
-                            'user'         => $order->user->name ?? 'Unknown',
-                            'order_no'     => $linkedOrderId,
-                            'client_name'  => $clientName,
-                        ];
-                    });
+                    return [
+                        'date' => $order->created_at->format('Y-m-d'),
+                        'product_code' => $item->product_code,
+                        'product_name' => $item->product_name ?? 'Unknown',
+                        'godown_name' => $godownName,
+                        'quantity' => $item->quantity,
+                        'type' => $item->type,
+                        'user' => $order->user->name ?? 'Unknown',
+                        'order_no' => $linkedOrderId, // Add order number
+                        'client_name' => $clientName, // Add client name
+                    ];
+                });
             });
 
             $sortedResult = $result->sortByDesc('date')->values();
 
             return response()->json([
                 'message' => 'Stock orders fetched successfully!',
-                'data'    => $sortedResult,
-                'status'  => 'true',
+                'data' => $sortedResult,
+                'status' => 'true',
             ], 200);
+
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'An error occurred while fetching stock records.',
-                'error'   => $e->getMessage(),
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
+
+    // public function product_stock_details(Request $request)
+    // {
+    //     $productCodes = $request->input('product_code') ? explode(',', $request->input('product_code')) : null;
+    //     $godownId    = $request->input('godown_id');
+    //     $userId      = $request->input('user_id');
+    //     $startDate   = $request->input('start_date');
+    //     $endDate     = $request->input('end_date');
+
+    //     // Default date range: last 3 months
+    //     $startDate = $startDate ?? now()->subMonths(3)->startOfDay();
+    //     $endDate   = $endDate ?? now()->endOfDay();
+
+    //     try {
+    //         $stockOrders = StockOrdersModel::with([
+    //                 'user',
+    //                 'items.godown',
+    //                 'items.stock_product',
+    //             ])
+    //             ->when($userId, fn ($q) => $q->where('user_id', $userId))
+    //             ->when($startDate && $endDate, fn ($q) => $q->whereBetween('order_date', [$startDate, $endDate]))
+    //             ->get();
+
+    //         if ($stockOrders->isEmpty()) {
+    //             return response()->json([
+    //                 'message' => 'No stock orders found for the given criteria.',
+    //                 'data'    => [],
+    //                 'status'  => 'false',
+    //             ], 404);
+    //         }
+
+    //         $result = $stockOrders->flatMap(function ($order) use ($productCodes, $godownId) {
+    //             return $order->items
+    //                 ->filter(function ($item) use ($productCodes, $godownId) {
+    //                     return (!$productCodes || in_array($item->product_code, $productCodes))
+    //                         && (!$godownId || $item->godown_id == $godownId);
+    //                 })
+    //                 ->map(function ($item) use ($order) {
+    //                     // Default godown name
+    //                     $godownName = $item->godown->name ?? 'Unknown';
+
+    //                     // Linked order details (if any)
+    //                     $linkedOrder      = null;
+    //                     $linkedOrderId    = null;
+    //                     $linkedOrderUser  = null;
+    //                     $clientName       = null;
+
+    //                     if (!empty($order->t_order_id)) {
+    //                         $linkedOrder = \App\Models\OrderModel::with('user')->find($order->t_order_id);
+
+    //                         if ($linkedOrder) {
+    //                             $linkedOrderId   = $linkedOrder->order_id ?? 'N/A';
+    //                             $linkedOrderUser = $linkedOrder->user->name ?? 'Unknown';
+    //                             $clientName      = $linkedOrder->user->name ?? null; // may be null/empty
+    //                             $godownName     .= "\n({$linkedOrderUser})";
+    //                         }
+    //                     }
+
+    //                     // 👉 If client_name is empty, fall back to stock order remarks
+    //                     if (is_null($clientName) || trim($clientName) === '') {
+    //                         $clientName = $order->remarks ?? 'Unknown';
+    //                     }
+
+    //                     return [
+    //                         'date'         => $order->created_at?->format('Y-m-d') ?? ($order->order_date ? \Carbon\Carbon::parse($order->order_date)->format('Y-m-d') : null),
+    //                         'product_code' => $item->product_code,
+    //                         'product_name' => $item->product_name ?? 'Unknown',
+    //                         'godown_name'  => $godownName,
+    //                         'quantity'     => $item->quantity,
+    //                         'type'         => $item->type,
+    //                         'user'         => $order->user->name ?? 'Unknown',
+    //                         'order_no'     => $linkedOrderId,
+    //                         'client_name'  => $clientName,
+    //                     ];
+    //                 });
+    //         });
+
+    //         $sortedResult = $result->sortByDesc('date')->values();
+
+    //         return response()->json([
+    //             'message' => 'Stock orders fetched successfully!',
+    //             'data'    => $sortedResult,
+    //             'status'  => 'true',
+    //         ], 200);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'message' => 'An error occurred while fetching stock records.',
+    //             'error'   => $e->getMessage(),
+    //         ], 500);
+    //     }
+    // }
 
 
     /**
