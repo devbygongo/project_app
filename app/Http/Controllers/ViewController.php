@@ -610,7 +610,7 @@ class ViewController extends Controller
         });
 
         $show_basic = false;
-        if($user_id == 113 || $user_id == 98 || $user_id == 89 || $user_id == 103) {
+        if($user_id == 113 || $user_id == 98 || $user_id == 89) {
             // If the user is admin or has a specific mobile number, show basic prices
             $show_basic = true;
         }
@@ -1203,7 +1203,7 @@ class ViewController extends Controller
         });
 
         $show_basic = false;
-        if($user_id == 113 || $user_id == 98 || $user_id == 89 || $user_id == 103) {
+        if($user_id == 113 || $user_id == 98 || $user_id == 89) {
             // If the user is admin or has a specific mobile number, show basic prices
             $show_basic = true;
         }
@@ -1431,7 +1431,7 @@ class ViewController extends Controller
         }
 
         $show_basic = false;
-        if($user_id == 113 || $user_id == 98 || $user_id == 89 || $user_id == 103) {
+        if($user_id == 113 || $user_id == 98 || $user_id == 89) {
             // If the user is admin or has a specific mobile number, show basic prices
             $show_basic = true;
         }
