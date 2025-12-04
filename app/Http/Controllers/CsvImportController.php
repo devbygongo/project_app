@@ -40,9 +40,9 @@ class CsvImportController extends Controller
         foreach ($records_csv as $record_csv) {
 
             // SKIP MP series products
-            if (isset($record_csv['Product Code']) && preg_match('/^MP\d+/i', $record_csv['Product Code'])) {
-                continue; // jump to next row
-            }
+            // if (isset($record_csv['Product Code']) && preg_match('/^MP\d+/i', $record_csv['Product Code'])) {
+            //     continue; // jump to next row
+            // }
 
             // Check if 'Yet to Launch' is 1, delete the product if it exists
             if ($record_csv['Delete'] == 'TRUE') {
