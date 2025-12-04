@@ -370,6 +370,8 @@ class ViewController extends Controller
             $user_id = $request->input('user_id');
         }
 
+        // === Get user meta (type + new ss/mp flags) ===
+        $userMeta = User::select('type', 'ss', 'mp')->where('id', $user_id)->first();
         // Get the user type
 		$user_type = User::select('type')->where('id', $user_id)->first();
 
@@ -497,6 +499,28 @@ class ViewController extends Controller
                 'video_link'
 			);
 		}
+
+        // ====== APPLY SS / MP SERIES RULES HERE ======
+        if ($userMeta) {
+            $hasSs = (int) $userMeta->ss === 1;
+            $hasMp = (int) $userMeta->mp === 1;
+
+            // if both are 1 → show all products (no extra where)
+            if ($hasSs && !$hasMp) {
+                // ss = 1, mp = 0 → all products EXCEPT those starting with MP
+                $query->where('product_code', 'not like', 'MP%');
+
+                // note: S* products are already included because they are not MP*
+            } elseif (!$hasSs && $hasMp) {
+                // ss = 0, mp = 1 → only MP* + S*
+                $query->where(function ($q) {
+                    $q->where('product_code', 'like', 'MP%')
+                    ->orWhere('product_code', 'like', 'S%');
+                });
+            }
+            // else: ss=0, mp=0 or ss=1, mp=1 → no extra filter (show all)
+        }
+        // ====== END SS / MP SERIES RULES ======
 
         // Apply filters
         if ($search) {
