@@ -102,6 +102,55 @@ class UpdateController extends Controller
         }
     }
 
+    public function updateUserSeries(Request $request)
+    {
+        // Validate the incoming request data
+        $request->validate([
+            'user_id' => 'required|exists:users,id',   // Ensure user exists
+            'ss'      => 'nullable|in:0,1',           // Optional, must be 0 or 1 if present
+            'mp'      => 'nullable|in:0,1',           // Optional, must be 0 or 1 if present
+        ]);
+
+        // At least one of ss or mp must be present
+        if (!$request->has('ss') && !$request->has('mp')) {
+            return response()->json([
+                'message' => 'Please provide at least one of ss or mp to update.',
+            ], 422);
+        }
+
+        $user_id = $request->input('user_id');
+
+        $updateData = [];
+
+        // Only update the fields that are actually passed in the request
+        if ($request->has('ss')) {
+            $updateData['ss'] = (int) $request->input('ss');  // cast to int 0/1
+        }
+
+        if ($request->has('mp')) {
+            $updateData['mp'] = (int) $request->input('mp');  // cast to int 0/1
+        }
+
+        // If for some reason nothing to update, return error
+        if (empty($updateData)) {
+            return response()->json([
+                'message' => 'No valid series fields provided to update.',
+            ], 422);
+        }
+
+        $updated = User::where('id', $user_id)->update($updateData);
+
+        if ($updated) {
+            return response()->json([
+                'message' => 'User series updated successfully!',
+            ], 200);
+        } else {
+            return response()->json([
+                'message' => 'Failed to update user series.',
+            ], 400);
+        }
+    }
+
     public function inactivate_user(Request $request)
     {
         // Validate the incoming request data
