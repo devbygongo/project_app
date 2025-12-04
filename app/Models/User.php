@@ -28,6 +28,8 @@ class User extends Authenticatable
         'mobile',
         'name_in_hindi',
         'name_in_telugu',
+        'ss',
+        'mp',
         'otp',
         'role',
         'is_verified',
