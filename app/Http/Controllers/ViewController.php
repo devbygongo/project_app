@@ -1052,7 +1052,7 @@ class ViewController extends Controller
 
     public function user($lang = 'eng')
     {
-        $get_user_details = User::select('id', 'name', 'name_in_hindi', 'name_in_telugu', 'email', 'mobile', 'role', 'address_line_1', 'address_line_2', 'city', 'pincode', 'gstin', 'state', 'country', 'is_verified', 'type', 'app_status', 'purchase_lock', 'purchase_limit')
+        $get_user_details = User::select('id', 'name', 'name_in_hindi', 'name_in_telugu', 'email', 'mobile', 'role', 'address_line_1', 'address_line_2', 'city', 'pincode', 'gstin', 'state', 'country', 'is_verified', 'type', 'app_status', 'purchase_lock', 'ss', 'mp', 'purchase_limit')
                                 ->where('role', 'user')->orderBy('name', 'asc')
                                 ->get();
     
