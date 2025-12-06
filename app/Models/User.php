@@ -41,6 +41,7 @@ class User extends Authenticatable
         'state',
         'country',
         'type',
+        'mp_type',
         'app_status',
         'purchase_lock',
         'purchase_limit',

@@ -76,17 +76,34 @@ class UpdateController extends Controller
         // Validate the incoming request data
         $request->validate([
             'user_id' => 'required|exists:users,id', // Ensure that the user_id exists in the users table
-            'type' => 'required|string', // Add validation for type (e.g., role, address, etc.)
+            'type'    => 'required|string',
+            'series'  => 'nullable|in:ss,mp',        // series can be null, ss, or mp
         ]);
 
-        // Get the user_id and type from the request
+        // Get the user_id, type and series from the request
         $user_id = $request->input('user_id');
-        $type = $request->input('type');
+        $type    = $request->input('type');
+        $series  = $request->input('series'); // nullable
 
-        // Based on the type, you can update specific fields of the user
+        // Prepare data to update based on series
         $updateData = [];
-        $updateData['type'] = $request->input('type');
-        
+
+        // If series is not passed OR series is 'ss' => update `type` column only
+        if (is_null($series) || $series === 'ss') {
+            $updateData['type'] = $type;
+        }
+        // If series is 'mp' => update `mp_type` column only
+        elseif ($series === 'mp') {
+            $updateData['mp_type'] = $type;
+        }
+
+        // Safety check: if somehow nothing to update
+        if (empty($updateData)) {
+            return response()->json([
+                'message' => 'No valid fields to update.',
+            ], 400);
+        }
+
         // Update the user record with the given data
         $update_user_record = User::where('id', $user_id)->update($updateData);
 
