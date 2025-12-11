@@ -375,7 +375,8 @@ class ViewController extends Controller
         // Get the user type
 		$user_type = User::select('type')->where('id', $user_id)->first();
 
-        $admin_user_mobile = User::select('mobile')->where('id', $user_id)->first();
+        // $admin_user_mobile = User::select('mobile')->where('id', $user_id)->first();
+        $admin_user_mobile = User::where('id', $user_id)->value('mobile');
 
 		if ($get_user->mobile == "+919951263652") {
 
