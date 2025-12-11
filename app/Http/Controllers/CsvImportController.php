@@ -127,7 +127,7 @@ class CsvImportController extends Controller
                     'outstation_gst' => $gstPrice_prduct_outstation,     // Ensure this is a valid number
                     'aakhambati_gst' => $aakhambati_gst_outstation,     // Ensure this is a valid number
                     'guest_price' => $guest_price,     // Ensure this is a valid number
-                    'mp_price' => $guest_price,     // Ensure this is a valid number
+                    'mp_price' => $mp_price,     // Ensure this is a valid number
                     're_order_level' => $re_order_level,     // Ensure this is a valid number
                     'out_of_stock' => $record_csv['Out of Stock'] === 'TRUE' ? 1 : 0,
                     'yet_to_launch' => $record_csv['Yet to Launch'] === 'TRUE' ? 1 : 0,
