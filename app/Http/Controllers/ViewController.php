@@ -373,7 +373,7 @@ class ViewController extends Controller
         // === Get user meta (type + new ss/mp flags) ===
         $userMeta = User::select('type', 'ss', 'mp')->where('id', $user_id)->first();
         // Get the user type
-		$user_type = User::select('type')->where('id', $user_id)->get();
+		$user_type = User::select('type')->where('id', $user_id)->first();
 
         $admin_user_mobile = User::select('mobile')->where('id', $user_id)->first();
 
