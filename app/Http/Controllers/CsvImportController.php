@@ -64,7 +64,7 @@ class CsvImportController extends Controller
             $gstPrice_prduct_outstation = $record_csv['Outstation GST Price'] !== '' ? $record_csv['Outstation GST Price'] : 0;
             $aakhambati_gst_outstation = $record_csv['AA Khambati Price'] !== '' ? $record_csv['AA Khambati Price'] : 0;
             $guest_price = $record_csv['Guest Price'] !== '' ? $record_csv['Guest Price'] : 0;
-            $mp_price = $record_csv['MP Purchase Price'] !== '' ? $record_csv['Guest Price'] : 0;
+            $mp_price = $record_csv['MP Purchase Price'] !== '' ? $record_csv['MP Purchase Price'] : 0;
             $re_order_level = $record_csv['RE ORDER LEVEL'] !== '' ? $record_csv['RE ORDER LEVEL'] : 0;
             $filename = $record_csv['Product Code'];
 
