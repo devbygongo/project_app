@@ -27,9 +27,16 @@
 @endif
 
 
-<div class="header">
-    <img src="{{ asset('storage/uploads/s1.jpg') }}" alt="Logo">
-</div>
+@if ($order->user_id == 489)
+    <div class="header">
+        <img src="{{ asset('storage/uploads/s2.jpg') }}" alt="Logo">
+    </div>
+@else
+    <div class="header">
+        <img src="{{ asset('storage/uploads/s1.jpg') }}" alt="Logo">
+    </div>
+@endif
+
 
 
 
