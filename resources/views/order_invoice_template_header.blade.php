@@ -22,7 +22,7 @@
 
 @if ($order->user_id == 226)
     <div class="order-title">Quotation</div>
-@else if ($order->user_id == 489)
+@elseif ($order->user_id == 489)
     <div class="order-title">Purchase Order</div>
 @else
     <div class="order-title">Order Invoice</div>
