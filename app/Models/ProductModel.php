@@ -36,6 +36,7 @@ class ProductModel extends Model
         'aakhambati_gst',
         // 'mark_up',
         'guest_price',
+        'mp_price',
         're_order_level',
         'out_of_stock',
         'yet_to_launch',
