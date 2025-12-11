@@ -375,6 +375,8 @@ class ViewController extends Controller
         // Get the user type
 		$user_type = User::select('type')->where('id', $user_id)->first();
 
+        $admin_user_mobile = User::select('mobile')->where('id', $user_id)->first();
+
 		if ($get_user->mobile == "+919951263652") {
 
 
@@ -394,7 +396,7 @@ class ViewController extends Controller
                 'video_link'
             );
 
-        } else if ($get_user->mobile == "+919819084849") {
+        } else if ($admin_user_mobile == "+919819084849") {
 
             // If user type is 'special', select special columns but alias them as 'basic' and 'gst'
             $query = ProductModel::select(
