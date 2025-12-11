@@ -661,8 +661,8 @@ class ViewController extends Controller
 
         // Return response based on the result
         return $processed_prd_lang_rec->isEmpty()
-        ? response()->json(['Failed to fetch data!'.$admin_user_mobile], 404)
-        : response()->json(['message' => 'Fetch data successfully!',
+        ? response()->json(['Failed to fetch data!'], 404)
+        : response()->json(['message' => 'Fetch data successfully!'.$admin_user_mobile,
                 'show_basic' => $show_basic,
                 'data' => $processed_prd_lang_rec,
                 'count' => $total_products_count], 200);
