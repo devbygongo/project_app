@@ -20,14 +20,15 @@
 </head>
 <body>
 
-@if ($order->user_id == 226)
-    <div class="order-title">Quotation</div>
-@elseif ($order->user_id == 489)
-    <div class="order-title">Purchase Order</div>
-@else
-    <div class="order-title">Order Invoice</div>
-@endif
-
+<div class="order-title">
+    @if ($order->user_id == 226)
+        Quotation
+    @elseif ($order->user_id == 489)
+        Purchase Order
+    @else
+        Order Invoice
+    @endif
+</div>
 
 @if ($order->user_id == 489)
     <div class="header">
