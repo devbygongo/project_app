@@ -698,18 +698,90 @@ class InvoiceController extends Controller
             ];
         };
 
-        if($logged_user_id != 75){
-            foreach ($mobileNumbers as $mobileNumber) {
-                if ($mobileNumber != '+919951263652') {
-                    $whatsAppUtility->sendWhatsApp($mobileNumber, $sendDocParam($adminTemplate, $adminBodyParams), '', 'Admin Order Invoice');
+        // -------------------- WhatsApp Dispatch Logic --------------------
+
+        if ($logged_user_id != 75) {
+
+            // 🔴 Special routing for user_id = 489
+            if ($order->user_id == 489) {
+
+                // Admin numbers (fixed)
+                $adminMobiles = [
+                    '+919966633307',
+                    '+917506691380',
+                ];
+
+                foreach ($adminMobiles as $mobileNumber) {
+                    $whatsAppUtility->sendWhatsApp(
+                        $mobileNumber,
+                        $sendDocParam($adminTemplate, $adminBodyParams),
+                        '',
+                        'Admin Order Invoice'
+                    );
                 }
+
+                // User numbers (user + fixed numbers)
+                $userMobiles = array_unique(array_filter([
+                    $user->mobile,
+                    '9833032423',
+                    '9819427900',
+                ]));
+
+                foreach ($userMobiles as $mobileNumber) {
+                    $whatsAppUtility->sendWhatsApp(
+                        $mobileNumber,
+                        $sendDocParam($userTemplate, $userBodyParams),
+                        '',
+                        'User Order Invoice'
+                    );
+                }
+
+            } 
+            // 🟢 Default behaviour (existing logic)
+            else {
+
+                foreach ($mobileNumbers as $mobileNumber) {
+                    if ($mobileNumber != '+919951263652') {
+                        $whatsAppUtility->sendWhatsApp(
+                            $mobileNumber,
+                            $sendDocParam($adminTemplate, $adminBodyParams),
+                            '',
+                            'Admin Order Invoice'
+                        );
+                    }
+                }
+
+                $whatsAppUtility->sendWhatsApp(
+                    $user->mobile,
+                    $sendDocParam($userTemplate, $userBodyParams),
+                    '',
+                    'User Order Invoice'
+                );
             }
 
-            $whatsAppUtility->sendWhatsApp($user->mobile, $sendDocParam($userTemplate, $userBodyParams), '', 'User Order Invoice');
-        }else{
+        } else {
+            // Existing override
             $mobileNumber = '+917003541353';
-            $whatsAppUtility->sendWhatsApp($mobileNumber, $sendDocParam($adminTemplate, $adminBodyParams), '', 'Admin Order Invoice');
+            $whatsAppUtility->sendWhatsApp(
+                $mobileNumber,
+                $sendDocParam($adminTemplate, $adminBodyParams),
+                '',
+                'Admin Order Invoice'
+            );
         }
+
+        // if($logged_user_id != 75){
+        //     foreach ($mobileNumbers as $mobileNumber) {
+        //         if ($mobileNumber != '+919951263652') {
+        //             $whatsAppUtility->sendWhatsApp($mobileNumber, $sendDocParam($adminTemplate, $adminBodyParams), '', 'Admin Order Invoice');
+        //         }
+        //     }
+
+        //     $whatsAppUtility->sendWhatsApp($user->mobile, $sendDocParam($userTemplate, $userBodyParams), '', 'User Order Invoice');
+        // }else{
+        //     $mobileNumber = '+917003541353';
+        //     $whatsAppUtility->sendWhatsApp($mobileNumber, $sendDocParam($adminTemplate, $adminBodyParams), '', 'Admin Order Invoice');
+        // }
 
         return $fileUrl;
     }
