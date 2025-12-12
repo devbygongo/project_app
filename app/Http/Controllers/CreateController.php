@@ -467,6 +467,8 @@ class CreateController extends Controller
                         'amount' => $amount_total,
                         'type' => 'basic',
                         'remarks' => $request->input('remarks'),
+                        // ✅ add this line
+                        'status' => ($userId == 489) ? 'completed' : 'pending',
                         // NEW fields for Quotation user
                         'name'       => $customerName,
                         'mobile'     => $customerMobile,
@@ -576,6 +578,8 @@ class CreateController extends Controller
                         'amount' => $basic_amount_total,
                         'type' => 'basic',
                         'remarks' => $request->input('remarks'),
+                        // ✅ add this line
+                        'status' => ($userId == 489) ? 'completed' : 'pending',
                         // NEW fields for Quotation user
                         'name'       => $customerName,
                         'mobile'     => $customerMobile,
@@ -632,6 +636,8 @@ class CreateController extends Controller
                         'amount' => $gst_amount_total,
                         'type' => 'gst',
                         'remarks' => $request->input('remarks'),
+                        // ✅ add this line
+                        'status' => ($userId == 489) ? 'completed' : 'pending',
                         // NEW fields for Quotation user
                         'name'       => $customerName,
                         'mobile'     => $customerMobile,
