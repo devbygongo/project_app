@@ -1224,7 +1224,8 @@ class ViewController extends Controller
         $user_id = $id;
 
         // Fetch all orders and their associated order items with product image
-        $get_user_orders = OrderModel::when($id, function ($query, $id) {
+        $get_user_orders = OrderModel::where('user_id', '!=', 489)
+            ->when($id, function ($query, $id) {
             return $query->where('user_id', $id);
         })
         ->with(['order_items' => function($query) {
@@ -1233,8 +1234,6 @@ class ViewController extends Controller
         }])
         ->orderBy('created_at', 'desc')
         ->get();
-
-        
 
         // Modify the order items to append the product image directly
         $get_user_orders->each(function($order) {
