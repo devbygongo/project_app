@@ -21,7 +21,7 @@ class StockController extends Controller
         // If 'type' is required, you can also validate the presence of the type
         $request->validate([
             'type' => 'required|in:with_value,without_value',
-            'series' => 'nullable|in:SS,MP,ss,mp',
+            'series' => 'nullable|in:SS,MP,SAFETY,ss,mp,safety',
         ]);
 
         // $type = $request->type;
@@ -45,6 +45,9 @@ class StockController extends Controller
             $stockDataQuery->where('product_code', 'not like', 'S%')
                 ->where('product_code', 'not like', 'MP%')
                 ->where('product_code', 'not like', 'IPT%');
+        } elseif ($seriesKey === 'SAFETY') {
+            // Safety products: product_code starts with S-
+            SafetyStockUtility::applySafetyProductScope($stockDataQuery);
         }
 
         // Fetch stock data
@@ -117,6 +120,7 @@ class StockController extends Controller
         $reportTitle = match ($seriesKey) {
             'MP' => 'Stock Report Master Pro',
             'SS' => 'Stock Report Super Steel',
+            'SAFETY' => 'Stock Report Safety',
             default => 'Stock Report',
         };
 
