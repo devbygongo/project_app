@@ -10,10 +10,21 @@ use Illuminate\Support\Facades\DB;
 class SafetyStockUtility
 {
     public const SAFETY_PRODUCT_PREFIX = 'S-';
+    public const SAFETY_PURCHASE_MOBILE = '+919987654321';
 
     public static function isSafetyProduct(?string $productCode): bool
     {
         return $productCode !== null && str_starts_with($productCode, self::SAFETY_PRODUCT_PREFIX);
+    }
+
+    public static function isSafetyPurchaseUser(?string $mobile): bool
+    {
+        return $mobile === self::SAFETY_PURCHASE_MOBILE;
+    }
+
+    public static function applySafetyProductScope(Builder $query, string $column = 'product_code'): Builder
+    {
+        return $query->where($column, 'like', self::SAFETY_PRODUCT_PREFIX . '%');
     }
 
     public static function cutoffDate(): ?Carbon

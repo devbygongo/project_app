@@ -61,7 +61,11 @@ class CsvImportController extends Controller
                 : (
                     (!empty($record_csv['MP Purchase Price']) && $record_csv['MP Purchase Price'] !== '#N/A')
                         ? $record_csv['MP Purchase Price']
-                        : 0
+                        : (
+                            (!empty($record_csv['Safety Purchase Price']) && $record_csv['Safety Purchase Price'] !== '#N/A')
+                                ? $record_csv['Safety Purchase Price']
+                                : 0
+                        )
                 );
             $basicPrice_product = $record_csv['Basic Price'] !== '' ? $record_csv['Basic Price'] : 0;
             $gstPrice_prduct = $record_csv['GST Price'] !== '' ? $record_csv['GST Price'] : 0;

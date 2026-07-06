@@ -19,6 +19,7 @@ use Illuminate\Validation\Rule;
 use App\Models\SpecialRateModel;
 use App\Models\JobCardModel;
 use App\Utils\CartPricingUtility;
+use App\Utils\SafetyStockUtility;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\WishlistController;
 use App\Utils\sendWhatsAppUtility;
@@ -1255,6 +1256,12 @@ class UpdateController extends Controller
                         'product_code',
                         DB::raw('0 as basic'),
                         DB::raw('mp_price as gst')
+                    )->whereIn('product_code', $productCodes)->get()->keyBy('product_code');
+                } elseif ($orderUser && SafetyStockUtility::isSafetyPurchaseUser($orderUser->mobile)) {
+                    $productPrices = ProductModel::select(
+                        'product_code',
+                        DB::raw('0 as basic'),
+                        DB::raw('purchase as gst')
                     )->whereIn('product_code', $productCodes)->get()->keyBy('product_code');
                 } elseif ($orderUser && $orderUser->type == 'outstation') {
                     $productPrices = ProductModel::select(

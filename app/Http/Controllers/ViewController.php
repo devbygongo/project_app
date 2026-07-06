@@ -394,6 +394,7 @@ class ViewController extends Controller
 
         $purchasePricingForTarget = false;
         $supersteelPricingForTarget = $user_type && $user_type->type === 'supersteel';
+        $safetyPurchasePricingForTarget = SafetyStockUtility::isSafetyPurchaseUser($admin_user_mobile);
 
         if ($get_user->role !== 'user' && $targetUserRow && stripos((string) ($targetUserRow->name ?? ''), 'PURCHASE') !== false) {
             $purchasePricingForTarget = true;
@@ -457,6 +458,22 @@ class ViewController extends Controller
                 'size',
                 DB::raw('0 as basic'), 
                 DB::raw('mp_price as gst'), 
+                'out_of_stock',
+                'yet_to_launch',
+                'video_link'
+            );
+
+        } else if ($safetyPurchasePricingForTarget) {
+            $query = ProductModel::select(
+                'product_code',
+                'product_name',
+                'category',
+                'sub_category',
+                'product_image',
+                'extra_images',
+                'size',
+                DB::raw('0 as basic'),
+                DB::raw('purchase as gst'),
                 'out_of_stock',
                 'yet_to_launch',
                 'video_link'
@@ -584,7 +601,9 @@ class ViewController extends Controller
 		}
 
         // ====== APPLY SS / MP SERIES RULES HERE ======
-        if ($userMeta) {
+        if ($safetyPurchasePricingForTarget) {
+            SafetyStockUtility::applySafetyProductScope($query);
+        } elseif ($userMeta) {
             $hasSs = (int) $userMeta->ss === 1;
             $hasMp = (int) $userMeta->mp === 1;
 
@@ -608,7 +627,7 @@ class ViewController extends Controller
         $isAdmin = $get_user->role !== 'user';
 
         // SS products (not S* / MP*): only show if stock > 0 — for users only; admins see all (set SS_STOCK_FILTER_ENABLED=false in .env to turn off for users)
-        if (!$isAdmin && filter_var(env('SS_STOCK_FILTER_ENABLED', true), FILTER_VALIDATE_BOOLEAN)) {
+        if (!$isAdmin && !$safetyPurchasePricingForTarget && filter_var(env('SS_STOCK_FILTER_ENABLED', true), FILTER_VALIDATE_BOOLEAN)) {
             $query->whereRaw("(
                 product_code LIKE 'S%' OR product_code LIKE 'MP%'
                 OR product_code IN (
@@ -670,9 +689,9 @@ class ViewController extends Controller
             // Alias joined product_code so WHERE/search clauses are not ambiguous with t_products.product_code
             $stockBalanceSub = SafetyStockUtility::stockBalanceSubquery();
 
-            // t_products.* overwrites computed basic/gst (e.g. purchase as basic/gst); keep explicit select for PURCHASE/supersteel pricing
+            // t_products.* overwrites computed basic/gst (e.g. purchase as basic/gst); keep explicit select for PURCHASE/supersteel/safety pricing
             $adminFetch = clone $query;
-            if (!$purchasePricingForTarget && !$supersteelPricingForTarget) {
+            if (!$purchasePricingForTarget && !$supersteelPricingForTarget && !$safetyPurchasePricingForTarget) {
                 $adminFetch->select('t_products.*');
             }
 
@@ -758,7 +777,7 @@ class ViewController extends Controller
         }
 
         // Process products for language and cart details
-        $processed_prd_lang_rec = $get_products->map(function ($prd_rec) use ($lang, $user_id, $dropdown, $specialRates, $isAdmin, $ssOutOfStockCodes, $cartByCode, $hasSparesByCode, $purchasePricingForTarget, $supersteelPricingForTarget) {
+        $processed_prd_lang_rec = $get_products->map(function ($prd_rec) use ($lang, $user_id, $dropdown, $specialRates, $isAdmin, $ssOutOfStockCodes, $cartByCode, $hasSparesByCode, $purchasePricingForTarget, $supersteelPricingForTarget, $safetyPurchasePricingForTarget) {
             
             // Set product name based on the selected language
             $product_name = $prd_rec->product_name;
@@ -785,8 +804,8 @@ class ViewController extends Controller
                 }
             }
 
-            // If a special rate exists for this product for this client, override GST with that rate (not for admin PURCHASE/supersteel pricing)
-            if (!$purchasePricingForTarget && !$supersteelPricingForTarget && isset($specialRates[$prd_rec->product_code])) {
+            // If a special rate exists for this product for this client, override GST with that rate (not for admin PURCHASE/supersteel/safety pricing)
+            if (!$purchasePricingForTarget && !$supersteelPricingForTarget && !$safetyPurchasePricingForTarget && isset($specialRates[$prd_rec->product_code])) {
                 $prd_rec->gst = (float) $specialRates[$prd_rec->product_code];
             }
 
@@ -886,7 +905,8 @@ class ViewController extends Controller
             $user_id = $get_user->id;
 
             // Fetch user type
-            $user_type = User::select('type')->where('id', $user_id)->first();
+            $user_type = User::select('type', 'mobile')->where('id', $user_id)->first();
+            $targetMobile = $get_user->mobile;
         }
         else{
             // $request->validate([
@@ -895,13 +915,21 @@ class ViewController extends Controller
             // $user_id = $request->input('user_id');
             // $user_type = User::select('type')->where('id', $user_id)->first();
             $user_type = (object) ['type' => 'normal'];
+            $targetMobile = null;
         }
+
+        $isSafetyPurchaseUser = SafetyStockUtility::isSafetyPurchaseUser($targetMobile);
 
         // Base query for products
         $productQuery = ProductModel::select('product_code', 'product_name', 'name_in_hindi', 'name_in_telugu', 'category', 'sub_category', 'product_image', 'out_of_stock', 'yet_to_launch');
 
         // Add pricing columns dynamically based on user type
-        if ($get_user->mobile == "+919951263652") {
+        if ($isSafetyPurchaseUser) {
+            $productQuery->addSelect(
+                DB::raw('0 as basic'),
+                DB::raw('purchase as gst')
+            );
+        } elseif ($get_user->mobile == "+919951263652") {
             $productQuery->addSelect(
                 DB::raw('0 as basic'), 
                 DB::raw('0 as gst')
@@ -942,6 +970,10 @@ class ViewController extends Controller
 
         // Filter products by type and optionally machine part number
         $productQuery->where('type', 'SPARE');
+
+        if ($isSafetyPurchaseUser) {
+            SafetyStockUtility::applySafetyProductScope($productQuery);
+        }
 
         if ($code !== null) {
             $productQuery->where('machine_part_no', 'like', "%{$code}%");
@@ -988,22 +1020,30 @@ class ViewController extends Controller
             $user_id = $get_user->id;
 
             // Fetch user type
-            $user_type = User::select('type')->where('id', $user_id)->first();
+            $user_type = User::select('type', 'mobile')->where('id', $user_id)->first();
         }
         else{
             $request->validate([
                 'user_id' => 'required',
             ]);
             $user_id = $request->input('user_id');
-            $user_type = User::select('type')->where('id', $user_id)->first();
+            $user_type = User::select('type', 'mobile')->where('id', $user_id)->first();
             // $user_type = (object) ['type' => 'normal'];
         }
+
+        $targetMobile = $user_type->mobile ?? null;
+        $isSafetyPurchaseUser = SafetyStockUtility::isSafetyPurchaseUser($targetMobile);
 
         // Base query for products
         $productQuery = ProductModel::select('product_code', 'product_name', 'name_in_hindi', 'name_in_telugu', 'category', 'sub_category', 'product_image', 'out_of_stock', 'yet_to_launch');
 
         // Add pricing columns dynamically based on user type
-        if ($user_type && $user_type->type == 'special') {
+        if ($isSafetyPurchaseUser) {
+            $productQuery->addSelect(
+                DB::raw('0 as basic'),
+                DB::raw('purchase as gst')
+            );
+        } elseif ($user_type && $user_type->type == 'special') {
             $productQuery->addSelect(
                 DB::raw('special_basic as basic'), 
                 DB::raw('special_gst as gst')
@@ -1044,6 +1084,10 @@ class ViewController extends Controller
 
         // Filter products by type and optionally machine part number
         $productQuery->where('type', 'SPARE');
+
+        if ($isSafetyPurchaseUser) {
+            SafetyStockUtility::applySafetyProductScope($productQuery);
+        }
 
         if ($code !== null) {
             $productQuery->where('machine_part_no', 'like', "%{$code}%");
@@ -1673,7 +1717,7 @@ class ViewController extends Controller
 
         if ($get_user->role == 'admin') {
 
-            $user_type = User::select('type')->where('id', $id)->first();
+            $user_type = User::select('type', 'mobile')->where('id', $id)->first();
             $user_id = $id;
             $basic_column = 'basic';
             $gst_column = 'gst';
@@ -1695,6 +1739,9 @@ class ViewController extends Controller
                 $gst_column = DB::raw('0 as gst');
             } elseif ($user_type && $user_type->type == 'supersteel') {
                 $basic_column = DB::raw('purchase as basic');
+                $gst_column = DB::raw('purchase as gst');
+            } elseif (SafetyStockUtility::isSafetyPurchaseUser($user_type->mobile ?? null)) {
+                $basic_column = DB::raw('0 as basic');
                 $gst_column = DB::raw('purchase as gst');
             }
             
@@ -1742,6 +1789,9 @@ class ViewController extends Controller
                 $gst_column = DB::raw('0 as gst');
             } elseif ($user_type && $user_type->type == 'supersteel') {
                 $basic_column = DB::raw('purchase as basic');
+                $gst_column = DB::raw('purchase as gst');
+            } elseif (SafetyStockUtility::isSafetyPurchaseUser($get_user->mobile)) {
+                $basic_column = DB::raw('0 as basic');
                 $gst_column = DB::raw('purchase as gst');
             }
             
